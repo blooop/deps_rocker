@@ -5,9 +5,9 @@ with open("README.md", "r") as f:
 
 setup(
     name='deps_rocker',
-    version='0.0.2',
+    version='0.0.3',
     packages=['deps_rocker'],
-    package_data={'deps_rocker': ['templates/*.em']},
+    package_data={'deps_rocker': ['templates/*.Dockerfile']},
     author='Austin Gregg-Smith',
     author_email='blooop@gmail.com',
     description='A rocker plugin to help installing apt and pip dependencies',
