@@ -17,9 +17,10 @@ setup(
     install_requires=[
         'rocker',
     ],
+    #call it odeps_dependencies so that it is called after nvidia "lmnop"
     entry_points={
         'rocker.extensions': [
-            'deps_dependencies = deps_rocker.dependencies:Dependencies',
+            'odeps_dependencies = deps_rocker.dependencies:Dependencies',
         ]
     },
 )
