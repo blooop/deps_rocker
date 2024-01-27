@@ -13,5 +13,3 @@ RUN apt-get update \
 
 COPY pip.deps pip.deps
 RUN pip install -U $(cat /pip.deps)
-
-RUN echo "lol"
