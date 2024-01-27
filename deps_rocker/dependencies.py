@@ -49,8 +49,16 @@ class Dependencies(RockerExtension):
         for p in pp_toml:
             with open(p, 'r') as f:
                 config = toml.load(f)
-                deps.extend(config["project"]["dependencies"])
-                deps.extend(config["project"]["optional-dependencies"]["test"])
+                project = config["project"]
+                if "dependencies" in project:
+                    deps.extend(project["dependencies"])
+                if "optional-dependencies" in project:
+                    optional = project["optional-dependencies"]
+                    if "test" in optional:
+                        deps.extend(optional["test"])
+                    if "dev" in optional:
+                        deps.extend(optional["dev"])
+                    
         return " "+" ".join(deps)
 
     def get_preamble(self, cli_args):
