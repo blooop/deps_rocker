@@ -2,11 +2,6 @@
 
 This is a [rocker](https://github.com/tfoote/rocker) extension for automating dependency installation.
 
-run with:
-
-```
-rocker vs-dependencies ubuntu:22.04
-```
 
 The extension will recursivly search for dependencies.yaml files and run the install commands in several layers
 
@@ -17,9 +12,10 @@ Layer order:
 - apt
 - pip
 
+example dependencies.yaml
 
 ```
-apt_base: #base image dependencies that rarely change
+apt_base: #base apt dependencies that rarely change
   - git
   - git-lfs
   - python3-pip
@@ -37,7 +33,16 @@ pip: #project pip dependencies that may change on a more regular basis
 
 ```
 
-limitations/TODO
+run with:
+
+```
+rocker deps-dependencies ubuntu:22.04
+```
+
+## limitations/TODO
+
+This has only been tested on the ubuntu base image. It assumes you have access to apt-get.
 
 all the pip tags must have an entry for the moment.  Will improve the dockerfile logic to allow empty pip layers
+
 
