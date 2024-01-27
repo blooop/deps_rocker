@@ -4,6 +4,7 @@ import pkgutil
 from rocker.extensions import RockerExtension
 from pathlib import Path
 import yaml
+import toml
 
 class Dependencies(RockerExtension):
 
@@ -30,7 +31,7 @@ class Dependencies(RockerExtension):
         all_files = {}
 
         self.read_dependencies()
-        deps_names = ["apt_base","pip_base","apt","pip"]
+        deps_names = ["apt_base","pip_base","apt"]
         for dep in deps_names:
             filename = f"{dep}.deps"
             if dep in self.dependencies:
@@ -38,7 +39,19 @@ class Dependencies(RockerExtension):
             else:
                 all_files[filename] = ""
 
+        all_files["pip.deps"] = self.get_deps("pip") + self.get_pyproject_toml_deps()
+
         return all_files
+
+    def get_pyproject_toml_deps(self):
+        pp_toml = Path.cwd().glob("pyproject.toml")
+        deps = []
+        for p in pp_toml:
+            with open(p, 'r') as f:
+                config = toml.load(f)
+                deps.extend(config["project"]["dependencies"])
+                deps.extend(config["project"]["optional-dependencies"]["test"])
+        return " "+" ".join(deps)
 
     def get_preamble(self, cli_args):
         return ''
@@ -58,3 +71,6 @@ class Dependencies(RockerExtension):
             action='store_true',
             help='install dependencies.yaml ')
 
+if __name__ == "__main__":
+    res =Dependencies().get_pyproject_toml_deps()
+    print(res)
