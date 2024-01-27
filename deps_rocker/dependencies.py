@@ -24,8 +24,10 @@ class Dependencies(RockerExtension):
             with open(path, 'r') as file:
                 self.dependencies.update(yaml.safe_load(file))
 
-    def get_deps(self,key):
-        return " ".join(self.dependencies[key])
+    def get_deps(self,key)->str:
+        if key in self.dependencies:
+            return " ".join(self.dependencies[key])
+        return ""
 
     def get_files(self, cliargs):
         all_files = {}
@@ -39,11 +41,11 @@ class Dependencies(RockerExtension):
             else:
                 all_files[filename] = ""
 
-        all_files["pip.deps"] = self.get_deps("pip") + self.get_pyproject_toml_deps()
+        all_files["pip.deps"] =  self.get_deps("pip") +" "+ self.get_pyproject_toml_deps()
 
         return all_files
 
-    def get_pyproject_toml_deps(self):
+    def get_pyproject_toml_deps(self)->str:
         pp_toml = Path.cwd().glob("pyproject.toml")
         deps = []
         for p in pp_toml:
@@ -59,7 +61,7 @@ class Dependencies(RockerExtension):
                     if "dev" in optional:
                         deps.extend(optional["dev"])
                     
-        return " "+" ".join(deps)
+        return " ".join(deps)
 
     def get_preamble(self, cli_args):
         return ''
