@@ -7,7 +7,7 @@ import yaml
 
 class Dependencies(RockerExtension):
 
-    name = 'deps_deps'
+    name = 'deps_dependencies'
 
     @classmethod
     def get_name(cls):
@@ -53,7 +53,7 @@ class Dependencies(RockerExtension):
         return ''
 
     @staticmethod
-    def register_arguments(parser):
+    def register_arguments(parser,defaults={}):
         parser.add_argument('--deps-dependencies',
             action='store_true',
             help='install dependencies.yaml ')
