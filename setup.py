@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setup(
     name='deps_rocker',
-    version='0.0.4',
+    version='0.0.5',
     packages=['deps_rocker'],
     package_data={'deps_rocker': ['templates/*.Dockerfile']},
     author='Austin Gregg-Smith',

@@ -1,5 +1,4 @@
 import em
-import os
 import pkgutil
 from rocker.extensions import RockerExtension
 from pathlib import Path
@@ -18,7 +17,7 @@ class Dependencies(RockerExtension):
         pass
 
     def read_dependencies(self):
-        deps_paths = Path.cwd().glob("dependencies.yaml")
+        deps_paths = Path.cwd().glob("deps.yaml")
         self.dependencies={}
         for path in deps_paths:
             with open(path, 'r') as file:
@@ -79,7 +78,7 @@ class Dependencies(RockerExtension):
     def register_arguments(parser,defaults={}):
         parser.add_argument('--deps-dependencies',
             action='store_true',
-            help='install dependencies.yaml ')
+            help='install deps.yaml ')
 
 if __name__ == "__main__":
     res =Dependencies().get_pyproject_toml_deps()

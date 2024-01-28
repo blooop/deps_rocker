@@ -3,7 +3,7 @@
 This is a [rocker](https://github.com/tfoote/rocker) extension for automating dependency installation.
 
 
-The extension will recursivly search for dependencies.yaml files and run the install commands in several layers
+The extension will recursivly search for deps.yaml files and run the install commands in several layers
 
 Layer order:
 
@@ -12,7 +12,7 @@ Layer order:
 - apt
 - pip
 
-example dependencies.yaml
+example deps.yaml
 
 ```
 apt_base: #base apt dependencies that rarely change
