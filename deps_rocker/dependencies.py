@@ -40,7 +40,13 @@ class Dependencies(RockerExtension):
             else:
                 all_files[filename] = ""
 
-        all_files["pip.deps"] =  self.get_deps("pip") +" "+ self.get_pyproject_toml_deps()
+        pip_deps = self.get_deps("pip") +" "+ self.get_pyproject_toml_deps()
+
+        #todo remove this hack
+        if pip_deps =="":
+            pip_deps = "pip"
+
+        all_files["pip.deps"] =  pip_deps
 
         return all_files
 
