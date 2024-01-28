@@ -13,22 +13,23 @@ class AptDependencies(DependenciesBase):
     def get_name(cls):
         return cls.name
 
-    def get_files(self, cliargs):
+    def get_files(self, cliargs=None):
         all_files = {}
 
         self.read_dependencies()
-        deps_names = ["apt_base","pip_base","apt"]
-        for dep in deps_names:
-            filename = f"{dep}.deps"
-            if dep in self.dependencies:
-                all_files[filename] = self.get_deps(dep)
-            else:
-                all_files[filename] = ""
 
-        
-        all_files["pip.deps"] =  self.get_deps("pip") +" "+ self.get_pyproject_toml_deps()
-        #todo remove this hack
-        if all_files["pip.deps"] ==""
+        for d in self.dependencies:
+            if "apt" in d:
+                print(d)
+
+        # deps_names = ["apt_base","pip_base","apt"]
+        # for dep in deps_names:
+        #     filename = f"{dep}.deps"
+        #     if dep in self.dependencies:
+        #         all_files[filename] = self.get_deps(dep)
+        #     else:
+        #         all_files[filename] = ""
+
 
 
         return all_files
@@ -46,5 +47,5 @@ class AptDependencies(DependenciesBase):
             help='install deps.yaml ')
 
 if __name__ == "__main__":
-    res =Dependencies().get_pyproject_toml_deps()
+    res =AptDependencies().get_files()
     print(res)
