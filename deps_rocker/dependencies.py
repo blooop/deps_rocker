@@ -13,7 +13,7 @@ class Dependencies(RockerExtension):
     def get_name(cls):
         return cls.name
 
-    def precondition_environment(self, cli_args):
+    def precondition_environment(self, cliargs):
         pass
 
     def read_dependencies(self):
@@ -40,7 +40,11 @@ class Dependencies(RockerExtension):
             else:
                 all_files[filename] = ""
 
+        
         all_files["pip.deps"] =  self.get_deps("pip") +" "+ self.get_pyproject_toml_deps()
+        #todo remove this hack
+        if all_files["pip.deps"] ==""
+
 
         return all_files
 
@@ -62,16 +66,16 @@ class Dependencies(RockerExtension):
                     
         return " ".join(deps)
 
-    def get_preamble(self, cli_args):
+    def get_preamble(self, cliargs):
         return ''
 
-    def get_snippet(self, cli_args):
+    def get_snippet(self, cliargs):
         snippet = pkgutil.get_data(
             'deps_rocker',
             'templates/dependencies_snippet.Dockerfile').decode('utf-8')
         return em.expand(snippet)
 
-    def get_docker_args(self, cli_args):
+    def get_docker_args(self, cliargs):
         return ''
 
     @staticmethod
