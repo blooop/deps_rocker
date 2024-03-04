@@ -15,7 +15,7 @@ setup(
     url="https://github.com/blooop/deps_rocker",
     license='MIT',
     install_requires=[
-        'rocker',
+        'rocker', 'pyyaml', 'toml'
     ],
     #call it odeps_dependencies so that it is called after nvidia "lmnop"
     entry_points={
