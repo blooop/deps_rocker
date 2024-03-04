@@ -41,7 +41,7 @@ class Dependencies(RockerExtension):
             return " ".join(self.dependencies[key])
         return ""
 
-    def get_files(self, cliargs):
+    def get_files(self, cliargs) ->dict[str]:
         all_files = {}
 
         self.read_dependencies()
@@ -61,7 +61,35 @@ class Dependencies(RockerExtension):
 
         all_files["pip.deps"] =  pip_deps
 
+        scripts = ["#! /bin/bash"]
+
+        # print(self.get_deps("scripts_base"))
+
+        # for s in self.get_deps("scripts_base"):
+        #     print(s)
+        #     with open(Path(s)) as f:
+        #         scripts.extend(f.readlines())
+
+        # with open("./scripts_base.sh") as f:
+            # scripts.extend(f.readlines())
+
+
+        # scripts.extend()
+
+        # print(scripts)
+
+        # all_files["scripts_base.sh"] = "\n".join(scripts)
+
+        # all_files["rocker-latest.list"] = "\n".join(scripts)
+        all_files["rocker-latest.list"] = self.get_deps("sources")
+
+
+
+
         return all_files
+    
+    def get_scripts(self):
+        return self.get_deps["script_base"]
 
     def get_pyproject_toml_deps(self)->str:
         """Recursivly load all dependencies from pyproject.toml"
