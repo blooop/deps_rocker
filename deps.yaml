@@ -4,7 +4,7 @@ apt_base:
   - python3-pip
 
 scripts_base:
-  - ./install.sh
+  - ./scripts_base.sh
 
 sources:
   # - deb https://apt.dockerproject.org/repo ubuntu-xenial main
