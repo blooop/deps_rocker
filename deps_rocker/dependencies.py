@@ -61,15 +61,29 @@ class Dependencies(RockerExtension):
 
         all_files["pip.deps"] =  pip_deps
 
-        #collect all scripts files into a single script
-        #make sure the first line has shebang
-        scripts = ["#! /bin/bash"]
-        for s in self.get_deps("scripts_base").split(" "):
-            with open(s,encoding="utf-8") as f:
-                scripts.extend(f.readlines())
-        all_files["scripts_base.sh"] = "\n".join(scripts)
+       
+        all_files["scripts_base.sh"] = self.get_scripts("scripts_base")
+        all_files["scripts.sh"] = self.get_scripts("scripts")
 
         return all_files
+    
+    def get_scripts(self,name:str)->str:
+        """collect all scripts files into a single script
+
+        Args:
+            name (str): name of the scripts key and output script name
+        Returns:
+            str: All scripts combined into a single script
+        """
+        #make sure the first line has shebang
+        scripts = ["#! /bin/bash"]
+        scripts_deps = self.get_deps(name)
+        if len(scripts_deps)>0:
+            for s in scripts_deps.split(" "):
+                with open(s,encoding="utf-8") as f:
+                    scripts.extend(f.readlines())
+
+        return "\n".join(scripts) 
     
 
     def get_pyproject_toml_deps(self)->str:
