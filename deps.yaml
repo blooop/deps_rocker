@@ -6,14 +6,15 @@ apt_base:
 scripts_base:
   - ./scripts_base.sh
 
-sources:
-  # - deb https://apt.dockerproject.org/repo ubuntu-xenial main
-  # - deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub jammy
-  - deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -sc) robotpkg
+
 
 pip_base:
   - flit
   - pip #updates to latest pip
+
+
+scripts:
+  - ./scripts_base.sh
 
 pip:
   - pip

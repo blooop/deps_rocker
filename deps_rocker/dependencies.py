@@ -40,30 +40,37 @@ class Dependencies(RockerExtension):
         if key in self.dependencies:
             return " ".join(self.dependencies[key])
         return ""
-
-    def get_files(self, cliargs)->dict:
-        all_files = {}
-
-        self.read_dependencies()
-        deps_names = ["apt_base","pip_base","apt"]
-        for dep in deps_names:
-            filename = f"{dep}.deps"
-            if dep in self.dependencies:
-                all_files[filename] = self.get_deps(dep)
-            else:
-                all_files[filename] = ""
-
-        pip_deps = self.get_deps("pip") +" "+ self.get_pyproject_toml_deps()
+    
+    def get_pips_deps(self,key:str)->str:
+        pip_deps = self.get_deps(key)
+        print(pip_deps)
 
         #todo remove this hack
         if pip_deps =="":
             pip_deps = "pip"
+        return pip_deps
+        
+    def get_files(self, cliargs)->dict:
+        all_files = {}
 
-        all_files["pip.deps"] =  pip_deps
+        self.read_dependencies()
+        #apt deps
+        deps_names = ["apt_tools","apt_base","apt"]
+        for dep in deps_names:
+            all_files[f"{dep}.deps"]= self.get_deps(dep)
 
-       
+        #pip deps
+        deps_names = ["pip_tools","pip_base"]
+        for dep in deps_names:
+            all_files[f"{dep}.deps"]=self.get_pips_deps(dep) 
+
+        all_files["pip.deps"] =  self.get_pips_deps("pip") +" "+ self.get_pyproject_toml_deps()
+
+        #setup custom scripts
+        all_files["scripts_tools.sh"] = self.get_scripts("scripts_tools")
         all_files["scripts_base.sh"] = self.get_scripts("scripts_base")
         all_files["scripts.sh"] = self.get_scripts("scripts")
+        all_files["scripts_post.sh"] = self.get_scripts("scripts_post")
 
         return all_files
     
