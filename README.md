@@ -6,12 +6,18 @@ This is a [rocker](https://github.com/tfoote/rocker) extension for automating de
 The extension will recursivly search for deps.yaml files and run the install commands in several layers
 
 Layer order:
+- script_tools
+- apt_tools
+- pip_tools
+
 - script_base
 - apt_base
 - pip_base
+
 - script
 - apt
 - pip
+- script_post
 
 example deps.yaml
 
