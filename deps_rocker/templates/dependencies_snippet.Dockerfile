@@ -5,7 +5,7 @@ RUN chmod +x /scripts_tools.sh; /scripts_tools.sh
 COPY apt_tools.deps /apt_tools.deps
 RUN apt-get update \ 
  && apt-get install -y $(cat /apt_tools.deps) \
- && apt-get clean 
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY pip_tools.deps /pip_tools.deps
 RUN pip install -U $(cat /pip_tools.deps)
@@ -17,7 +17,7 @@ RUN chmod +x /scripts_base.sh; /scripts_base.sh
 COPY apt_base.deps /apt_base.deps
 RUN apt-get update \ 
  && apt-get install -y $(cat /apt_base.deps) \
- && apt-get clean 
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY pip_base.deps /pip_base.deps
 RUN pip install -U $(cat /pip_base.deps)
@@ -29,7 +29,7 @@ RUN chmod +x /scripts.sh; /scripts.sh
 COPY apt.deps /apt.deps
 RUN apt-get update \ 
  && apt-get install -y $(cat /apt.deps) \
- && apt-get clean 
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY pip.deps /pip.deps
 RUN pip install -U $(cat /pip.deps)
