@@ -1,11 +1,15 @@
-apt_base:
+apt_tools:
   - git
   - git-lfs
   - python3-pip
 
-pip_base:
+pip_tools:
   - flit
   - pip #updates to latest pip
+
+
+scripts:
+  - ./scripts_base.sh
 
 pip:
   - pip
