@@ -1,9 +1,6 @@
 # deps_rocker
 
-This is a [rocker](https://github.com/tfoote/rocker) extension for automating dependency installation.
-
-
-The extension will recursivly search for deps.yaml files and run the install commands in several layers
+This is a [rocker](https://github.com/tfoote/rocker) extension for automating dependency installation.  The aim is to allow a projects to define its development dependencies in a deps.yaml file which are added to the rocker container. The extension will recursivly search for deps.yaml files and run the install commands in several layers.  
 
 Layer order:
 - script_tools
@@ -19,44 +16,34 @@ Layer order:
 - pip
 - script_post
 
+If rocker is used to launch from a folder that contains multple projects with deps.yaml it will create a container to enable development of all of them combined together. 
+
 example deps.yaml
 
-cuda
-nvidia
-apt_dev all apt dev dependencies
-pip_dev pip dev dependencies
-apt_large
-apt
-pip_large
-pip
-
-
 ```
-apt_base: #base apt dependencies that rarely change. Usually dev dep
+apt_tools: #install basic development tools which almost never change
   - git
   - git-lfs
   - python3-pip
 
-pip_base: #base pip dependencies that rarely change
+pip_tools: #install basic development tools which almost never change
+  - pip #this updates pip to latest version
   - flit
-  - pip
-
-apt_large
-
-apt: #project apt dependencies that may change on a more regular basis
-  - nano
-  - vim
+  - pytest
+  - ruff
 
 pip: #project pip dependencies that may change on a more regular basis
- - pyyaml
+  - pyyaml
 
 ```
 
 run with:
 
 ```
-rocker deps-dependencies ubuntu:22.04
+rocker --deps-dependencies ubuntu:22.04
 ```
+
+
 
 ## limitations/TODO
 
