@@ -8,7 +8,7 @@ RUN apt-get update \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY pip_tools.deps /pip_tools.deps
-RUN pip install -U $(cat /pip_tools.deps)
+RUN pip3 install -U $(cat /pip_tools.deps)
 
 #INSTALL EXPENSIVE BASE DEPENDENCIES
 COPY scripts_base.sh /scripts_base.sh
@@ -20,7 +20,7 @@ RUN apt-get update \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY pip_base.deps /pip_base.deps
-RUN pip install -U $(cat /pip_base.deps)
+RUN pip3 install -U $(cat /pip_base.deps)
 
 #INSTALL DEVELOPMENT DEPENDENCIES
 COPY scripts.sh /scripts.sh
@@ -32,7 +32,7 @@ RUN apt-get update \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY pip.deps /pip.deps
-RUN pip install -U $(cat /pip.deps)
+RUN pip3 install -U $(cat /pip.deps)
 
 #POST SETUP
 COPY scripts_post.sh /scripts_post.sh
