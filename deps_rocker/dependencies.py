@@ -38,7 +38,7 @@ class Dependencies(RockerExtension):
             str: space delimited dependencies
         """
         if key in self.dependencies:
-            return " ".join(self.dependencies[key])
+            return " ".join(sorted(self.dependencies[key]))
         return ""
     
     def get_pips_deps(self,key:str)->str:
