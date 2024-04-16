@@ -1,3 +1,6 @@
+env:
+  - DEPS_ROCKER=1  
+
 apt_tools:
   - git
   - git-lfs

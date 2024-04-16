@@ -72,6 +72,8 @@ class Dependencies(RockerExtension):
         all_files["scripts.sh"] = self.get_scripts("scripts")
         all_files["scripts_post.sh"] = self.get_scripts("scripts_post")
 
+        all_files["env_vars"] = self.get_deps("env")
+
         return all_files
     
     def get_scripts(self,name:str)->str:
