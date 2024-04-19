@@ -13,6 +13,7 @@ class Dependencies(RockerExtension):
     def __init__(self) -> None:
         self.dependencies= defaultdict(set)
         self.empy_args={}
+        self.all_files={}
         self.read_dependencies()
         print("dependencies dictionary")
         for k,v in self.dependencies.items():
@@ -54,8 +55,6 @@ class Dependencies(RockerExtension):
      
         
     def get_files(self, cliargs)->dict:
-        self.all_files = {}
-
         self.read_dependencies()
         #apt and pip deps
         deps_names = ["apt_tools","apt_base","apt","pip_tools","pip_base", "pip"]
