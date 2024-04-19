@@ -7,9 +7,8 @@ pip_tools:
   - flit
   - pip #updates to latest pip
 
-
 scripts:
-  - ./scripts_base.sh
+  - scripts_base.sh
 
 pip:
   - pip

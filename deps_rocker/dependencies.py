@@ -12,6 +12,10 @@ class Dependencies(RockerExtension):
 
     def __init__(self) -> None:
         self.dependencies= defaultdict(set)
+        self.read_dependencies()
+        print("dependencies dictionary")
+        for k,v in self.dependencies.items():
+            print(k,v)
         super().__init__()
 
     @classmethod
@@ -20,12 +24,15 @@ class Dependencies(RockerExtension):
 
     def read_dependencies(self):
         """Recursivly load all deps.yaml and create a dictionary containing sets of each type of dependency. Each type of dependency (apt_base, apt etc) should have duplicates rejected when adding to the set"""
-       
         for path in Path.cwd().rglob("deps.yaml"):
+            print(f"found {path}")
             with open(path, 'r',encoding="utf-8") as file:
                 vals = yaml.safe_load(file)
                 for k in vals:                
                     for v in vals[k]:
+                        if "scripts" in k:
+                            v = (path.parent/ Path(v)).absolute().as_posix()
+                        print(k,v)
                         self.dependencies[k].add(v)
 
     def get_deps(self,key:str)->str:
@@ -130,5 +137,18 @@ class Dependencies(RockerExtension):
             help='install deps.yaml ')
 
 if __name__ == "__main__":
-    res =Dependencies().get_files(None)
-    print(res)
+
+    deps = Dependencies()
+    # print(deps)
+
+    # scr= deps
+    # scr= deps.get_scripts("scripts_tools")
+    scr= deps.get_deps("scripts")
+
+    # print(scr)
+
+
+    # res =Dependencies().get_files(None)
+
+
+    # print(res)
