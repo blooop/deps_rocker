@@ -12,6 +12,7 @@ class Dependencies(RockerExtension):
 
     def __init__(self) -> None:
         self.dependencies= defaultdict(set)
+        self.empy_args={}
         self.read_dependencies()
         print("dependencies dictionary")
         for k,v in self.dependencies.items():
@@ -50,41 +51,38 @@ class Dependencies(RockerExtension):
                 return dep_list
             return " ".join(dep_list)
         return ""
-    
-    def get_pips_deps(self,key:str)->str:
-        pip_deps = self.get_deps(key)
-        print(pip_deps)
-
-        #todo remove this hack
-        if pip_deps =="":
-            pip_deps = "pip"
-        return pip_deps
+     
         
     def get_files(self, cliargs)->dict:
-        all_files = {}
+        self.all_files = {}
 
         self.read_dependencies()
-        #apt deps
-        deps_names = ["apt_tools","apt_base","apt"]
+        #apt and pip deps
+        deps_names = ["apt_tools","apt_base","apt","pip_tools","pip_base", "pip"]
         for dep in deps_names:
-            all_files[f"{dep}.deps"]= self.get_deps(dep)
+            self.add_file(dep, self.get_deps(dep))
 
-        #pip deps
-        deps_names = ["pip_tools","pip_base"]
-        for dep in deps_names:
-            all_files[f"{dep}.deps"]=self.get_pips_deps(dep) 
-
-        all_files["pip.deps"] =  self.get_pips_deps("pip") +" "+ self.get_pyproject_toml_deps()
+        #pyproject.toml deps
+        self.add_file("pyproject_toml", self.get_pyproject_toml_deps())
 
         #setup custom scripts
-        all_files["scripts_tools.sh"] = self.get_scripts("scripts_tools")
-        all_files["scripts_base.sh"] = self.get_scripts("scripts_base")
-        all_files["scripts.sh"] = self.get_scripts("scripts")
-        all_files["scripts_post.sh"] = self.get_scripts("scripts_post")
+        for s in ["scripts_tools","scripts_base","scripts","scripts_post"]:
+            self.add_file(s,self.get_scripts(s))
+          
+        return self.all_files
+    
+    def add_file(self,filename:str,content:str)->None:
+        """Create a file on the users host machine to be copied into the docker context. This also updates the empy_args dictionary with True if that file is generated.  The empy_args are used to determine if a snipped related to that file should be generated or not.
 
-        all_files["env_vars"] = self.get_deps("env")
-
-        return all_files
+        Args:
+            filename (str): name of file to create
+            content (str): the contents of the file
+        """
+        valid = len(content)>0
+        print(f"adding file {filename}, {valid}")
+        self.empy_args[filename] =valid
+        if valid:
+            self.all_files[filename] = content
     
     def get_scripts(self,name:str)->str:
         """collect all scripts files into a single script
@@ -102,7 +100,9 @@ class Dependencies(RockerExtension):
                 with open(s,encoding="utf-8") as f:
                     scripts.extend(f.readlines())
 
-        return "\n".join(scripts) 
+        if len(scripts)>1:
+            return "\n".join(scripts) 
+        return ""
     
 
     def get_pyproject_toml_deps(self)->str:
@@ -133,10 +133,13 @@ class Dependencies(RockerExtension):
             'deps_rocker',
             'templates/dependencies_snippet.Dockerfile').decode('utf-8')            
         
-        empy_args={}
-        empy_args["env_vars"] = self.get_deps("env",as_list=True)
-        print("empy_args",empy_args)
-        return em.expand(snippet,empy_args)
+        self.get_files(None)
+        self.empy_args["env_vars"] = self.get_deps("env",as_list=True)
+        print("all files")
+        for k,v in self.all_files.items():
+            print(k,v)
+        print("empy_args",self.empy_args)
+        return em.expand(snippet,self.empy_args)
 
 
     @staticmethod
