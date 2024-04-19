@@ -1,3 +1,8 @@
+#SET UP ENVIRONMENT VARIABLES
+@[for x in env_vars]@
+ENV @x
+@[end for]@
+
 #INSTALL DEVELOPMENT TOOLS
 COPY scripts_tools.sh /scripts_tools.sh
 RUN chmod +x /scripts_tools.sh; /scripts_tools.sh

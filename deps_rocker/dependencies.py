@@ -35,7 +35,7 @@ class Dependencies(RockerExtension):
                         print(k,v)
                         self.dependencies[k].add(v)
 
-    def get_deps(self,key:str)->str:
+    def get_deps(self,key:str,as_list:bool = False)->str:
         """Given a dependency key return a space delimited string of dependencies
 
         Args:
@@ -45,7 +45,10 @@ class Dependencies(RockerExtension):
             str: space delimited dependencies
         """
         if key in self.dependencies:
-            return " ".join(sorted(self.dependencies[key]))
+            dep_list = list(sorted(self.dependencies[key]))
+            if as_list:
+                return dep_list
+            return " ".join(dep_list)
         return ""
     
     def get_pips_deps(self,key:str)->str:
@@ -124,12 +127,16 @@ class Dependencies(RockerExtension):
                         deps.extend(optional["dev"])
                     
         return " ".join(deps)
-
+    
     def get_snippet(self, cliargs):
         snippet = pkgutil.get_data(
             'deps_rocker',
-            'templates/dependencies_snippet.Dockerfile').decode('utf-8')
-        return em.expand(snippet)
+            'templates/dependencies_snippet.Dockerfile').decode('utf-8')            
+        
+        empy_args={}
+        empy_args["env_vars"] = self.get_deps("env",as_list=True)
+        print("empy_args",empy_args)
+        return em.expand(snippet,empy_args)
 
 
     @staticmethod
@@ -147,7 +154,8 @@ if __name__ == "__main__":
     # scr= deps.get_scripts("scripts_tools")
     scr= deps.get_deps("scripts")
 
-    # print(scr)
+    scr= deps.get_deps("env")
+    print(scr)
 
 
     # res =Dependencies().get_files(None)
