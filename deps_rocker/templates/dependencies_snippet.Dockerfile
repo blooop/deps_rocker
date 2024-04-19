@@ -1,44 +1,47 @@
+@# DEFINE EMPY MACROS FOR GENERATING DOCKERFILE
+
+@# DEFINE EMPY FUNCTION FOR RUNNING SCRIPTS
+@[def define_script(filename)]@
+COPY @filename /@filename
+RUN chmod +x /@filename; /@filename
+@[end def]@
+
+@# DEFINE EMPY FUNCTION FOR INSTALLING APT DEPS
+@[def define_apt_deps(filename)]@
+COPY @filename /@filename
+RUN apt-get update \ 
+ && apt-get install -y --no-install-recommends $(cat /@filename) \
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
+@[end def]@
+
+@# DEFINE EMPY FUNCTION FOR PIP INSTALLING
+@[def define_pip_install(filename)]@
+COPY @filename /@filename
+RUN pip3 install -U $(cat /@filename)
+@[end def]@
+
+@# END OF EMPY MACROS
+
+
 #SET UP ENVIRONMENT VARIABLES
 @[for x in env_vars]@
 ENV @x
 @[end for]@
 
 #INSTALL DEVELOPMENT TOOLS
-COPY scripts_tools.sh /scripts_tools.sh
-RUN chmod +x /scripts_tools.sh; /scripts_tools.sh
-
-COPY apt_tools.deps /apt_tools.deps
-RUN apt-get update \ 
- && apt-get install -y --no-install-recommends $(cat /apt_tools.deps) \
- && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-COPY pip_tools.deps /pip_tools.deps
-RUN pip3 install -U $(cat /pip_tools.deps)
+@define_script("scripts_tools.sh")
+@define_apt_deps("apt_tools.deps")
+@define_pip_install("pip_tools.deps")
 
 #INSTALL EXPENSIVE BASE DEPENDENCIES
-COPY scripts_base.sh /scripts_base.sh
-RUN chmod +x /scripts_base.sh; /scripts_base.sh
-
-COPY apt_base.deps /apt_base.deps
-RUN apt-get update \ 
- && apt-get install -y --no-install-recommends $(cat /apt_base.deps) \
- && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-COPY pip_base.deps /pip_base.deps
-RUN pip3 install -U $(cat /pip_base.deps)
+@define_script("scripts_base.sh")
+@define_apt_deps("apt_base.deps")
+@define_pip_install("pip_base.deps")
 
 #INSTALL DEVELOPMENT DEPENDENCIES
-COPY scripts.sh /scripts.sh
-RUN chmod +x /scripts.sh; /scripts.sh
-
-COPY apt.deps /apt.deps
-RUN apt-get update \ 
- && apt-get install -y --no-install-recommends $(cat /apt.deps) \
- && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-COPY pip.deps /pip.deps
-RUN pip3 install -U $(cat /pip.deps)
+@define_script("scripts.sh")
+@define_apt_deps("apt.deps")
+@define_pip_install("pip.deps")
 
 #POST SETUP
-COPY scripts_post.sh /scripts_post.sh
-RUN chmod +x /scripts_post.sh; /scripts_post.sh
+@define_script("scripts_post.sh")
