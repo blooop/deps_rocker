@@ -3,24 +3,34 @@
 This is a [rocker](https://github.com/tfoote/rocker) extension for automating dependency installation.  The aim is to allow a projects to define its development dependencies in a deps.yaml file which are added to the rocker container. The extension will recursivly search for deps.yaml files and run the install commands in several layers.  
 
 Layer order:
-- script_tools
+- env
+
+- scripts_tools
 - apt_tools
 - pip_tools
 
-- script_base
+- scripts_base
 - apt_base
 - pip_base
 
-- script
+- scripts
 - apt
 - pip
-- script_post
+
+- pyproject_toml #reads from all pyproject.toml files
+
+- scripts_post
 
 If rocker is used to launch from a folder that contains multple projects with deps.yaml it will create a container to enable development of all of them combined together. 
+
 
 example deps.yaml
 
 ```
+
+env:
+  - BASIC_ENV_VAR=1
+
 apt_tools: #install basic development tools which almost never change
   - git
   - git-lfs
@@ -48,7 +58,3 @@ rocker --deps-dependencies ubuntu:22.04
 ## limitations/TODO
 
 This has only been tested on the ubuntu base image. It assumes you have access to apt-get.
-
-all the pip tags must have an entry for the moment.  Will improve the dockerfile logic to allow empty pip layers
-
-
