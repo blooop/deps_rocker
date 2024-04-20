@@ -1,44 +1,56 @@
+@# DEFINE EMPY MACROS FOR GENERATING DOCKERFILE
+
+@# DEFINE EMPY FUNCTION FOR RUNNING SCRIPTS
+@[def define_script(filename,file_exists)]@
+@[if file_exists]@
+COPY @filename /@filename
+RUN chmod +x /@filename; /@filename
+@[end if]@
+@[end def]@
+
+@# DEFINE EMPY FUNCTION FOR INSTALLING APT DEPS
+@[def define_apt_deps(filename,file_exists)]@
+@[if file_exists]@
+COPY @filename /@filename
+RUN apt-get update \ 
+ && apt-get install -y --no-install-recommends $(cat /@filename) \
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
+@[end if]@
+@[end def]@
+
+@# DEFINE EMPY FUNCTION FOR PIP INSTALLING
+@[def define_pip_install(filename,file_exists)]@
+@[if file_exists]@
+COPY @filename /@filename
+RUN pip3 install -U $(cat /@filename)
+@[end if]@
+@[end def]@
+
+@# END OF EMPY MACROS
+
+
 #SET UP ENVIRONMENT VARIABLES
 @[for x in env_vars]@
 ENV @x
 @[end for]@
 
 #INSTALL DEVELOPMENT TOOLS
-COPY scripts_tools.sh /scripts_tools.sh
-RUN chmod +x /scripts_tools.sh; /scripts_tools.sh
-
-COPY apt_tools.deps /apt_tools.deps
-RUN apt-get update \ 
- && apt-get install -y --no-install-recommends $(cat /apt_tools.deps) \
- && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-COPY pip_tools.deps /pip_tools.deps
-RUN pip3 install -U $(cat /pip_tools.deps)
+@define_script("scripts_tools",scripts_tools)
+@define_apt_deps("apt_tools",apt_tools)
+@define_pip_install("pip_tools",pip_tools)
 
 #INSTALL EXPENSIVE BASE DEPENDENCIES
-COPY scripts_base.sh /scripts_base.sh
-RUN chmod +x /scripts_base.sh; /scripts_base.sh
-
-COPY apt_base.deps /apt_base.deps
-RUN apt-get update \ 
- && apt-get install -y --no-install-recommends $(cat /apt_base.deps) \
- && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-COPY pip_base.deps /pip_base.deps
-RUN pip3 install -U $(cat /pip_base.deps)
+@define_script("scripts_base",scripts_base)
+@define_apt_deps("apt_base",apt_base)
+@define_pip_install("pip_base",pip_base)
 
 #INSTALL DEVELOPMENT DEPENDENCIES
-COPY scripts.sh /scripts.sh
-RUN chmod +x /scripts.sh; /scripts.sh
+@define_script("scripts",scripts)
+@define_apt_deps("apt",apt)
+@define_pip_install("pip",pip)
 
-COPY apt.deps /apt.deps
-RUN apt-get update \ 
- && apt-get install -y --no-install-recommends $(cat /apt.deps) \
- && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-COPY pip.deps /pip.deps
-RUN pip3 install -U $(cat /pip.deps)
+#INSTALL FROM PYPROJECT.TOML
+@define_pip_install("pyproject_toml",pyproject_toml)
 
 #POST SETUP
-COPY scripts_post.sh /scripts_post.sh
-RUN chmod +x /scripts_post.sh; /scripts_post.sh
+@define_script("scripts_post",scripts_post)

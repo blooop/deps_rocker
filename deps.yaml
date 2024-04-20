@@ -1,6 +1,9 @@
 env:
   - DEPS_ROCKER=1  
 
+scripts_tools:
+  - add_robotpkg.sh
+
 apt_tools:
   - git
   - git-lfs
@@ -9,9 +12,3 @@ apt_tools:
 pip_tools:
   - flit
   - pip #updates to latest pip
-
-scripts:
-  - scripts_base.sh
-
-pip:
-  - pip
