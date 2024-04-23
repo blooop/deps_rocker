@@ -134,10 +134,85 @@ class Dependencies(RockerExtension):
         
         self.get_files(None)
         self.empy_args["env_vars"] = self.get_deps("env",as_list=True)
-        print("all files")
+        print("All files")
         for k,v in self.all_files.items():
-            print(k,v)
+            print(f"{k}:{v}")
         print("empy_args",self.empy_args)
+        
+        snippets = ["apt","pip", "script"]
+
+        with open("deps_order.yaml", 'r',encoding="utf-8") as file:
+            deps_order = yaml.safe_load(file)
+            layer_order = deps_order["group_layer_order"]
+            snippet_order = deps_order["snippet_order"]
+        from graphlib import TopologicalSorter
+
+        layer_order_sorted = list(TopologicalSorter(layer_order).static_order())
+        command_snippet_order_sorted = list(TopologicalSorter(snippet_order).static_order())
+
+        print(layer_order)
+        print(layer_order_sorted)
+        print(snippet_order)
+        print(command_snippet_order_sorted)
+
+        snippet_dict = {}
+        for s in snippets:
+            snippet_dict[s] = pkgutil.get_data("deps_rocker",f"templates/{s}_snippet.Dockerfile").decode("utf-8")     
+
+
+        groups=  defaultdict(list)
+
+
+        for k in self.all_files.keys():
+            split = k.split("_")
+            command_snippet = split[0]
+            group_layer = split[1]
+
+            groups[group_layer].append(command_snippet)
+
+            print(f"command: {command_snippet},group {group_layer}")
+
+        print(groups)
+
+        ordered_snippets=[]
+        for i in layer_order_sorted:
+            for j in command_snippet_order_sorted:
+                ordered_snippets.append(f"{j}_{i}")
+
+
+        print(ordered_snippets)
+        docker_snippets=[]
+
+        for s in ordered_snippets:
+            
+            split = s.split("_")
+            command_snippet = split[0]
+            group_layer = split[1]
+            print(command_snippet)
+            if s in self.all_files:
+            # if command_snippet in snippet_dict:
+                # if group_layer in 
+                docker_snippets.append(em.expand(snippet_dict[command_snippet],dict(filename=s)))
+
+
+        print(docker_snippets)
+        # exit()
+
+
+
+        # for k,v in self.all_files.items():
+        #     split = k.split("_")
+        #     command_snippet = split[0]
+        #     if command_snippet in snippet_dict:
+        #         docker_snippets.append(em.expand(snippet_dict[command_snippet],dict(filename=k)))
+
+        return "\n".join(docker_snippets)            
+
+        # print(apt_snipped)
+
+        # return apt_snipped
+
+
         return em.expand(snippet,self.empy_args)
 
 
@@ -157,6 +232,7 @@ if __name__ == "__main__":
     scr= deps.get_deps("scripts")
 
     scr= deps.get_deps("env")
+    deps.get_snippet(None)
     print(scr)
 
 
