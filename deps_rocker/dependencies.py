@@ -12,10 +12,12 @@ class Dependencies(RockerExtension):
 
     def __init__(self) -> None:
         self.dependencies= defaultdict(set)
+        self.dep_group_order = defaultdict(list)
         self.empy_args={}
         self.all_files={}
         self.read_dependencies()
         print("dependencies dictionary")
+
         for k,v in self.dependencies.items():
             print(k,v)
         super().__init__()
@@ -30,12 +32,23 @@ class Dependencies(RockerExtension):
             print(f"found {path}")
             with open(path, 'r',encoding="utf-8") as file:
                 vals = yaml.safe_load(file)
+                print(vals)
+                prev_k="PRIMAL_DEPENDENCY"
                 for k in vals:                
                     for v in vals[k]:
                         if "scripts" in k:
                             v = (path.parent/ Path(v)).absolute().as_posix()
                         print(k,v)
                         self.dependencies[k].add(v)
+                    if prev_k is not None:
+                        self.dep_group_order[k].append(prev_k)
+                    prev_k = k
+        
+        self.dep_group_order["PRIMAL_DEPENDENCY"] =sorted(self.dep_group_order["PRIMAL_DEPENDENCY"])
+
+        for k,v in self.dep_group_order.items():
+            self.dep_group_order[k] = list(dict.fromkeys(v))
+
 
     def get_deps(self,key:str,as_list:bool = False)->str:
         """Given a dependency key return a space delimited string of dependencies
@@ -150,10 +163,17 @@ class Dependencies(RockerExtension):
         layer_order_sorted = list(TopologicalSorter(layer_order).static_order())
         command_snippet_order_sorted = list(TopologicalSorter(snippet_order).static_order())
 
+        commands_ordered = list(TopologicalSorter(self.dep_group_order).static_order()) 
+
         print(layer_order)
         print(layer_order_sorted)
         print(snippet_order)
         print(command_snippet_order_sorted)
+
+        print("deps_yaml_ordered",self.dep_group_order)
+
+        print(commands_ordered)
+        exit(1)
 
         snippet_dict = {}
         for s in snippets:

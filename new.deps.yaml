@@ -1,0 +1,13 @@
+Base:
+  cmd: ENV
+  data: 
+    - flit
+    - pip
+
+
+
+tools:
+  cmd: pip
+  data:
+  - flit
+  - pip #updates to latest pip
