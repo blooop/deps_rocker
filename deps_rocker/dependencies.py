@@ -5,7 +5,6 @@ from pathlib import Path
 import yaml
 import toml
 from collections import defaultdict
-from graphlib import TopologicalSorter
 from dataclasses import dataclass, field
 from typing import List
 
@@ -45,7 +44,6 @@ class CommandLayer:
 
 
 class Dependencies(RockerExtension):
-
     name = "deps_dependencies"
 
     def __init__(self, path: Path = Path.cwd(), pattern: str = "*deps.yaml") -> None:
@@ -198,7 +196,6 @@ class Dependencies(RockerExtension):
 
 
 if __name__ == "__main__":
-
     deps = Dependencies()
     # print(deps)
 
