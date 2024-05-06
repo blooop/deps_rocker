@@ -42,6 +42,20 @@ class TestBasicClass(TestCase):
 
         self.assertEqual(deps1.get_snippet(), deps_both.get_snippet())
 
+    def test_no_layer(self):
+        deps = Dependencies(pattern="no_layer.deps_test.yaml")
+
+        print(deps.layers)
+
+        self.assertTrue("env" in deps.layers)
+        self.assertTrue(deps.layers["env"].layer == "default")
+
+    def test_invalid_command(self):
+        deps = Dependencies(pattern="invalid_command.deps_test.yaml")
+
+        self.assertTrue("env" in deps.layers)
+        self.assertTrue(deps.layers["env"].layer == "default")
+
 
 if __name__ == "__main__":
     unittest.main()

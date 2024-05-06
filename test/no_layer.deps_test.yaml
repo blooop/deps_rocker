@@ -1,0 +1,6 @@
+env:
+  - DEPS_ROCKER=1  
+
+pip:
+  - flit
+  - pip #updates to latest pip

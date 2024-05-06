@@ -21,7 +21,10 @@ class CommandLayer:
     def update(self, key: str, value: List):
         split = key.split("_")
         self.command = split[0]
-        self.layer = split[1]
+        if len(split) > 1:
+            self.layer = split[1]
+        else:
+            self.layer = "default"
         if isinstance(value, list):
             for v in value:
                 self.data.add(v)
@@ -54,16 +57,6 @@ class Dependencies(RockerExtension):
         self.empy_args = {}
         self.all_files = {}
         self.read_dependencies(path, pattern)
-
-        # pyproject_deps = self.get_pyproject_toml_deps()
-        # if len(pyproject_deps) > 0:
-        #     print(pyproject_deps)
-        #     self.layers["pip_main"].update("pip_main", pyproject_deps)
-
-        # print("dependencies dictionary")
-        # for k, v in self.dependencies.items():
-        # print(k, v)
-
         super().__init__()
 
     @classmethod
@@ -121,7 +114,7 @@ class Dependencies(RockerExtension):
     def get_files(self, cliargs) -> dict:
         print("Getting files")
 
-        self.add_file("pyproject_main", self.get_pyproject_toml_deps())
+        self.add_file("pyproject_default", self.get_pyproject_toml_deps())
 
         for lay in self.layers.values():
             print(lay.get_filename())
@@ -171,21 +164,20 @@ class Dependencies(RockerExtension):
             str: Space delimited string of dependencies
         """
         pp_toml = Path.cwd().rglob("pyproject.toml")
-        deps = []
+        pyproj_deps = []
         for p in pp_toml:
             with open(p, "r", encoding="utf-8") as f:
                 config = toml.load(f)
                 project = config["project"]
                 if "dependencies" in project:
-                    deps.extend(project["dependencies"])
+                    pyproj_deps.extend(project["dependencies"])
                 if "optional-dependencies" in project:
                     optional = project["optional-dependencies"]
                     if "test" in optional:
-                        deps.extend(optional["test"])
+                        pyproj_deps.extend(optional["test"])
                     if "dev" in optional:
-                        deps.extend(optional["dev"])
-        # return deps
-        return " ".join(deps)
+                        pyproj_deps.extend(optional["dev"])
+        return " ".join(pyproj_deps)
 
     def get_snippet(self, cliargs=None):
         return "\n".join([lay.to_snippet() for lay in self.layers.values()])

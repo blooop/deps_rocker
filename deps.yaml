@@ -1,8 +1,6 @@
-env:
+env_base:
   - DEPS_ROCKER=1  
 
-scripts_tools:
-  - add_robotpkg.sh
 
 apt_tools:
   - git
@@ -12,3 +10,6 @@ apt_tools:
 pip_tools:
   - flit
   - pip #updates to latest pip
+
+pyproject:
+  - all

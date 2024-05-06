@@ -1,0 +1,39 @@
+#Template package  Uncomment or modify these entries.
+
+# env_base:
+#   - DEPS_ROCKER=1
+
+# apt_base:
+#   - build-essentials
+
+# apt_sources:
+#   - wget
+#   - curl
+#   - git
+#   - git-lfs
+
+# script_sources:
+#   - sources.sh
+
+# apt_language-toolchain:
+#   - python3-pip
+#   - make
+
+# apt_tools:
+  # - colcon
+
+# apt_main:
+  # - fsearch
+
+# apt:
+  # - fsearch
+
+# script_build:
+#   - build.sh
+
+# script_lint:
+#   - lint.sh
+
+# script_test:
+#   - test.sh
+
