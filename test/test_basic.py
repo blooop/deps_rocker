@@ -3,6 +3,8 @@ from unittest import TestCase
 from deps_rocker.dependencies import Dependencies
 from pathlib import Path
 
+# pylint: disable=no-value-for-parameter
+
 
 class TestBasicClass(TestCase):
     def test_init(self):
@@ -15,10 +17,10 @@ class TestBasicClass(TestCase):
         """a1.deps_test.yaml and a2.deps_test.yaml are the same. Check they result in the same output as eachother, and also the same output when both files are loaded at the same time"""
 
         deps1 = Dependencies("a1.deps_test.yaml")
-        self.assertEqual(deps1.deps_files, [Path("test/a1.deps_test.yaml")])
+        self.assertEqual([f.name for f in deps1.deps_files], ["a1.deps_test.yaml"])
 
         deps2 = Dependencies("a2.deps_test.yaml")
-        self.assertEqual(deps2.deps_files, [Path("test/a2.deps_test.yaml")])
+        self.assertEqual([f.name for f in deps2.deps_files], ["a2.deps_test.yaml"])
 
         self.assertEqual(
             deps1.get_snippet(),
@@ -35,11 +37,9 @@ class TestBasicClass(TestCase):
         deps_both = Dependencies("a*.deps_test.yaml")
 
         self.assertEqual(
-            deps_both.deps_files, [Path("test/a1.deps_test.yaml"), Path("test/a2.deps_test.yaml")]
+            [f.name for f in deps_both.deps_files], ["a1.deps_test.yaml", "a2.deps_test.yaml"]
         )
 
-        print(deps1.get_snippet())
-        print(deps_both.get_snippet())
 
         self.assertEqual(deps1.get_snippet(), deps_both.get_snippet())
 

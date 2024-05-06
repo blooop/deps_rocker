@@ -80,7 +80,8 @@ class Dependencies(RockerExtension):
                     for k in vals:
                         for v in vals[k]:
                             if "script" in k:
-                                v = (p.parent / Path(v)).absolute().as_posix()
+                                if v is not None:
+                                    v = (p.parent / Path(v)).absolute().as_posix()
                             print(f"key:{k} val:{v}")
 
                             self.layers[k].update(k, v)
@@ -181,7 +182,9 @@ class Dependencies(RockerExtension):
                         pyproj_deps.extend(optional["dev"])
         return " ".join(pyproj_deps)
 
-    def get_snippet(self, cliargs):
+    def get_snippet(self, cliargs=None):
+        # print("CLIARGS", cliargs)
+        # exit()
         return "\n".join([lay.to_snippet() for lay in self.layers.values()])
 
     @staticmethod
