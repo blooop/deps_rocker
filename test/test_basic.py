@@ -6,17 +6,18 @@ from pathlib import Path
 
 class TestBasicClass(TestCase):
     def test_init(self):
-        instance = Dependencies(Path("test"), "*.deps_test.yaml")
+        print(Path.cwd())
+        instance = Dependencies("*.deps_test.yaml")
         instance.get_files(None)
         print(instance.get_snippet())
 
     def test_single(self):
         """a1.deps_test.yaml and a2.deps_test.yaml are the same. Check they result in the same output as eachother, and also the same output when both files are loaded at the same time"""
 
-        deps1 = Dependencies(Path("test"), "a1.deps_test.yaml")
+        deps1 = Dependencies("a1.deps_test.yaml")
         self.assertEqual(deps1.deps_files, [Path("test/a1.deps_test.yaml")])
 
-        deps2 = Dependencies(Path("test"), "a2.deps_test.yaml")
+        deps2 = Dependencies("a2.deps_test.yaml")
         self.assertEqual(deps2.deps_files, [Path("test/a2.deps_test.yaml")])
 
         self.assertEqual(
@@ -31,7 +32,7 @@ class TestBasicClass(TestCase):
             "Get snipped should be indemipotent",
         )
 
-        deps_both = Dependencies(Path("test"), "a*.deps_test.yaml")
+        deps_both = Dependencies("a*.deps_test.yaml")
 
         self.assertEqual(
             deps_both.deps_files, [Path("test/a1.deps_test.yaml"), Path("test/a2.deps_test.yaml")]
@@ -43,7 +44,7 @@ class TestBasicClass(TestCase):
         self.assertEqual(deps1.get_snippet(), deps_both.get_snippet())
 
     def test_no_layer(self):
-        deps = Dependencies(pattern="no_layer.deps_test.yaml")
+        deps = Dependencies("no_layer.deps_test.yaml")
 
         print(deps.layers)
 
@@ -51,7 +52,7 @@ class TestBasicClass(TestCase):
         self.assertTrue(deps.layers["env"].layer == "default")
 
     def test_invalid_command(self):
-        deps = Dependencies(pattern="invalid_command.deps_test.yaml")
+        deps = Dependencies("invalid_command.deps_test.yaml")
 
         self.assertTrue("env" in deps.layers)
         self.assertTrue(deps.layers["env"].layer == "default")

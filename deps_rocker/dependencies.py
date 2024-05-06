@@ -49,7 +49,9 @@ class CommandLayer:
 class Dependencies(RockerExtension):
     name = "deps_dependencies"
 
-    def __init__(self, path: Path = Path.cwd(), pattern: str = "*deps.yaml") -> None:
+    def __init__(self, pattern: str = "*deps.yaml", path: Path = None) -> None:
+        if path is None:
+            path = Path.cwd()
         self.deps_files = []
         self.dependencies = defaultdict(set)
         self.layers = defaultdict(CommandLayer)
@@ -179,7 +181,7 @@ class Dependencies(RockerExtension):
                         pyproj_deps.extend(optional["dev"])
         return " ".join(pyproj_deps)
 
-    def get_snippet(self, cliargs=None):
+    def get_snippet(self, cliargs):
         return "\n".join([lay.to_snippet() for lay in self.layers.values()])
 
     @staticmethod
