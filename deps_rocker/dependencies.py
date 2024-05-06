@@ -36,14 +36,15 @@ class CommandLayer:
             "deps_rocker", f"templates/{self.command}_snippet.Dockerfile"
         ).decode("utf-8")
 
-        return em.expand(
-            snippet,
-            dict(
-                data_list=list(sorted(self.data)),
-                filename=self.get_filename(),
-                layer_name=self.layer,
-            ),
+        empy_data = dict(
+            data_list=list(sorted(self.data)),
+            filename=self.get_filename(),
+            layer_name=self.layer,
         )
+        print("empy_snippet", snippet)
+        print("empy_data", empy_data)
+
+        return em.expand(snippet, empy_data)
 
 
 class Dependencies(RockerExtension):

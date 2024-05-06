@@ -1,17 +1,16 @@
 import unittest
 from unittest import TestCase
 from deps_rocker.dependencies import Dependencies
-from pathlib import Path
 
 # pylint: disable=no-value-for-parameter
 
 
 class TestBasicClass(TestCase):
-    def test_init(self):
-        print(Path.cwd())
-        instance = Dependencies("*.deps_test.yaml")
-        instance.get_files(None)
-        print(instance.get_snippet())
+    # def test_init(self):
+    #     print(Path.cwd())
+    #     instance = Dependencies("*.deps_test.yaml")
+    #     instance.get_files(None)
+    #     print(instance.get_snippet())
 
     def test_single(self):
         """a1.deps_test.yaml and a2.deps_test.yaml are the same. Check they result in the same output as eachother, and also the same output when both files are loaded at the same time"""
@@ -40,8 +39,14 @@ class TestBasicClass(TestCase):
             [f.name for f in deps_both.deps_files], ["a1.deps_test.yaml", "a2.deps_test.yaml"]
         )
 
-
         self.assertEqual(deps1.get_snippet(), deps_both.get_snippet())
+
+    def test_get_snippet(self):
+        deps1 = Dependencies("a1.deps_test.yaml")
+
+        # deps1.
+        for v in deps1.layers.values():
+            v.to_snippet()
 
     def test_no_layer(self):
         deps = Dependencies("no_layer.deps_test.yaml")
