@@ -14,7 +14,7 @@ from typing import List
 class CommandLayer:
     layer: str = None
     command: str = None
-    data: list = field(default_factory=list)
+    data: set = field(default_factory=set)
 
     def get_filename(self):
         return f"{self.command}_{self.layer}"
@@ -24,9 +24,10 @@ class CommandLayer:
         self.command = split[0]
         self.layer = split[1]
         if isinstance(value, list):
-            self.data.extend(value)
+            for v in value:
+                self.data.add(v)
         else:
-            self.data.append(value)
+            self.data.add(value)
 
     def to_snippet(self):
         snippet = pkgutil.get_data(
@@ -48,6 +49,7 @@ class Dependencies(RockerExtension):
     name = "deps_dependencies"
 
     def __init__(self, path: Path = Path.cwd(), pattern: str = "*deps.yaml") -> None:
+        self.deps_files = []
         self.dependencies = defaultdict(set)
         self.layers = defaultdict(CommandLayer)
         self.dep_group_order = defaultdict(list)
@@ -74,6 +76,7 @@ class Dependencies(RockerExtension):
         """Recursivly load all deps.yaml and create a dictionary containing sets of each type of dependency. Each type of dependency (apt_base, apt etc) should have duplicates rejected when adding to the set"""
         for p in path.rglob(pattern):
             print(f"found {p}")
+            self.deps_files.append(p)
             with open(p, "r", encoding="utf-8") as file:
                 vals = yaml.safe_load(file)
                 print(vals)
@@ -186,7 +189,7 @@ class Dependencies(RockerExtension):
         # return deps
         return " ".join(deps)
 
-    def get_snippet(self, cliargs):
+    def get_snippet(self, cliargs=None):
         return "\n".join([lay.to_snippet() for lay in self.layers.values()])
 
     @staticmethod

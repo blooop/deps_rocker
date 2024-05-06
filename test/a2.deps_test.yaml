@@ -1,0 +1,17 @@
+env_base:
+  - DEPS_ROCKER=1  
+
+apt_repository-software-sources:
+  - wget
+  - curl
+
+apt_version-control:
+  - git
+  - git-lfs
+
+apt_language-toolchain:
+  - python3-pip
+
+pip_language-toolchain:
+  - flit
+  - pip #updates to latest pip
