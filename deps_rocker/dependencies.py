@@ -55,7 +55,9 @@ class Dependencies(RockerExtension):
             path = Path.cwd()
         self.deps_files = []
         self.dependencies = defaultdict(set)
+        self.layers_preamble = defaultdict(CommandLayer)
         self.layers = defaultdict(CommandLayer)
+        self.layers_user = defaultdict(CommandLayer)
         self.dep_group_order = defaultdict(list)
         self.empy_args = {}
         self.all_files = {}
@@ -85,7 +87,12 @@ class Dependencies(RockerExtension):
                                     v = (p.parent / Path(v)).absolute().as_posix()
                             print(f"key:{k} val:{v}")
 
-                            self.layers[k].update(k, v)
+                            if "preamble" in k:
+                                self.layers_preamble[k].update(k, v)
+                            elif "user" in k:
+                                self.layers_user[k].update(k, v)
+                            else:
+                                self.layers[k].update(k, v)
 
                             self.dependencies[k].add(v)
                         if prev_k is not None:
@@ -120,11 +127,15 @@ class Dependencies(RockerExtension):
 
         self.add_file("pyproject_default", self.get_pyproject_toml_deps())
 
-        for lay in self.layers.values():
+        all_layers = list(self.layers_preamble.values()) + list(self.layers.values()) + list(self.layers_user.values())
+
+        for lay in all_layers:
             print(lay.get_filename())
             if "script" in lay.command:
                 fn = lay.get_filename()
                 self.add_file(fn, self.get_scripts(fn))
+
+       
 
         return self.all_files
 
@@ -158,7 +169,10 @@ class Dependencies(RockerExtension):
                     scripts.extend(f.readlines())
 
         if len(scripts) > 1:
-            return "\n".join(scripts)
+            combined = "\n".join(scripts)
+            combined =combined.replace("sudo ","")
+            combined =combined.replace("sudo","")
+            return combined
         return ""
 
     def get_pyproject_toml_deps(self) -> str:
@@ -182,11 +196,19 @@ class Dependencies(RockerExtension):
                     if "dev" in optional:
                         pyproj_deps.extend(optional["dev"])
         return " ".join(pyproj_deps)
+    
+    def get_preamble(self, cliargs):
+        return "\n".join([lay.to_snippet() for lay in self.layers_preamble.values()])
 
     def get_snippet(self, cliargs=None):
-        # print("CLIARGS", cliargs)
-        # exit()
         return "\n".join([lay.to_snippet() for lay in self.layers.values()])
+    
+   
+
+
+    def get_user_snippet(self, cliargs):
+        """ Get a dockerfile snippet to be executed after switchingto the expected USER."""
+        return "\n".join([lay.to_snippet() for lay in self.layers_user.values()])
 
     @staticmethod
     def register_arguments(parser, defaults=None):
