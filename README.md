@@ -181,6 +181,8 @@ apt_sources: #apt dependencies for setting up software sources
   - ca-certificates #needed for wget
   - wget
   - curl
+  - lsb-release
+  - gnupg2
   - git
   - git-lfs
 
