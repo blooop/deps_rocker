@@ -150,9 +150,13 @@ Existing Commands:
   - env: define environment variables
   - pip: install pip packages
   - run: RUN a docker command
-  - script: run a script. 
+  - script: run a script.
   - pyproject: look for any local pyproject.toml files and install dependencies listed there. 
 
+
+script:
+
+If you have sudo inside your script deps-rocker will automatically remove them.  This is so that you can run the script on the host machine where sudo is required. 
 
 ## Layer conventions
 
