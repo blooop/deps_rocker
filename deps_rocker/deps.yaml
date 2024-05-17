@@ -1,15 +1,14 @@
-env_base:
+env:
   - DEPS_ROCKER=1  
 
-
-apt_tools:
+apt_base:
   - git
   - git-lfs
   - python3-pip
 
-pip_tools:
+pip_base:
   - flit
   - pip #updates to latest pip
 
-pyproject:
-  - all
+
+  
