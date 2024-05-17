@@ -1,9 +1,10 @@
 [project]
 name = "deps_rocker"
-version = "0.1.2"
+version = "0.1.3"
+license = { text = "MIT" }
 
 authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
-description = "A python package template"
+description = "A rocker plugin to help installing apt and pip dependencies"
 readme = "README.md"
 
 requires-python = ">=3.10"
@@ -25,17 +26,18 @@ test = [
 Source = "https://github.com/blooop/deps_rocker"
 Home = "https://github.com/blooop/deps_rocker"
 
-
-[tool.flit.module]
-name = "deps_rocker"
-
 [build-system]
 requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 
+[tool.flit.sdist]
+include = ["deps_rocker/templates/*.Dockerfile"]
+
+[project.entrypoints."rocker.extensions"]
+"odeps_dependencies" = "deps_rocker.dependencies:Dependencies"
+
 
 [tool.pylint]
-extension-pkg-whitelist = ["numpy"]
 jobs = 16                           #detect number of cores
 
 [tool.pylint.'MESSAGES CONTROL']
