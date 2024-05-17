@@ -33,7 +33,7 @@ build-backend = "flit_core.buildapi"
 [tool.flit.sdist]
 include = ["deps_rocker/templates/*.Dockerfile"]
 
-[tool.flit.entrypoints."rocker.extensions"]
+[project.entrypoints."rocker.extensions"]
 "odeps_dependencies" = "deps_rocker.dependencies:Dependencies"
 
 
