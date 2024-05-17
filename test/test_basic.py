@@ -42,6 +42,7 @@ class TestBasicClass(TestCase):
         )
 
         self.assertEqual(deps1.get_snippet(), deps_both.get_snippet())
+
     @pytest.mark.skip
     def test_get_snippet(self):
         deps1 = Dependencies("a1.deps_test.yaml")
