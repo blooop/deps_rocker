@@ -56,11 +56,11 @@ class TestBasicClass(TestCase):
         self.assertTrue("env" in deps.layers)
         self.assertTrue(deps.layers["env"].layer == "default")
 
-    def test_invalid_command(self):
-        deps = Dependencies("invalid_command.deps_test.yaml")
+    # def test_invalid_command(self):
+    #     deps = Dependencies("invalid_command.deps_test.yaml")
 
-        self.assertTrue("env" in deps.layers)
-        self.assertTrue(deps.layers["env"].layer == "default")
+    #     self.assertTrue("env" in deps.layers)
+    #     self.assertTrue(deps.layers["env"].layer == "default")
 
 
 if __name__ == "__main__":

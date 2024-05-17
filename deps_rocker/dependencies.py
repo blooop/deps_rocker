@@ -127,15 +127,17 @@ class Dependencies(RockerExtension):
 
         self.add_file("pyproject_default", self.get_pyproject_toml_deps())
 
-        all_layers = list(self.layers_preamble.values()) + list(self.layers.values()) + list(self.layers_user.values())
+        all_layers = (
+            list(self.layers_preamble.values())
+            + list(self.layers.values())
+            + list(self.layers_user.values())
+        )
 
         for lay in all_layers:
             print(lay.get_filename())
             if "script" in lay.command:
                 fn = lay.get_filename()
                 self.add_file(fn, self.get_scripts(fn))
-
-       
 
         return self.all_files
 
@@ -170,8 +172,8 @@ class Dependencies(RockerExtension):
 
         if len(scripts) > 1:
             combined = "\n".join(scripts)
-            combined =combined.replace("sudo ","")
-            combined =combined.replace("sudo","")
+            combined = combined.replace("sudo ", "")
+            combined = combined.replace("sudo", "")
             return combined
         return ""
 
@@ -196,18 +198,15 @@ class Dependencies(RockerExtension):
                     if "dev" in optional:
                         pyproj_deps.extend(optional["dev"])
         return " ".join(pyproj_deps)
-    
+
     def get_preamble(self, cliargs):
         return "\n".join([lay.to_snippet() for lay in self.layers_preamble.values()])
 
     def get_snippet(self, cliargs=None):
         return "\n".join([lay.to_snippet() for lay in self.layers.values()])
-    
-   
 
-
-    def get_user_snippet(self, cliargs):
-        """ Get a dockerfile snippet to be executed after switchingto the expected USER."""
+    def get_user_snippet(self, cliargs):  # pylint: disable=unused-argument
+        """Get a dockerfile snippet to be executed after switchingto the expected USER."""
         return "\n".join([lay.to_snippet() for lay in self.layers_user.values()])
 
     @staticmethod
