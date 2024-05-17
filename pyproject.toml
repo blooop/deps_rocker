@@ -26,10 +26,6 @@ test = [
 Source = "https://github.com/blooop/deps_rocker"
 Home = "https://github.com/blooop/deps_rocker"
 
-
-[tool.flit.module]
-name = "deps_rocker"
-
 [build-system]
 requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
