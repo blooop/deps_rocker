@@ -34,7 +34,7 @@ build-backend = "flit_core.buildapi"
 include = ["deps_rocker/templates/*.Dockerfile"]
 
 [project.scripts]
-deps-rocker = "deps_rocker.dep_rocker_cli:gen_dockerfile"
+deps-rocker = "deps_rocker.dep_rocker_cli:launch_vscode"
 
 [project.entry-points."rocker.extensions"]
 odeps_dependencies = "deps_rocker.dependencies:Dependencies"
