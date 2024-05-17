@@ -1,6 +1,6 @@
 [project]
 name = "deps_rocker"
-version = "0.1.0"
+version = "0.1.1"
 
 authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
 description = "A python package template"
@@ -8,7 +8,7 @@ readme = "README.md"
 
 requires-python = ">=3.10"
 
-dependencies = ["numpy>=1.2,<=1.26.3","rocker","pyyaml","off-your-rocker","toml"]
+dependencies = ["rocker","pyyaml","off-your-rocker","toml"]
 
 [project.optional-dependencies]
 test = [
