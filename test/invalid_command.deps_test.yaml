@@ -1,12 +1,12 @@
-# env1:
-#   - DEPS_ROCKER=1  
+env1:
+  - DEPS_ROCKER=1  
 
-# pipa:
-#   - flit
-#   - pip #updates to latest pip
+pipa:
+  - flit
+  - pip #updates to latest pip
 
-# apts:
-#   - glxgears
+apts:
+  - glxgears
 
-scripts_main:
-  - 
+# scripts_main:
+  # - 
