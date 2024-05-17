@@ -1,6 +1,7 @@
 [project]
 name = "deps_rocker"
 version = "0.1.1"
+license = "MIT"
 
 authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
 description = "A python package template"
@@ -33,9 +34,17 @@ name = "deps_rocker"
 requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 
+[tool.flit.metadata]
+module = "deps_rocker"
+
+[tool.flit.sdist]
+include = ["deps_rocker/templates/*.Dockerfile"]
+
+[tool.flit.entrypoints."rocker.extensions"]
+"odeps_dependencies" = "deps_rocker.dependencies:Dependencies"
+
 
 [tool.pylint]
-extension-pkg-whitelist = ["numpy"]
 jobs = 16                           #detect number of cores
 
 [tool.pylint.'MESSAGES CONTROL']
