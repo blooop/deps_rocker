@@ -76,6 +76,7 @@ class Dependencies(RockerExtension):
         return ""
 
     def get_files(self, cliargs) -> dict:
+        """Get a dict of local filenames and content to write into them"""
         print("Getting files")
 
         self.add_file("pyproject_default", self.get_pyproject_toml_deps())
@@ -164,7 +165,12 @@ class Dependencies(RockerExtension):
 
     @staticmethod
     def register_arguments(parser, defaults=None):
-        parser.add_argument("--deps-dependencies", action="store_true", help="install deps.yaml ")
+        parser.add_argument("--deps-all", action="store_true", help="install all deps.yaml ")
+        # parser.add_argument(
+        #     "--deps-filter",
+        #     help="A filter to select deps.yaml files. Defaults to *.deps.yaml",
+        #     default="*.deps.yaml",
+        # )
 
 
 if __name__ == "__main__":

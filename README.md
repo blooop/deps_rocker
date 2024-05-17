@@ -19,7 +19,7 @@ pip install deps-rocker
 ## Usage
 
 ```
-rocker --deps-dependencies ubuntu:22.04
+rocker --deps ubuntu:22.04
 ```
 
 ## Motivation
