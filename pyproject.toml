@@ -1,6 +1,6 @@
 [project]
 name = "deps_rocker"
-version = "0.1.3"
+version = "0.1.5"
 license = { text = "MIT" }
 
 authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
@@ -33,8 +33,11 @@ build-backend = "flit_core.buildapi"
 [tool.flit.sdist]
 include = ["deps_rocker/templates/*.Dockerfile"]
 
-[project.entrypoints."rocker.extensions"]
-"odeps_dependencies" = "deps_rocker.dependencies:Dependencies"
+[project.scripts]
+deps-rocker = "deps_rocker.dep_rocker_cli:gen_dockerfile"
+
+[project.entry-points."rocker.extensions"]
+odeps_dependencies = "deps_rocker.dependencies:Dependencies"
 
 
 [tool.pylint]
