@@ -17,10 +17,13 @@ class TestBasicClass(TestCase):
     def test_single(self):
         """a1.deps_test.yaml and a2.deps_test.yaml are the same. Check they result in the same output as eachother, and also the same output when both files are loaded at the same time"""
 
-        deps1 = Dependencies("a1.deps_test.yaml")
+        deps1 = Dependencies()
+        deps1.setup_deps(dict(deps="a1.deps_test.yaml"))
         self.assertEqual([f.name for f in deps1.deps_files], ["a1.deps_test.yaml"])
 
-        deps2 = Dependencies("a2.deps_test.yaml")
+        deps2 = Dependencies()
+        deps2.setup_deps(dict(deps="a2.deps_test.yaml"))
+
         self.assertEqual([f.name for f in deps2.deps_files], ["a2.deps_test.yaml"])
 
         self.assertEqual(
@@ -35,7 +38,8 @@ class TestBasicClass(TestCase):
             "Get snipped should be indemipotent",
         )
 
-        deps_both = Dependencies("a*.deps_test.yaml")
+        deps_both = Dependencies()
+        deps_both.setup_deps(dict(deps="a*.deps_test.yaml"))
 
         self.assertEqual(
             [f.name for f in deps_both.deps_files], ["a1.deps_test.yaml", "a2.deps_test.yaml"]
@@ -43,16 +47,37 @@ class TestBasicClass(TestCase):
 
         self.assertEqual(deps1.get_snippet(), deps_both.get_snippet())
 
+    def test_filter(self):
+        """a1.deps_test.yaml and a2.deps_test.yaml are the same. Check they result in the same output as eachother, and also the same output when both files are loaded at the same time"""
+
+        deps1 = Dependencies()
+        deps1.setup_deps(dict(deps="a1.deps_test.yaml"))
+        self.assertEqual([f.name for f in deps1.deps_files], ["a1.deps_test.yaml"])
+
+        deps2 = Dependencies()
+        deps2.setup_deps(dict(deps="a2.deps_test.yaml"))
+
+        self.assertEqual([f.name for f in deps2.deps_files], ["a2.deps_test.yaml"])
+
+        deps_both = Dependencies()
+        deps_both.setup_deps(dict(deps="a*.deps_test.yaml"))
+
+        self.assertEqual(
+            [f.name for f in deps_both.deps_files], ["a1.deps_test.yaml", "a2.deps_test.yaml"]
+        )
+
     @pytest.mark.skip
     def test_get_snippet(self):
-        deps1 = Dependencies("a1.deps_test.yaml")
+        deps1 = Dependencies()
+        deps1.setup_deps(dict(deps="a1.deps_test.yaml"))
 
         # deps1.
         for v in deps1.layers.values():
             v.to_snippet()
 
     def test_no_layer(self):
-        deps = Dependencies("no_layer.deps_test.yaml")
+        deps = Dependencies()
+        deps.setup_deps(dict(deps="no_layer.deps_test.yaml"))
 
         print(deps.layers)
 
