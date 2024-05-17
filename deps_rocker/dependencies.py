@@ -7,11 +7,9 @@ from .command_layer import CommandLayer
 
 
 class Dependencies(RockerExtension):
-    name = "deps_dependencies"
+    name = "deps"
 
-    def __init__(self, pattern: str = "*deps.yaml", path: Path = None) -> None:
-        if path is None:
-            path = Path.cwd()
+    def __init__(self) -> None:
         self.deps_files = []
         self.dependencies = defaultdict(set)
         self.layers_preamble = defaultdict(CommandLayer)
@@ -20,12 +18,23 @@ class Dependencies(RockerExtension):
         self.dep_group_order = defaultdict(list)
         self.empy_args = {}
         self.all_files = {}
-        self.read_dependencies(path, pattern)
+        self.parsed = False
         super().__init__()
 
     @classmethod
     def get_name(cls):
         return cls.name
+
+    def setup_deps(self, cliargs):
+        if not self.parsed:
+            if cliargs is not None:
+                file_filter = cliargs["deps"]
+                # if ".deps.yaml" not in file_filter:
+                # file_filter += ".deps.yaml"
+            else:
+                file_filter = "*.deps.yaml"
+            self.read_dependencies(Path.cwd(), file_filter)
+            self.parsed = True
 
     def read_dependencies(self, path: Path, pattern: str):
         """Recursivly load all deps.yaml and create a dictionary containing sets of each type of dependency. Each type of dependency (apt_base, apt etc) should have duplicates rejected when adding to the set"""
@@ -157,20 +166,25 @@ class Dependencies(RockerExtension):
         return "\n".join([lay.to_snippet() for lay in self.layers_preamble.values()])
 
     def get_snippet(self, cliargs=None):
+        self.setup_deps(cliargs)
         return "\n".join([lay.to_snippet() for lay in self.layers.values()])
 
-    def get_user_snippet(self, cliargs):  # pylint: disable=unused-argument
+    def get_user_snippet(self, cliargs):
         """Get a dockerfile snippet to be executed after switchingto the expected USER."""
+        self.setup_deps(cliargs)
         return "\n".join([lay.to_snippet() for lay in self.layers_user.values()])
 
     @staticmethod
     def register_arguments(parser, defaults=None):
-        parser.add_argument("--deps-all", action="store_true", help="install all deps.yaml ")
-        # parser.add_argument(
-        #     "--deps-filter",
-        #     help="A filter to select deps.yaml files. Defaults to *.deps.yaml",
-        #     default="*.deps.yaml",
-        # )
+        # parser.add_argument("--deps", action="store_true", help="install all deps.yaml ")
+        parser.add_argument(
+            "--deps",
+            type=str,
+            nargs="?",
+            const="*.deps.yaml",
+            help="A filter to select deps.yaml files. Defaults to *.deps.yaml",
+            # default="*.deps.yaml",
+        )
 
 
 if __name__ == "__main__":
