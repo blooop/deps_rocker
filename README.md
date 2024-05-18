@@ -19,12 +19,7 @@ pip install deps-rocker
 ## Usage
 
 ```
-rocker --deps ubuntu:22.04
-#or
-rocker --deps "specific_pkg.deps.yaml" ubuntu:22.04
-#or
-rocker --deps "*.deps.yaml" ubuntu:22.04
-
+rocker --deps ubuntu:22.04  #recursivly search for *.deps.yaml
 ```
 
 ## Motivation
