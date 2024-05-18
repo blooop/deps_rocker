@@ -151,15 +151,16 @@ class Dependencies(RockerExtension):
         for p in pp_toml:
             with open(p, "r", encoding="utf-8") as f:
                 config = toml.load(f)
-                project = config["project"]
-                if "dependencies" in project:
-                    pyproj_deps.extend(project["dependencies"])
-                if "optional-dependencies" in project:
-                    optional = project["optional-dependencies"]
-                    if "test" in optional:
-                        pyproj_deps.extend(optional["test"])
-                    if "dev" in optional:
-                        pyproj_deps.extend(optional["dev"])
+                if "project" in config:
+                    project = config["project"]
+                    if "dependencies" in project:
+                        pyproj_deps.extend(project["dependencies"])
+                    if "optional-dependencies" in project:
+                        optional = project["optional-dependencies"]
+                        if "test" in optional:
+                            pyproj_deps.extend(optional["test"])
+                        if "dev" in optional:
+                            pyproj_deps.extend(optional["dev"])
         return " ".join(pyproj_deps)
 
     def get_preamble(self, cliargs):
@@ -176,14 +177,14 @@ class Dependencies(RockerExtension):
 
     @staticmethod
     def register_arguments(parser, defaults=None):
-        parser.add_argument("--deps", action="store_true", help="install all deps.yaml ")
-        # parser.add_argument(
-        #     "--deps",
-        #     type=str,
-        #     nargs="?",
-        #     const="*.deps.yaml",
-        #     help="A filter to select deps.yaml files. Defaults to *.deps.yaml",
-        # )
+        # parser.add_argument("--deps", action="store_true", help="install all deps.yaml ")
+        parser.add_argument(
+            "--deps",
+            type=str,
+            nargs="?",
+            const="*.deps.yaml",
+            help="A filter to select deps.yaml files. Defaults to *.deps.yaml",
+        )
 
 
 if __name__ == "__main__":
