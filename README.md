@@ -43,7 +43,7 @@ pkg a requires git, make and ffmpeg and pkg_b requires git-lfs and pip.  Their d
 pkg_a.deps.yaml:
 
 ```
-apt_tools:
+apt_sources:
   - git
 
 apt_language-toolchain:
@@ -56,7 +56,7 @@ apt:
 pkg_b.deps.yaml
 
 ```
-apt_tools:
+apt_sources:
   - git
   - git-lfs
 
@@ -67,7 +67,7 @@ apt_language-toolchain:
 If you wanted a container that had the dependencies of both installed deps-rocker would combine the dependencies to produce a file like:
 
 ```
-apt_tools:
+apt_sources:
   - git
   - git-lfs
 
@@ -82,7 +82,7 @@ apt:
 
 Each heading in the yaml file produces a docker layer based on the command and the label.  The format of the labels is {command_name}_{command-label}.  The layer names are delimited by _ so layer names should use - eg: language-toolchain. 
 
-This makes it easy to define the dependencies for a single project, but enable reuse of common dependencies across multiple projects. However, deps rocker does not restrict what is defined in each layer and so relies on a common convention for multiple packages to play nicely with eachother.  If one package adds "make" to apt_tools and other package adds "make" to apt_langage_toolchain, the deps-rocker will not complain and will not deduplicate that install step.   
+This makes it easy to define the dependencies for a single project, but enable reuse of common dependencies across multiple projects. However, deps rocker does not restrict what is defined in each layer and so relies on a common convention for multiple packages to play nicely with eachother.  If one package adds "make" to apt_sources and other package adds "make" to apt_langage_toolchain, the deps-rocker will not complain and will not deduplicate that install step.   
 
 ## Methodology:
 
@@ -91,7 +91,7 @@ The algorithm works by splitting each entry in the yaml file into a command and 
 pkg_a.deps.yaml:
 
 ```
-apt_tools:
+apt_sources:
   - git
 
 apt_language-toolchain:
@@ -104,12 +104,12 @@ pkg_b.deps.yaml
 apt_language-toolchain:
   - python3-pip
 
-apt_tools:
+apt_sources:
   - git
   - git-lfs
 ```
 
-pkg_a says that apt_langage-toolchain comes before apt_tools, and pkg_b says that apt_tools comes before apt_language-toolchain, which is a conflict. 
+pkg_a says that apt_langage-toolchain comes before apt_sources, and pkg_b says that apt_sources comes before apt_language-toolchain, which is a conflict. 
 
 The pseudocode for the deps-rocker algorithm is as follows:
 ```
@@ -124,7 +124,7 @@ If two packages have unqiue layers that depend on a common layer
 pkg_a.deps.yaml:
 
 ```
-apt_tools:
+apt_sources:
   - git
 
 apt_pkg_a_custom:
@@ -133,14 +133,14 @@ apt_pkg_a_custom:
 pkg_b.deps.yaml
 
 ```
-apt_tools:
+apt_sources:
   - git-lfs
 
 apt_pkg_b_custom:
   - custom1
 ```
 
-Here apt_pkg_b_custom and apt_pkg_a_custom both need to be run after apt_tools.  They will be run run in alphabetical order (to ensure determinism)
+Here apt_pkg_b_custom and apt_pkg_a_custom both need to be run after apt_sources.  They will be run run in alphabetical order (to ensure determinism)
 
 
 ## Commands
