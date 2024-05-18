@@ -176,14 +176,14 @@ class Dependencies(RockerExtension):
 
     @staticmethod
     def register_arguments(parser, defaults=None):
-        parser.add_argument("--deps", action="store_true", help="install all deps.yaml ")
-        # parser.add_argument(
-        #     "--deps",
-        #     type=str,
-        #     nargs="?",
-        #     const="*.deps.yaml",
-        #     help="A filter to select deps.yaml files. Defaults to *.deps.yaml",
-        # )
+        # parser.add_argument("--deps", action="store_true", help="install all deps.yaml ")
+        parser.add_argument(
+            "--deps",
+            type=str,
+            nargs="?",
+            const="*.deps.yaml",
+            help="A filter to select deps.yaml files. Defaults to *.deps.yaml",
+        )
 
 
 if __name__ == "__main__":
