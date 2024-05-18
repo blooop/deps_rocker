@@ -1,6 +1,6 @@
 [project]
 name = "deps_rocker"
-version = "0.1.7"
+version = "0.1.8"
 license = { text = "MIT" }
 
 authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
