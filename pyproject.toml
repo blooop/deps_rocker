@@ -35,9 +35,9 @@ test = [
   "pylint>=2.17.7,<=3.2.2",
   "pytest-cov>=4.1,<=5.0.0",
   "pytest>=7.4,<=8.2.1",
-  "hypothesis>=6.82,<=6.102.6",
-  "ruff>=0.0.280,<=0.4.5",
-  "coverage>=7.2.7,<=7.5.1",
+  "hypothesis>=6.82,<=6.103.0",
+  "ruff>=0.0.280,<=0.4.7",
+  "coverage>=7.2.7,<=7.5.3",
 ]
 
 
@@ -67,6 +67,7 @@ py310 = ["py310","test"]
 py311 = ["py311","test"]
 
 [tool.pixi.tasks]
+code = "scripts/launch_vscode.sh"
 format = "black ."
 check-clean-workspace = "git diff --exit-code"
 ruff-lint = "ruff check . --fix"
