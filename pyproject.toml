@@ -23,11 +23,11 @@ python = "3.11.*"
 
 [tool.pixi.pypi-dependencies]
 deps_rocker = { path = ".", editable = true }
-# rocker= ">=0.2.16"
-# off-your-rocker = ">=0.1.0"
-# deps-rocker = ">=0.2"
-# pyyaml=">=5.0"
-# toml=">=0.10"
+rocker= ">=0.2.16"
+off-your-rocker = ">=0.1.0"
+deps-rocker = ">=0.2"
+pyyaml=">=5.0"
+toml=">=0.10"
 
 [project.optional-dependencies]
 test = [
