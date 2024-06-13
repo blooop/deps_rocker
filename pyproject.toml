@@ -40,16 +40,18 @@ test = [
   "coverage>=7.2.7,<=7.5.1",
 ]
 
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+
 [project.urls]
 Source = "https://github.com/blooop/deps_rocker"
 Home = "https://github.com/blooop/deps_rocker"
 
-[build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
-
-[tool.flit.sdist]
-include = ["deps_rocker/templates/*.Dockerfile"]
+# [tool.flit.sdist]
+# include = ["deps_rocker/templates/*.Dockerfile"]
 
 [project.scripts]
 deps-rocker = "deps_rocker.dep_rocker_cli:gen_dockerfile"
@@ -57,9 +59,6 @@ deps-rocker = "deps_rocker.dep_rocker_cli:gen_dockerfile"
 [project.entry-points."rocker.extensions"]
 odeps_dependencies = "deps_rocker.dependencies:Dependencies"
 
-[build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
 
 # Environments
 [tool.pixi.environments]
@@ -88,7 +87,9 @@ clear-pixi = "rm -rf .pixi pixi.lock"
 
 
 [tool.setuptools.packages.find]
-include= ["python_template"]
+include= ["deps_rocker"]
+
+
 
 [tool.pylint]
 extension-pkg-whitelist = ["numpy"]
