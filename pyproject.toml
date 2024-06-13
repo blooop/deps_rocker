@@ -7,31 +7,51 @@ authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
 description = "A rocker plugin to help installing apt and pip dependencies"
 readme = "README.md"
 
-requires-python = ">=3.10"
+dependencies = []
 
-dependencies = ["rocker","pyyaml","off-your-rocker","toml"]
+[tool.pixi.project]
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[tool.pixi.dependencies]
+python = ">=3.10"
+
+[tool.pixi.feature.py310.dependencies]
+python = "3.10.*"
+[tool.pixi.feature.py311.dependencies]
+python = "3.11.*"
+
+[tool.pixi.pypi-dependencies]
+deps_rocker = { path = ".", editable = true }
+rocker= ">=0.2.16"
+off-your-rocker = ">=0.1.0"
+deps-rocker = ">=0.2"
+pyyaml=">=5.0"
+toml=">=0.10"
 
 [project.optional-dependencies]
 test = [
   "black>=23,<=24.4.2",
-  "pylint>=2.16,<=3.2.0",
+  "pylint>=2.17.7,<=3.2.2",
   "pytest-cov>=4.1,<=5.0.0",
-  "pytest>=7.4,<=8.2.0",
-  "hypothesis>=6.82,<=6.102.4",
-  "ruff>=0.0.280,<=0.4.4",
+  "pytest>=7.4,<=8.2.1",
+  "hypothesis>=6.82,<=6.102.6",
+  "ruff>=0.0.280,<=0.4.5",
   "coverage>=7.2.7,<=7.5.1",
 ]
+
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
 
 [project.urls]
 Source = "https://github.com/blooop/deps_rocker"
 Home = "https://github.com/blooop/deps_rocker"
 
-[build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
-
-[tool.flit.sdist]
-include = ["deps_rocker/templates/*.Dockerfile"]
+# [tool.flit.sdist]
+# include = ["deps_rocker/templates/*.Dockerfile"]
 
 [project.scripts]
 deps-rocker = "deps_rocker.dep_rocker_cli:gen_dockerfile"
@@ -40,7 +60,39 @@ deps-rocker = "deps_rocker.dep_rocker_cli:gen_dockerfile"
 odeps_dependencies = "deps_rocker.dependencies:Dependencies"
 
 
+# Environments
+[tool.pixi.environments]
+default = {features = ["test"], solve-group = "default" }
+py310 = ["py310","test"]
+py311 = ["py311","test"]
+
+[tool.pixi.tasks]
+format = "black ."
+check-clean-workspace = "git diff --exit-code"
+ruff-lint = "ruff check . --fix"
+pylint = "pylint --version && echo 'running pylint...' && pylint $(git ls-files '*.py')"
+lint = { depends_on = ["ruff-lint", "pylint"] }
+style = { depends_on = ["format","lint"]}
+commit-format = "git commit -a -m'autoformat code'"
+test = "pytest"
+coverage = "coverage run -m pytest && coverage xml -o coverage.xml"
+coverage-report = "coverage report -m"
+update-lock = "pixi update && git commit -a -m'update pixi.lock'"
+push = "git push"
+update-lock-push = { depends_on = ["update-lock", "push"] }
+ci-no-cover = { depends_on = ["style", "test"] }
+ci = { depends_on = ["format","ruff-lint","check-clean-workspace","pylint", "coverage", "coverage-report"] }
+ci-push = {depends_on=["format","ruff-lint","update-lock","ci","push"]}
+clear-pixi = "rm -rf .pixi pixi.lock"
+
+
+[tool.setuptools.packages.find]
+include= ["deps_rocker"]
+
+
+
 [tool.pylint]
+extension-pkg-whitelist = ["numpy"]
 jobs = 16                           #detect number of cores
 
 [tool.pylint.'MESSAGES CONTROL']
@@ -51,17 +103,16 @@ enable = "no-else-return,consider-using-in"
 line-length = 100
 
 [tool.ruff]
-# Never enforce `E501` (line length violations).
-#"F841" will auto remove unused variables which is annoying during development, pylint catches this anyway
-lint.ignore = ["E501", "E902", "F841"]
-
-# Same as Black.
-line-length = 100
+line-length = 100 # Same as Black.
 
 target-version = "py310"
 
+[tool.ruff.lint]
+# Never enforce `E501` (line length violations).
+#"F841" will auto remove unused variables which is annoying during development, pylint catches this anyway
+ignore = ["E501", "E902", "F841"]
 # Allow unused variables when underscore-prefixed.
-lint.dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 # Ignore `E402` (import violations) in all `__init__.py` files, and in `path/to/file.py`.
 [tool.ruff.lint.per-file-ignores]
@@ -79,4 +130,6 @@ exclude_also = [
   "raise AssertionError",
   "raise NotImplementedError",
   "if __name__ == .__main__.:",
+  "pass",
+  "(_):",
 ]
