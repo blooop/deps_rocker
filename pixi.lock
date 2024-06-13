@@ -343,6 +343,20 @@ packages:
   - tomli ; python_full_version <= '3.11.0a6' and extra == 'toml'
   requires_python: '>=3.8'
 - kind: pypi
+  name: deps-rocker
+  version: 0.2.0
+  path: .
+  sha256: 354dd18693977f568f7d3b3e895b2079528eaf0dc73695da3d1f925d289b057e
+  requires_dist:
+  - black>=23,<=24.4.2 ; extra == 'test'
+  - pylint>=2.17.7,<=3.2.2 ; extra == 'test'
+  - pytest-cov>=4.1,<=5.0.0 ; extra == 'test'
+  - pytest>=7.4,<=8.2.1 ; extra == 'test'
+  - hypothesis>=6.82,<=6.102.6 ; extra == 'test'
+  - ruff>=0.0.280,<=0.4.5 ; extra == 'test'
+  - coverage>=7.2.7,<=7.5.1 ; extra == 'test'
+  editable: true
+- kind: pypi
   name: dill
   version: 0.3.8
   url: https://files.pythonhosted.org/packages/c9/7a/cef76fd8438a42f96db64ddaa85280485a9c395e7df3db8158cfec1eee34/dill-0.3.8-py3-none-any.whl
@@ -812,20 +826,6 @@ packages:
   purls: []
   size: 31991381
   timestamp: 1713208036041
-- kind: pypi
-  name: python-template
-  version: 0.2.0
-  path: .
-  sha256: 80184f8e6c7853fc018105e7be2d6c761906d640923ab756ed710006f4f61f71
-  requires_dist:
-  - black>=23,<=24.4.2 ; extra == 'test'
-  - pylint>=2.17.7,<=3.2.2 ; extra == 'test'
-  - pytest-cov>=4.1,<=5.0.0 ; extra == 'test'
-  - pytest>=7.4,<=8.2.1 ; extra == 'test'
-  - hypothesis>=6.82,<=6.102.6 ; extra == 'test'
-  - ruff>=0.0.280,<=0.4.5 ; extra == 'test'
-  - coverage>=7.2.7,<=7.5.1 ; extra == 'test'
-  editable: true
 - kind: conda
   name: readline
   version: '8.2'
