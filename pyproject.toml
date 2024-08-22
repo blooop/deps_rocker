@@ -1,6 +1,6 @@
 [project]
 name = "deps_rocker"
-version = "0.2.0"
+version = "0.2.1"
 license = { text = "MIT" }
 
 authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
@@ -14,8 +14,10 @@ channels = ["conda-forge"]
 platforms = ["linux-64"]
 
 [tool.pixi.dependencies]
-python = ">=3.10"
+python = ">=3.8"
 
+[tool.pixi.feature.py309.dependencies]
+python = "3.9.*"
 [tool.pixi.feature.py310.dependencies]
 python = "3.10.*"
 [tool.pixi.feature.py311.dependencies]
@@ -25,7 +27,6 @@ python = "3.11.*"
 deps_rocker = { path = ".", editable = true }
 rocker= ">=0.2.16"
 off-your-rocker = ">=0.1.0"
-deps-rocker = ">=0.2"
 pyyaml=">=5.0"
 toml=">=0.10"
 
@@ -63,6 +64,7 @@ odeps_dependencies = "deps_rocker.dependencies:Dependencies"
 # Environments
 [tool.pixi.environments]
 default = {features = ["test"], solve-group = "default" }
+py39 = ["py309","test"]
 py310 = ["py310","test"]
 py311 = ["py311","test"]
 
