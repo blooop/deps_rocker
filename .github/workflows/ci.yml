@@ -14,13 +14,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        environment: [py310, py311]
+        environment: [py308, py309, py310, py311, py312]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - uses: prefix-dev/setup-pixi@v0.8.1
         with:
-          pixi-version: v0.23.0
+          pixi-version: v0.27.1
           cache: true
           frozen: true
           environments: ${{ matrix.environment }}
