@@ -24,6 +24,8 @@ python = "3.9.*"
 python = "3.10.*"
 [tool.pixi.feature.py311.dependencies]
 python = "3.11.*"
+[tool.pixi.feature.py312.dependencies]
+python = "3.12.*"
 
 [tool.pixi.pypi-dependencies]
 deps_rocker = { path = ".", editable = true }
@@ -70,6 +72,7 @@ py308 = ["py308","test"]
 py309 = ["py309","test"]
 py310 = ["py310","test"]
 py311 = ["py311","test"]
+py312 = ["py312","test"]
 
 [tool.pixi.tasks]
 format = "black ."
