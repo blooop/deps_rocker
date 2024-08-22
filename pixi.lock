@@ -687,9 +687,9 @@ packages:
   requires_python: '>=3.8'
 - kind: pypi
   name: deps-rocker
-  version: 0.2.2
+  version: 0.2.3
   path: .
-  sha256: 170d2b51c12b0045a4f3271325a709459e879547d990d8367d896c9783cb68ca
+  sha256: 81fe4165469af64d1695873020190c5226444dd79a1ab4d9cf5d8ef4159e51c6
   requires_dist:
   - black>=23,<=24.4.2 ; extra == 'test'
   - pylint>=2.17.7,<=3.2.3 ; extra == 'test'
