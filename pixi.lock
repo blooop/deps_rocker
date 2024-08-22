@@ -283,8 +283,8 @@ packages:
 - kind: pypi
   name: black
   version: 24.4.2
-  url: https://files.pythonhosted.org/packages/e0/7d/7f8df0fdbbbefc4362d3eca6b69b7a8a4249a8a88dabc00a207d31fddcd7/black-24.4.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-  sha256: eaea3008c281f1038edb473c1aa8ed8143a5535ff18f978a318f10302b254063
+  url: https://files.pythonhosted.org/packages/c5/48/34176b522e8cff4620a5d96c2e323ff2413f574870eb25efa8025885e028/black-24.4.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+  sha256: e151054aa00bad1f4e1f04919542885f89f5f7d086b8a59e5000e6c616896ffb
   requires_dist:
   - click>=8.0.0
   - mypy-extensions>=0.4.3
@@ -303,8 +303,8 @@ packages:
 - kind: pypi
   name: black
   version: 24.4.2
-  url: https://files.pythonhosted.org/packages/c5/48/34176b522e8cff4620a5d96c2e323ff2413f574870eb25efa8025885e028/black-24.4.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-  sha256: e151054aa00bad1f4e1f04919542885f89f5f7d086b8a59e5000e6c616896ffb
+  url: https://files.pythonhosted.org/packages/e0/7d/7f8df0fdbbbefc4362d3eca6b69b7a8a4249a8a88dabc00a207d31fddcd7/black-24.4.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+  sha256: eaea3008c281f1038edb473c1aa8ed8143a5535ff18f978a318f10302b254063
   requires_dist:
   - click>=8.0.0
   - mypy-extensions>=0.4.3
@@ -357,8 +357,8 @@ packages:
 - kind: pypi
   name: charset-normalizer
   version: 3.3.2
-  url: https://files.pythonhosted.org/packages/ee/fb/14d30eb4956408ee3ae09ad34299131fb383c47df355ddb428a7331cfa1e/charset_normalizer-3.3.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-  sha256: 90d558489962fd4918143277a773316e56c72da56ec7aa3dc3dbbe20fdfed15b
+  url: https://files.pythonhosted.org/packages/40/26/f35951c45070edc957ba40a5b1db3cf60a9dbb1b350c2d5bef03e01e61de/charset_normalizer-3.3.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+  sha256: 753f10e867343b4511128c6ed8c82f7bec3bd026875576dfd88483c5c73b2fd8
   requires_python: '>=3.7.0'
 - kind: pypi
   name: charset-normalizer
@@ -369,8 +369,8 @@ packages:
 - kind: pypi
   name: charset-normalizer
   version: 3.3.2
-  url: https://files.pythonhosted.org/packages/40/26/f35951c45070edc957ba40a5b1db3cf60a9dbb1b350c2d5bef03e01e61de/charset_normalizer-3.3.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-  sha256: 753f10e867343b4511128c6ed8c82f7bec3bd026875576dfd88483c5c73b2fd8
+  url: https://files.pythonhosted.org/packages/ee/fb/14d30eb4956408ee3ae09ad34299131fb383c47df355ddb428a7331cfa1e/charset_normalizer-3.3.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+  sha256: 90d558489962fd4918143277a773316e56c72da56ec7aa3dc3dbbe20fdfed15b
   requires_python: '>=3.7.0'
 - kind: pypi
   name: click
@@ -946,12 +946,6 @@ packages:
 - kind: pypi
   name: pyyaml
   version: 6.0.1
-  url: https://files.pythonhosted.org/packages/b4/33/720548182ffa8344418126017aa1d4ab4aeec9a2275f04ce3f3573d8ace8/PyYAML-6.0.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-  sha256: 6c22bec3fbe2524cde73d7ada88f6566758a8f7227bfbf93a408a9d86bcc12a0
-  requires_python: '>=3.6'
-- kind: pypi
-  name: pyyaml
-  version: 6.0.1
   url: https://files.pythonhosted.org/packages/29/61/bf33c6c85c55bc45a29eee3195848ff2d518d84735eb0e2d8cb42e0d285e/PyYAML-6.0.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
   sha256: ba336e390cd8e4d1739f42dfe9bb83a3cc2e80f567d8805e11b46f4a943f5515
   requires_python: '>=3.6'
@@ -960,6 +954,12 @@ packages:
   version: 6.0.1
   url: https://files.pythonhosted.org/packages/7b/5e/efd033ab7199a0b2044dab3b9f7a4f6670e6a52c089de572e928d2873b06/PyYAML-6.0.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
   sha256: d2b04aac4d386b172d5b9692e2d2da8de7bfb6c387fa4f801fbf6fb2e6ba4673
+  requires_python: '>=3.6'
+- kind: pypi
+  name: pyyaml
+  version: 6.0.1
+  url: https://files.pythonhosted.org/packages/b4/33/720548182ffa8344418126017aa1d4ab4aeec9a2275f04ce3f3573d8ace8/PyYAML-6.0.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+  sha256: 6c22bec3fbe2524cde73d7ada88f6566758a8f7227bfbf93a408a9d86bcc12a0
   requires_python: '>=3.6'
 - kind: conda
   name: readline
@@ -989,7 +989,7 @@ packages:
   - urllib3<3,>=1.21.1
   - certifi>=2017.4.17
   - pysocks!=1.5.7,>=1.5.6 ; extra == 'socks'
-  - chardet<6,>=3.0.2 ; extra == 'use_chardet_on_py3'
+  - chardet<6,>=3.0.2 ; extra == 'use-chardet-on-py3'
   requires_python: '>=3.8'
 - kind: pypi
   name: rocker
