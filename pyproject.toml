@@ -47,16 +47,13 @@ test = [
 
 
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 
 [project.urls]
 Source = "https://github.com/blooop/deps_rocker"
 Home = "https://github.com/blooop/deps_rocker"
-
-# [tool.flit.sdist]
-# include = ["deps_rocker/templates/*.Dockerfile"]
 
 [project.scripts]
 deps-rocker = "deps_rocker.dep_rocker_cli:gen_dockerfile"
@@ -75,6 +72,7 @@ py311 = ["py311","test"]
 py312 = ["py312","test"]
 
 [tool.pixi.tasks]
+code = "scripts/launch_vscode.sh"
 format = "black ."
 check-clean-workspace = "git diff --exit-code"
 ruff-lint = "ruff check . --fix"
