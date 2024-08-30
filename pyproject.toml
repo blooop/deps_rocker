@@ -1,13 +1,18 @@
 [project]
 name = "deps_rocker"
-version = "0.2.5.2"
+version = "0.2.5.3"
 license = { text = "MIT" }
 
 authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
 description = "A rocker plugin to help installing apt and pip dependencies"
 readme = "README.md"
 
-dependencies = []
+dependencies = [
+  "rocker>=0.2.17",
+  "off-your-rocker>=0.1.0",
+  "pyyaml>=5.0",
+  "toml>=0.10"
+]
 
 [project.urls]
 Source = "https://github.com/blooop/deps_rocker"
@@ -23,7 +28,7 @@ python = ">=3.8"
 [tool.pixi.feature.py308.dependencies]
 python = "3.8.*"
 [tool.pixi.feature.py309.dependencies]
-python = "3.9.*"
+python = "3.9.*"  
 [tool.pixi.feature.py310.dependencies]
 python = "3.10.*"
 [tool.pixi.feature.py311.dependencies]
@@ -37,12 +42,6 @@ dependencies = { python = "3.10" }
 pypi-dependencies = { deps-rocker = ">=0.2" }
 tasks = { code = "scripts/launch_vscode.sh",code-nocache = "scripts/launch_vscode.sh --nocache" }
 
-[tool.pixi.pypi-dependencies]
-deps_rocker = { path = ".", editable = true }
-rocker= ">=0.2.16"
-off-your-rocker = ">=0.1.0"
-pyyaml=">=5.0"
-toml=">=0.10"
 
 [project.optional-dependencies]
 test = [
