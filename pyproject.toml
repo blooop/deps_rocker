@@ -9,6 +9,10 @@ readme = "README.md"
 
 dependencies = []
 
+[project.urls]
+Source = "https://github.com/blooop/deps_rocker"
+Home = "https://github.com/blooop/deps_rocker"
+
 [tool.pixi.project]
 channels = ["conda-forge"]
 platforms = ["linux-64"]
@@ -56,10 +60,9 @@ test = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build]
+include= ["deps_rocker"]
 
-[project.urls]
-Source = "https://github.com/blooop/deps_rocker"
-Home = "https://github.com/blooop/deps_rocker"
 
 [project.scripts]
 deps-rocker = "deps_rocker.dep_rocker_cli:gen_dockerfile"
@@ -103,13 +106,6 @@ ci-push = {depends_on=["format","ruff-lint","update-lock","ci","push"]}
 clear-pixi = "rm -rf .pixi pixi.lock"
 setup-git-merge-driver = "git config merge.ourslock.driver true"
 update-from-template-repo = "./scripts/update_from_template.sh"
-
-
-
-[tool.setuptools.packages.find]
-include= ["deps_rocker"]
-
-
 
 [tool.pylint]
 extension-pkg-whitelist = ["numpy"]
