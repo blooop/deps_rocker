@@ -11,7 +11,7 @@ dependencies = [
   "rocker>=0.2.17",
   "off-your-rocker>=0.1.0",
   "pyyaml>=5.0",
-  # "toml>=0.10"
+  "toml>=0.10"
 ]
 
 [project.urls]
