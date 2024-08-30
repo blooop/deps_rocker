@@ -219,7 +219,6 @@ script_lint:
 script_test:
   - test.sh
 
-```
 
 ## limitations/TODO
 

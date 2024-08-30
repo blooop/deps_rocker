@@ -1,6 +1,6 @@
 [project]
 name = "deps_rocker"
-version = "0.2.3"
+version = "0.2.4"
 license = { text = "MIT" }
 
 authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
@@ -8,6 +8,10 @@ description = "A rocker plugin to help installing apt and pip dependencies"
 readme = "README.md"
 
 dependencies = []
+
+[project.urls]
+Source = "https://github.com/blooop/deps_rocker"
+Home = "https://github.com/blooop/deps_rocker"
 
 [tool.pixi.project]
 channels = ["conda-forge"]
@@ -27,6 +31,12 @@ python = "3.11.*"
 [tool.pixi.feature.py312.dependencies]
 python = "3.12.*"
 
+#an environment for launching vscode with rocker and deps_rocker
+[tool.pixi.feature.devenv]
+dependencies = { python = "3.10" }
+pypi-dependencies = { deps-rocker = ">=0.2" }
+tasks = { code = "scripts/launch_vscode.sh",code-nocache = "scripts/launch_vscode.sh --nocache" }
+
 [tool.pixi.pypi-dependencies]
 deps_rocker = { path = ".", editable = true }
 rocker= ">=0.2.16"
@@ -37,26 +47,22 @@ toml=">=0.10"
 [project.optional-dependencies]
 test = [
   "black>=23,<=24.4.2",
-  "pylint>=2.17.7,<=3.2.3",
+  "pylint>=3.2.5,<=3.2.6",
   "pytest-cov>=4.1,<=5.0.0",
-  "pytest>=7.4,<=8.2.2",
-  "hypothesis>=6.82,<=6.103.1",
-  "ruff>=0.0.280,<=0.4.8",
-  "coverage>=7.2.7,<=7.5.3",
+  "pytest>=7.4,<=8.3.2",
+  "hypothesis>=6.104.2,<=6.108.5",
+  "ruff>=0.5.0,<=0.5.5",
+  "coverage>=7.5.4,<=7.6.0",
 ]
 
 
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
+[tool.hatch.build]
+include= ["deps_rocker"]
 
-[project.urls]
-Source = "https://github.com/blooop/deps_rocker"
-Home = "https://github.com/blooop/deps_rocker"
-
-# [tool.flit.sdist]
-# include = ["deps_rocker/templates/*.Dockerfile"]
 
 [project.scripts]
 deps-rocker = "deps_rocker.dep_rocker_cli:gen_dockerfile"
@@ -74,6 +80,10 @@ py310 = ["py310","test"]
 py311 = ["py311","test"]
 py312 = ["py312","test"]
 
+devenv = { features = [
+  "devenv",
+], solve-group = "devenv", no-default-feature = true }
+
 [tool.pixi.tasks]
 format = "black ."
 check-clean-workspace = "git diff --exit-code"
@@ -81,23 +91,21 @@ ruff-lint = "ruff check . --fix"
 pylint = "pylint --version && echo 'running pylint...' && pylint $(git ls-files '*.py')"
 lint = { depends_on = ["ruff-lint", "pylint"] }
 style = { depends_on = ["format","lint"]}
-commit-format = "git commit -a -m'autoformat code'"
+commit-format = "git commit -a -m'autoformat code' || true"
 test = "pytest"
 coverage = "coverage run -m pytest && coverage xml -o coverage.xml"
 coverage-report = "coverage report -m"
-update-lock = "pixi update && git commit -a -m'update pixi.lock'"
+update-lock = "pixi update && git commit -a -m'update pixi.lock' || true"
 push = "git push"
 update-lock-push = { depends_on = ["update-lock", "push"] }
+fix = { depends_on = ["update-lock", "format", "ruff-lint"] }
+fix-commit-push = { depends_on = ["fix", "commit-format", "update-lock-push"] }
 ci-no-cover = { depends_on = ["style", "test"] }
 ci = { depends_on = ["format","ruff-lint","check-clean-workspace","pylint", "coverage", "coverage-report"] }
 ci-push = {depends_on=["format","ruff-lint","update-lock","ci","push"]}
 clear-pixi = "rm -rf .pixi pixi.lock"
-
-
-[tool.setuptools.packages.find]
-include= ["deps_rocker"]
-
-
+setup-git-merge-driver = "git config merge.ourslock.driver true"
+update-from-template-repo = "./scripts/update_from_template.sh"
 
 [tool.pylint]
 extension-pkg-whitelist = ["numpy"]
