@@ -8,7 +8,7 @@
 [![GitHub pull-requests merged](https://badgen.net/github/merged-prs/blooop/deps_rocker)](https://github.com/blooop/deps_rocker/pulls?q=is%3Amerged)
 [![GitHub release](https://img.shields.io/github/release/blooop/deps_rocker.svg)](https://GitHub.com/blooop/deps_rocker/releases/)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/deps-rocker)](https://pypistats.org/packages/deps-rocker)
-[![License](https://img.shields.io/pypi/l/bencher)](https://opensource.org/license/mit/)
+[![License](https://img.shields.io/pypi/l/deps-rocker)](https://opensource.org/license/mit/)
 [![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://www.python.org/downloads/)
 
 
