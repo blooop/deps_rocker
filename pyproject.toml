@@ -1,16 +1,22 @@
 [project]
-name = "template_rocker"
-version = "0.0.1"
-authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
-description = "A rocker extension for installing pixi in a container"
-readme = "README.md"
-license = "MIT"
+name = "deps_rocker"
+version = "0.2.5.3"
+license = { text = "MIT" }
 
-dependencies = ["rocker>=0.2.17"]
+authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
+description = "A rocker plugin to help installing apt and pip dependencies"
+readme = "README.md"
+
+dependencies = [
+  "rocker>=0.2.17",
+  "off-your-rocker>=0.1.0",
+  "pyyaml>=5.0",
+  "toml>=0.10"
+]
 
 [project.urls]
-Source = "https://github.com/blooop/template_rocker"
-Home = "https://github.com/blooop/template_rocker"
+Source = "https://github.com/blooop/deps_rocker"
+Home = "https://github.com/blooop/deps_rocker"
 
 [tool.pixi.project]
 channels = ["conda-forge"]
@@ -30,30 +36,39 @@ python = "3.11.*"
 [tool.pixi.feature.py312.dependencies]
 python = "3.12.*"
 
+#an environment for launching vscode with rocker and deps_rocker
+[tool.pixi.feature.devenv]
+dependencies = { python = "3.10" }
+pypi-dependencies = { deps-rocker = ">=0.2" }
+tasks = { code = "scripts/launch_vscode.sh",code-nocache = "scripts/launch_vscode.sh --nocache" }
 
-[tool.pixi.pypi-dependencies]
-template_rocker = { path = ".", editable = true }
 
 [project.optional-dependencies]
 test = [
   "black>=23,<=24.8.0",
-  "pylint>=3.2.5,<=3.3.1",
+  "pylint>=3.2.5,<=3.2.7",
   "pytest-cov>=4.1,<=5.0.0",
-  "pytest>=7.4,<=8.3.3",
-  "hypothesis>=6.104.2,<=6.112.2",
-  "ruff>=0.5.0,<=0.6.8",
+  "pytest>=7.4,<=8.3.2",
+  "hypothesis>=6.104.2,<=6.111.2",
+  "ruff>=0.5.0,<=0.6.3",
   "coverage>=7.5.4,<=7.6.1",
 ]
+
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
-include= ["template_rocker"]
+include= ["deps_rocker"]
+
+
+[project.scripts]
+deps-rocker = "deps_rocker.dep_rocker_cli:gen_dockerfile"
 
 [project.entry-points."rocker.extensions"]
-rocker_extension = "template_rocker.rocker_extension:NewRockerExtension"
+odeps_dependencies = "deps_rocker.dependencies:Dependencies"
+
 
 # Environments
 [tool.pixi.environments]
@@ -64,6 +79,9 @@ py310 = ["py310","test"]
 py311 = ["py311","test"]
 py312 = ["py312","test"]
 
+devenv = { features = [
+  "devenv",
+], solve-group = "devenv", no-default-feature = true }
 
 [tool.pixi.tasks]
 format = "black ."

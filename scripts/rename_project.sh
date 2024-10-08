@@ -1,10 +1,10 @@
 #!/bin/bash
 
-mv template_rocker "$1"
-mv template_rocker.deps.yaml "$1".deps.yaml
+mv python_template "$1"
+mv python_template.deps.yaml "$1".deps.yaml
 
 # change project name in all files
-find . \( -type d -name .git -prune \) -o \( -type f -not -name 'tasks.json' -not -name 'update_from_template.sh'  \) -print0 | xargs -0 sed -i "s/template_rocker/$1/g"
+find . \( -type d -name .git -prune \) -o \( -type f -not -name 'tasks.json' -not -name 'update_from_template.sh'  \) -print0 | xargs -0 sed -i "s/python_template/$1/g"
 
 # author name
 if [ -n "$2" ]; then
@@ -17,6 +17,6 @@ if [ -n "$3" ]; then
 fi
 
 # github username
-if [ -n "$4" ]; then
+if [ -n "$3" ]; then
     find . \( -type d -name .git -prune \) -o \( -type f -not -name 'setup_host.sh' -not -name 'update_from_template.sh'  \) -print0 | xargs -0 sed -i "s/blooop/$4/g"
 fi

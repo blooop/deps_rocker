@@ -1,9 +1,7 @@
 #! /bin/bash
 
-#THIS IS THE CORRECT TEMPLATE UPDATE SCRIPT, NOT update_from_python_template.sh
-
 git config --global pull.rebase false
-git remote add template https://github.com/blooop/template_rocker.git
+git remote add template https://github.com/blooop/python_template.git
 git fetch --all
 git checkout main && git pull origin main
 git checkout -B feature/update_from_template; git pull
