@@ -71,7 +71,6 @@ odeps_dependencies = "deps_rocker.dependencies:Dependencies"
 # Environments
 [tool.pixi.environments]
 default = {features = ["test"], solve-group = "default" }
-py308 = ["py308","test"]
 py309 = ["py309","test"]
 py310 = ["py310","test"]
 py311 = ["py311","test"]
