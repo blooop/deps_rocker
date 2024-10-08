@@ -17,10 +17,6 @@ dependencies = [
 Source = "https://github.com/blooop/deps_rocker"
 Home = "https://github.com/blooop/deps_rocker"
 
-[project.urls]
-Source = "https://github.com/blooop/python_template"
-Home = "https://github.com/blooop/python_template"
-
 [tool.pixi.project]
 channels = ["conda-forge"]
 platforms = ["linux-64"]
