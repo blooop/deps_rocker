@@ -656,12 +656,6 @@ packages:
 - kind: pypi
   name: charset-normalizer
   version: 3.3.2
-  url: https://files.pythonhosted.org/packages/3d/09/d82fe4a34c5f0585f9ea1df090e2a71eb9bb1e469723053e1ee9f57c16f3/charset_normalizer-3.3.2-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-  sha256: 45485e01ff4d3630ec0d9617310448a8702f70e9c01906b0d0118bdf9d124cf2
-  requires_python: '>=3.7.0'
-- kind: pypi
-  name: charset-normalizer
-  version: 3.3.2
   url: https://files.pythonhosted.org/packages/40/26/f35951c45070edc957ba40a5b1db3cf60a9dbb1b350c2d5bef03e01e61de/charset_normalizer-3.3.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
   sha256: 753f10e867343b4511128c6ed8c82f7bec3bd026875576dfd88483c5c73b2fd8
   requires_python: '>=3.7.0'
@@ -1289,9 +1283,9 @@ packages:
   timestamp: 1727719528404
 - kind: conda
   name: python
-  version: 3.10.0
-  build: h543edf9_3_cpython
-  build_number: 3
+  version: 3.10.15
+  build: h4a871b0_1_cpython
+  build_number: 1
   subdir: linux-64
   url: https://conda.anaconda.org/conda-forge/linux-64/python-3.10.0-h543edf9_3_cpython.tar.bz2
   sha256: 0661f43d7bc446c22bfcf1730ad5c7a2ac695c696ba4609bac896cefff879431
@@ -1437,12 +1431,6 @@ packages:
   version: 6.0.2
   url: https://files.pythonhosted.org/packages/b9/2b/614b4752f2e127db5cc206abc23a8c19678e92b23c3db30fc86ab731d3bd/PyYAML-6.0.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
   sha256: 80bab7bfc629882493af4aa31a4cfa43a4c57c83813253626916b8c7ada83476
-  requires_python: '>=3.8'
-- kind: pypi
-  name: pyyaml
-  version: 6.0.2
-  url: https://files.pythonhosted.org/packages/fd/7f/2c3697bba5d4aa5cc2afe81826d73dfae5f049458e44732c7a0938baa673/PyYAML-6.0.2-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-  sha256: 9056c1ecd25795207ad294bcf39f2db3d845767be0ea6e6a34d856f006006083
   requires_python: '>=3.8'
 - kind: conda
   name: readline

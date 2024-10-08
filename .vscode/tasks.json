@@ -210,7 +210,7 @@
 			"type": "promptString",
 			"id": "new_project_name",
 			"description": "The new name of the project",
-			"default": "python_template"
+			"default": "deps_rocker"
 		},
 		{
 			"type": "promptString",
