@@ -42,7 +42,8 @@ class TestBasicClass(TestCase):
         deps_both.setup_deps(dict(deps="a*.deps_test.yaml"))
 
         self.assertEqual(
-            [f.name for f in deps_both.deps_files], ["a1.deps_test.yaml", "a2.deps_test.yaml"]
+            sorted([f.name for f in deps_both.deps_files]),
+            ["a1.deps_test.yaml", "a2.deps_test.yaml"],
         )
 
         self.assertEqual(deps1.get_snippet(), deps_both.get_snippet())
