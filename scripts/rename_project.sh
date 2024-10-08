@@ -1,10 +1,10 @@
 #!/bin/bash
 
-mv python_template "$1"
-mv python_template.deps.yaml "$1".deps.yaml
+mv deps_rocker "$1"
+mv deps_rocker.deps.yaml "$1".deps.yaml
 
 # change project name in all files
-find . \( -type d -name .git -prune \) -o \( -type f -not -name 'tasks.json' -not -name 'update_from_template.sh'  \) -print0 | xargs -0 sed -i "s/python_template/$1/g"
+find . \( -type d -name .git -prune \) -o \( -type f -not -name 'tasks.json' -not -name 'update_from_template.sh'  \) -print0 | xargs -0 sed -i "s/deps_rocker/$1/g"
 
 # author name
 if [ -n "$2" ]; then
