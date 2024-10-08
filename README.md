@@ -21,7 +21,8 @@ pip install deps-rocker
 ## Usage
 
 ```
-rocker --deps ubuntu:22.04  #recursivly search for *.deps.yaml
+#recursively search for *.deps.yaml and install those packages on top of an existing image
+rocker --deps ubuntu:22.04  
 ```
 
 ## Motivation
