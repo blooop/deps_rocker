@@ -25,8 +25,6 @@ platforms = ["linux-64"]
 [tool.pixi.dependencies]
 python = ">=3.8"
 
-[tool.pixi.feature.py308.dependencies]
-python = "3.8.*"
 [tool.pixi.feature.py309.dependencies]
 python = "3.9.*"  
 [tool.pixi.feature.py310.dependencies]
