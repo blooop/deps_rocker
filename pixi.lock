@@ -596,7 +596,7 @@ packages:
   name: deps-rocker
   version: 0.2.5.3
   path: .
-  sha256: 6beffc9185d3d5a43c5325484c8122ed19f98aee003523af4685daf9ac553802
+  sha256: f5dc8c38962e051e11e6f1f52b4c6cff308adbffecfeb7c6cef6e6a2a5755eaa
   requires_dist:
   - rocker>=0.2.17
   - off-your-rocker>=0.1.0
