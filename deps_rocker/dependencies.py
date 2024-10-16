@@ -37,7 +37,7 @@ class Dependencies(RockerExtension):
             self.parsed = True
 
     def read_dependencies(self, path: Path, pattern: str):
-        """Recursivly load all deps.yaml and create a dictionary containing sets of each type of dependency. Each type of dependency (apt_base, apt etc) should have duplicates rejected when adding to the set"""
+        """Recursively load all deps.yaml and create a dictionary containing sets of each type of dependency. Each type of dependency (apt_base, apt etc) should have duplicates rejected when adding to the set"""
         for p in path.rglob(pattern):
             print(f"found {p}")
             self.deps_files.append(p)
@@ -141,7 +141,7 @@ class Dependencies(RockerExtension):
         return ""
 
     def get_pyproject_toml_deps(self) -> str:
-        """Recursivly load all dependencies from pyproject.toml"
+        """Recursively load all dependencies from pyproject.toml"
 
         Returns:
             str: Space delimited string of dependencies
@@ -171,7 +171,7 @@ class Dependencies(RockerExtension):
         return "\n".join([lay.to_snippet() for lay in self.layers.values()])
 
     def get_user_snippet(self, cliargs):
-        """Get a dockerfile snippet to be executed after switchingto the expected USER."""
+        """Get a dockerfile snippet to be executed after switching to the expected USER."""
         self.setup_deps(cliargs)
         return "\n".join([lay.to_snippet() for lay in self.layers_user.values()])
 
@@ -185,20 +185,3 @@ class Dependencies(RockerExtension):
             const="*.deps.yaml",
             help="A filter to select deps.yaml files. Defaults to *.deps.yaml",
         )
-
-
-if __name__ == "__main__":
-    deps = Dependencies()
-    # print(deps)
-
-    # scr= deps
-    # scr= deps.get_scripts("scripts_tools")
-    scr = deps.get_deps("scripts")
-
-    scr = deps.get_deps("env")
-    deps.get_snippet(None)
-    print(scr)
-
-    # res =Dependencies().get_files(None)
-
-    # print(res)
