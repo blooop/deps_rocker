@@ -2,6 +2,7 @@ from pathlib import Path
 from collections import defaultdict
 import yaml
 import toml
+import logging
 from rocker.extensions import RockerExtension
 from .command_layer import CommandLayer
 
@@ -130,6 +131,8 @@ class Dependencies(RockerExtension):
         scripts_deps = self.get_deps(name)
         if len(scripts_deps) > 0:
             for s in scripts_deps.split(" "):
+                logging.info(f"loading script: {s}")
+                print(f"loading script: {s}")
                 with open(s, encoding="utf-8") as f:
                     scripts.extend(f.readlines())
 
