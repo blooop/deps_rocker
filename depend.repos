@@ -1,0 +1,7 @@
+repositories:
+  py_binding_tools:
+    type: git
+    url: https://github.com/moveit/py_binding_tools.git
+    version: main 
+
+  
