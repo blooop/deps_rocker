@@ -1,9 +1,9 @@
 repositories:
-  py_binding_tools:
+  base_dep1:
     type: git
     url: https://github.com/moveit/py_binding_tools.git
     version: main 
-  rep1:
+  base_dep2:
     type: git
     url: https://github.com/moveit/py_binding_tools.git
     version: main 
