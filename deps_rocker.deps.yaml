@@ -10,3 +10,7 @@ pip_language-toolchain:
 
 pip:
   - vcstool
+
+
+# vcstool:
+#   - depends.repos
