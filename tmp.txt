@@ -1,0 +1,5 @@
+
+# @[for x in vcs_repos]@
+# COPY @x /depends.repos
+# RUN vcs import  < /depends.repos --recursive
+# @[end for]@

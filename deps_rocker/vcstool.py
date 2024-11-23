@@ -1,6 +1,8 @@
 import pkgutil
 from rocker.extensions import RockerExtension
-
+from pathlib import Path
+from collections import defaultdict
+import em
 
 class VCStool(RockerExtension):
     @staticmethod
@@ -14,9 +16,21 @@ class VCStool(RockerExtension):
     #     return "RUN pip install vcstool"
 
     def get_snippet(self, cliargs):
-        return pkgutil.get_data(
+        vcs_repos = Path.cwd().rglob("*.repos")
+
+        print(vcs_repos)
+
+
+        # for rep in vcs_repos:
+
+
+        # print(vcs_repos)
+
+
+        snippet = pkgutil.get_data(
             "deps_rocker", "templates/{}_snippet.Dockerfile".format(self.name)
         ).decode("utf-8")
+        return em.expand(snippet, dict(vcs_repos=vcs_repos))
 
     @staticmethod
     def register_arguments(parser, defaults=None):
@@ -28,3 +42,6 @@ class VCStool(RockerExtension):
             default=defaults.get("deps_rocker"),
             help="import and install repos with vcstool in your docker image",
         )
+
+if __name__ == "__main__":
+    VCStool().get_snippet("")

@@ -163,6 +163,20 @@ class Dependencies(RockerExtension):
                             pyproj_deps.extend(optional["dev"])
         return " ".join(pyproj_deps)
 
+
+    def get_vcstool_repos(self) -> str:
+        """Loads *.repos files to be read by vcstool
+
+        Returns:
+            str: Space delimited string of dependencies
+        """
+        repos = Path.cwd().rglob("*.repos")
+        pyproj_deps = []
+        for p in repos:
+            with open(p, "r", encoding="utf-8") as f:
+                print(f)
+
+        return " ".join(pyproj_deps)
     def get_preamble(self, cliargs):
         return "\n".join([lay.to_snippet() for lay in self.layers_preamble.values()])
 
@@ -189,6 +203,11 @@ class Dependencies(RockerExtension):
 
 if __name__ == "__main__":
     deps = Dependencies()
+
+
+    deps.get_vcstool_repos()
+
+    exit()
     # print(deps)
 
     # scr= deps
