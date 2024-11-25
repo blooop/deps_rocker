@@ -28,6 +28,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     sudo \
     software-properties-common \
     wget \
+    python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
 # Install ROS2
@@ -37,7 +38,10 @@ RUN sudo add-apt-repository universe \
   && apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-ros-core \
     python3-argcomplete \
+    python3-vcstool \
   && rm -rf /var/lib/apt/lists/*
+
+RUN pip install colcon-common-extensions colcon-spawn-shell uv
 
 ENV ROS_DISTRO=humble
 ENV AMENT_PREFIX_PATH=/opt/ros/humble
@@ -47,3 +51,6 @@ ENV PATH=/opt/ros/humble/bin:$PATH
 ENV PYTHONPATH=/opt/ros/humble/local/lib/python3.10/dist-packages:/opt/ros/humble/lib/python3.10/site-packages
 ENV ROS_PYTHON_VERSION=3
 ENV ROS_VERSION=2
+
+
+# RUN rosdep init
