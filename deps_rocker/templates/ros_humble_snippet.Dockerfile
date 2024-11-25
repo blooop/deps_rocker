@@ -3,7 +3,6 @@
 # # Env setup
 # ENV ROS_SYNC_DATESTAMP="2024-11-04"
 
-RUN locale-gen en_US en_US.UTF-8 && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 ENV ROS_PYTHON_VERSION=3
 ENV ROS_DISTRO=humble
@@ -11,6 +10,7 @@ ENV ROS_ROOT=/opt/ros/${ROS_DISTRO}
 # disable terminal interaction for apt
 ENV DEBIAN_FRONTEND=noninteractive
 # ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+
 
 RUN echo 'Etc/UTC' > /etc/timezone && \
     ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime && \

@@ -59,7 +59,7 @@ deps-rocker = "deps_rocker.dep_rocker_cli:gen_dockerfile"
 
 [project.entry-points."rocker.extensions"]
 odeps_dependencies = "deps_rocker.dependencies:Dependencies"
-ros-humble = "deps_rocker.ros_humble:RosHumble"
+roshumble = "deps_rocker.ros_humble:RosHumble"
 
 # Environments
 [tool.pixi.environments]
