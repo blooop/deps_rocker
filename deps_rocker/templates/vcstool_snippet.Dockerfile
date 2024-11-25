@@ -5,11 +5,6 @@ RUN pip3 install vcstool
 
 
 
-COPY depend.repos /deps.repos
+# COPY depend.repos /deps.repos
 
-
-RUN pip install vcstool
-
-@[for x in data_list]@
-RUN vcs import  < @x --recursive
-@[end for]@
+#tmp

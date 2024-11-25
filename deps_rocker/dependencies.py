@@ -3,7 +3,7 @@ from collections import defaultdict
 import yaml
 import toml
 from rocker.extensions import RockerExtension
-from .command_layer import CommandLayer
+from deps_rocker.command_layer import CommandLayer
 
 
 class Dependencies(RockerExtension):
@@ -90,6 +90,8 @@ class Dependencies(RockerExtension):
 
         self.add_file("pyproject_default", self.get_pyproject_toml_deps())
 
+        self.get_vcstool_repos()
+
         all_layers = (
             list(self.layers_preamble.values())
             + list(self.layers.values())
@@ -170,13 +172,18 @@ class Dependencies(RockerExtension):
         Returns:
             str: Space delimited string of dependencies
         """
+        print("getting *.repos to import with vcstool")
         repos = Path.cwd().rglob("*.repos")
-        pyproj_deps = []
+        combined_repos = []
         for p in repos:
+            print(p)
+            print(type(p))
             with open(p, "r", encoding="utf-8") as f:
-                print(f)
+                strs = "".join(f.readlines())
+                self.add_file(p.name,strs)
+                # combined_repos.extend(f.readlines())
 
-        return " ".join(pyproj_deps)
+        return " ".join(combined_repos)
     def get_preamble(self, cliargs):
         return "\n".join([lay.to_snippet() for lay in self.layers_preamble.values()])
 
