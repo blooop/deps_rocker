@@ -41,7 +41,7 @@ RUN sudo add-apt-repository universe \
     python3-vcstool \
   && rm -rf /var/lib/apt/lists/*
 
-RUN pip install colcon-common-extensions colcon-spawn-shell uv
+RUN pip install colcon-common-extensions colcon-spawn-shell uv rosdep
 
 ENV ROS_DISTRO=humble
 ENV AMENT_PREFIX_PATH=/opt/ros/humble
@@ -53,4 +53,4 @@ ENV ROS_PYTHON_VERSION=3
 ENV ROS_VERSION=2
 
 
-# RUN rosdep init
+RUN rosdep init
