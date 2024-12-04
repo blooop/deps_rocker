@@ -1,14 +1,14 @@
 import pkgutil
+from typing import Set
 from rocker.extensions import RockerExtension
 
 
 class IsaacSim(RockerExtension):
-    @staticmethod
-    def get_name():
-        return "isaac-sim"
+    name = "isaac_sim"
 
-    def __init__(self):
-        self.name = IsaacSim.get_name()
+    @classmethod
+    def get_name(cls):
+        return cls.name
 
     def get_snippet(self, cliargs):
         return pkgutil.get_data("deps_rocker", f"templates/{self.name}_snippet.Dockerfile").decode(
@@ -20,12 +20,15 @@ class IsaacSim(RockerExtension):
     #         "utf-8"
     #     )
 
+    def required(self, cliargs) -> Set[str]:
+        return set(["nvidia", "privileged", "x11"])
+
     @staticmethod
     def register_arguments(parser, defaults=None):
         if defaults is None:
             defaults = {}
         parser.add_argument(
-            f"--{IsaacSim.get_name()}",
+            f"--isaac-sim",
             action="store_true",
             default=defaults.get("deps_rocker"),
             help="add isaac_sim to your docker image",
