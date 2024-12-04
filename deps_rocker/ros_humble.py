@@ -24,7 +24,7 @@ class RosHumble(RockerExtension):
         if defaults is None:
             defaults = {}
         parser.add_argument(
-            f"--ros-humble",
+            "--ros-humble",
             action="store_true",
             default=defaults.get("deps_rocker"),
             help="add ros humble to your docker image",
