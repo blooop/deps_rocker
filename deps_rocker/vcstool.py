@@ -1,4 +1,5 @@
 import pkgutil
+from pathlib import Path
 from rocker.extensions import RockerExtension
 
 
@@ -19,13 +20,23 @@ class VcsTool(RockerExtension):
     #         "utf-8"
     #     )
 
+    def get_files(self, cliargs) -> dict:
+        repos = Path.cwd().rglob("*.repos")
+        output = {}
+        for r in repos:
+            if r.is_file():
+                with r.open(encoding="utf-8") as f:
+                    output[r.name] = f.read()
+                    print(r.name)
+
+        return output
+
     @staticmethod
     def register_arguments(parser, defaults=None):
         if defaults is None:
             defaults = {}
         parser.add_argument(
-            f"--vsctool",
+            f"--{VcsTool.name}",
             action="store_true",
-            default=defaults.get("deps_rocker"),
-            help="add vsc tool to your docker image",
+            help=f"add {VcsTool.name} to your docker image",
         )
