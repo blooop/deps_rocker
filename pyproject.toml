@@ -1,6 +1,6 @@
 [project]
 name = "deps_rocker"
-version = "0.2.6.0"
+version = "0.3.0"
 authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
 description = "A rocker plugin to help installing apt and pip dependencies"
 readme = "README.md"
@@ -59,6 +59,8 @@ deps-rocker = "deps_rocker.dep_rocker_cli:gen_dockerfile"
 
 [project.entry-points."rocker.extensions"]
 odeps_dependencies = "deps_rocker.dependencies:Dependencies"
+vcstool = "deps_rocker.vcstool:VcsTool"
+cwd = "deps_rocker.cwd:CWD"
 isaac_sim = "deps_rocker.isaac_sim:IsaacSim"
 
 # Environments
