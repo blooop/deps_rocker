@@ -15,9 +15,7 @@ class VcsTool(RockerExtension):
     def __init__(self) -> None:
         self.empy_args = dict()
         self.empy_args["depend_repos"] = []
-
         self.output_files = self.generate_files()
-
         super().__init__()
 
     def generate_files(self):
