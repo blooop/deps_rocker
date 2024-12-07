@@ -16,21 +16,27 @@ class VcsTool(RockerExtension):
         self.empy_args = dict()
         self.empy_args["depend_repos"] = []
 
+        self.output_files = self.generate_files()
+
+        super().__init__()
+
+    def generate_files(self):
+        """Generates depend.repos files and collects their paths
+
+        Returns:
+            dict[str]: _description_
+        """
         repos = Path.cwd().rglob("*.repos")
-        self.output_files = {}
+        output_files = {}
         for r in repos:
             if r.is_file():
                 with r.open(encoding="utf-8") as f:
                     rel_path = r.relative_to(Path.cwd()).as_posix()
-                    self.output_files[rel_path] = f.read()
+                    output_files[rel_path] = f.read()
                     self.empy_args["depend_repos"].append(
                         dict(dep=rel_path, path=Path(rel_path).parent.as_posix())
                     )
-                    # print(r.name)
-                    # print(output[r.name])
-        print(self.empy_args)
-
-        super().__init__()
+        return output_files
 
     def get_snippet(self, cliargs):
         snippet = pkgutil.get_data(
@@ -43,11 +49,6 @@ class VcsTool(RockerExtension):
 
         print("expanded\n", expanded)
         return expanded
-
-    # def get_user_snippet(self, cliargs):
-    #     return pkgutil.get_data("deps_rocker", f"templates/{self.name}_user_snippet.Dockerfile").decode(
-    #         "utf-8"
-    #     )
 
     def get_files(self, cliargs) -> dict:
         return self.output_files
