@@ -19,10 +19,10 @@ class SimpleRockerExtension(RockerExtension):
             dat = pkgutil.get_data(self.pkg, f"templates/{self.name}_snippet.Dockerfile")
             if dat is not None:
                 snippet = dat.decode("utf-8")
-                print("empy_snippet", snippet)
-                print("empy_args", self.empy_args)
+                logging.info(f"empy_snippet: {snippet}")
+                logging.info(f"empy_args: {self.empy_args}")
                 expanded = em.expand(snippet, self.empy_args)
-                print("expanded\n", expanded)
+                logging.info(f"expanded\n{expanded}")
                 return expanded
         except FileNotFoundError as _:
             logging.info(f"no snippet found templates/{self.name}_snippet.Dockerfile")
@@ -33,10 +33,10 @@ class SimpleRockerExtension(RockerExtension):
             dat = pkgutil.get_data(self.pkg, f"templates/{self.name}_suer_snippet.Dockerfile")
             if dat is not None:
                 snippet = dat.decode("utf-8")
-                print("empy_user_snippet", snippet)
-                print("empy_user_args", self.empy_user_args)
+                logging.info(f"empy_user_snippet: {snippet}")
+                logging.info(f"empy_user_args: {self.empy_user_args}")
                 expanded = em.expand(snippet, self.empy_user_args)
-                print("expanded\n", expanded)
+                logging.info(f"expanded\n{expanded}")
                 return expanded
         except FileNotFoundError as _:
             logging.info(f"no user snippet found templates/{self.name}_user_snippet.Dockerfile")
