@@ -9,7 +9,6 @@ class VcsTool(SimpleRockerExtension):
     name = "vcstool"
 
     def __init__(self) -> None:
-        super().__init__()
         self.empy_args["depend_repos"] = []
         self.output_files = self.generate_files()
 
