@@ -1,7 +1,7 @@
 import pkgutil
 import logging
-from rocker.extensions import RockerExtension
 import em
+from rocker.extensions import RockerExtension
 
 
 class SimpleRockerExtension(RockerExtension):
@@ -15,31 +15,34 @@ class SimpleRockerExtension(RockerExtension):
         return cls.name
 
     def get_snippet(self, cliargs):
-        try:
-            dat = pkgutil.get_data(self.pkg, f"templates/{self.name}_snippet.Dockerfile")
-            if dat is not None:
-                snippet = dat.decode("utf-8")
-                logging.info(f"empy_snippet: {snippet}")
-                logging.info(f"empy_args: {self.empy_args}")
-                expanded = em.expand(snippet, self.empy_args)
-                logging.info(f"expanded\n{expanded}")
-                return expanded
-        except FileNotFoundError as _:
-            logging.info(f"no snippet found templates/{self.name}_snippet.Dockerfile")
-        return ""
+        return self.get_and_expand_empy_template(cliargs, self.empy_args)
 
     def get_user_snippet(self, cliargs):
+        return self.get_and_expand_empy_template(
+            cliargs,
+            self.empy_user_args,
+            "user_",
+        )
+
+    def get_and_expand_empy_template(
+        self,
+        cliargs,
+        empy_args,
+        snippet_prefix: str = "",
+    ):
         try:
-            dat = pkgutil.get_data(self.pkg, f"templates/{self.name}_suer_snippet.Dockerfile")
+            snippet_name = f"templates/{self.name}_{snippet_prefix}snippet.Dockerfile"
+            dat = pkgutil.get_data(self.pkg, snippet_name)
             if dat is not None:
                 snippet = dat.decode("utf-8")
-                logging.info(f"empy_user_snippet: {snippet}")
-                logging.info(f"empy_user_args: {self.empy_user_args}")
-                expanded = em.expand(snippet, self.empy_user_args)
+                logging.warning(self.name)
+                logging.info(f"empy_{snippet_prefix}snippet: {snippet}")
+                logging.info(f"empy_{snippet_prefix}args: {empy_args}")
+                expanded = em.expand(snippet, empy_args)
                 logging.info(f"expanded\n{expanded}")
                 return expanded
         except FileNotFoundError as _:
-            logging.info(f"no user snippet found templates/{self.name}_user_snippet.Dockerfile")
+            logging.info(f"no user snippet found {snippet_name}")
         return ""
 
     @staticmethod
