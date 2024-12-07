@@ -1,9 +1,10 @@
-import pkgutil
 from pathlib import Path
 from rocker.extensions import RockerExtension
 
 
 class CWD(RockerExtension):
+    """Add the current working directory as a volume in your docker container"""
+
     name = "cwd"
 
     @classmethod
@@ -11,7 +12,7 @@ class CWD(RockerExtension):
         return cls.name
 
     def get_docker_args(self, cliargs):
-        return " -v %s:%s " % (Path.home(), Path.cwd())
+        return " -v %s:%s " % (Path.cwd(), Path.home())
 
     @staticmethod
     def register_arguments(parser, defaults=None):
