@@ -1,8 +1,5 @@
-import pkgutil
 from pathlib import Path
-import em
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
-import logging
 
 
 class VcsTool(SimpleRockerExtension):
