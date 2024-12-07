@@ -1,7 +1,6 @@
 import pkgutil
 from pathlib import Path
 import em
-from rocker.extensions import RockerExtension
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 

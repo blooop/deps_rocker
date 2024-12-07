@@ -43,6 +43,10 @@ class SimpleRockerExtension(RockerExtension):
         return ""
 
     @staticmethod
+    def register_arguments(parser, defaults=None):
+        raise NotImplementedError
+
+    @staticmethod
     def register_arguments_helper(name: str, parser, defaults=None):
         arg_name = name.replace("_", "-")
         docs_name = name.replace("_", " ")
