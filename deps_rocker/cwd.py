@@ -10,8 +10,9 @@ class CWD(SimpleRockerExtension):
     def get_docker_args(self, cliargs):
         return " -v %s:%s " % (Path.cwd(), "/workspaces")
 
-    # def invoke_after(self, cliargs):
-    #     return set(["vcstool"])
+    def invoke_after(self, cliargs):
+        # return set(["vcstool"])
+        return set(["user"])
 
     @staticmethod
     def register_arguments(parser, defaults=None):
