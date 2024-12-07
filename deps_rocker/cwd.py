@@ -1,4 +1,5 @@
 from pathlib import Path
+import pkgutil
 from rocker.extensions import RockerExtension
 
 
@@ -12,7 +13,14 @@ class CWD(RockerExtension):
         return cls.name
 
     def get_docker_args(self, cliargs):
-        return " -v %s:%s " % (Path.cwd(), Path.home())
+        return " -v %s:%s " % (Path.cwd(), "/workspaces")
+
+    def get_user_snippet(self, cliargs):
+        snippet = pkgutil.get_data(
+            "deps_rocker", f"templates/{self.name}_user_snippet.Dockerfile"
+        ).decode("utf-8")
+
+        return snippet
 
     @staticmethod
     def register_arguments(parser, defaults=None):
