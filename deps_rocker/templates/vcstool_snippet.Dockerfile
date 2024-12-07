@@ -10,5 +10,4 @@ RUN pip install vcstool
 @[for dep in depend_repos]@
 COPY @dep["dep"] /dependencies/@dep["dep"]
 RUN mkdir -p ./dependencies/@dep["path"] ; vcs import ./dependencies/@dep["path"] < /dependencies/@dep["dep"]
-# RUN vcs import . < /dependencies/@dep["dep"]
 @[end for]@
