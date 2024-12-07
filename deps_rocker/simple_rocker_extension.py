@@ -1,4 +1,5 @@
 import pkgutil
+import logging
 from rocker.extensions import RockerExtension
 
 
@@ -11,22 +12,32 @@ class SimpleRockerExtension(RockerExtension):
         return cls.name
 
     def get_snippet(self, cliargs):
-        return pkgutil.get_data(self.pkg, f"templates/{self.name}_snippet.Dockerfile").decode(
-            "utf-8"
-        )
+        try:
+            dat = pkgutil.get_data(self.pkg, f"templates/{self.name}_snippet.Dockerfile")
+            if dat is not None:
+                return dat.decode("utf-8")
+        except FileNotFoundError as e:
+            logging.info(f"no snippet found templates/{self.name}_snippet.Dockerfile")
+        return ""
 
     def get_user_snippet(self, cliargs):
-        return pkgutil.get_data(self.pkg, f"templates/{self.name}_snippet_user.Dockerfile").decode(
-            "utf-8"
-        )
+        try:
+            dat = pkgutil.get_data(self.pkg, f"templates/{self.name}_snippet_user.Dockerfile")
+            if dat is not None:
+                return dat.decode("utf-8")
+        except FileNotFoundError as e:
+            logging.info(f"no snippet found templates/{self.name}_snippet_user.Dockerfile")
+        return ""
 
     @staticmethod
-    def register_arguments(parser, defaults=None):
+    def register_arguments_helper(name: str, parser, defaults=None):
+        arg_name = name.replace("_", "-")
+        docs_name = name.replace("_", " ")
         if defaults is None:
             defaults = {}
         parser.add_argument(
-            "--ros-humble",
+            f"--{arg_name}",
             action="store_true",
             default=defaults.get("deps_rocker"),
-            help="add ros humble to your docker image",
+            help=f"add {docs_name} to your docker image",
         )

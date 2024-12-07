@@ -1,16 +1,12 @@
 import pkgutil
 from pathlib import Path
-from rocker.extensions import RockerExtension
-
 import em
+from rocker.extensions import RockerExtension
+from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
-class VcsTool(RockerExtension):
+class VcsTool(SimpleRockerExtension):
     name = "vcstool"
-
-    @classmethod
-    def get_name(cls):
-        return cls.name
 
     def __init__(self) -> None:
         self.empy_args = dict()
@@ -53,10 +49,4 @@ class VcsTool(RockerExtension):
 
     @staticmethod
     def register_arguments(parser, defaults=None):
-        if defaults is None:
-            defaults = {}
-        parser.add_argument(
-            f"--{VcsTool.name}",
-            action="store_true",
-            help=f"add {VcsTool.name} to your docker image",
-        )
+        SimpleRockerExtension.register_arguments_helper(VcsTool.name, parser, defaults)
