@@ -26,7 +26,7 @@ class SimpleRockerExtension(RockerExtension):
             if dat is not None:
                 return dat.decode("utf-8")
         except FileNotFoundError as e:
-            logging.info(f"no snippet found templates/{self.name}_snippet_user.Dockerfile")
+            logging.info(f"no snippet found templates/{self.name}_user_snippet.Dockerfile")
         return ""
 
     @staticmethod

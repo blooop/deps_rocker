@@ -6,6 +6,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN pip install vcstool
 
+WORKDIR /workspaces
+
 #loops through all the *.repos files that were found and imports them with the same folder structure
 @[for dep in depend_repos]@
 COPY @dep["dep"] /dependencies/@dep["dep"]

@@ -47,6 +47,9 @@ class VcsTool(SimpleRockerExtension):
     def get_files(self, cliargs) -> dict:
         return self.output_files
 
+    def invoke_after(self, cliargs):
+        return set(["cwd"])
+
     @staticmethod
     def register_arguments(parser, defaults=None):
         SimpleRockerExtension.register_arguments_helper(VcsTool.name, parser, defaults)
