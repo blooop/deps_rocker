@@ -2,6 +2,7 @@ import pkgutil
 from pathlib import Path
 import em
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
+import logging
 
 
 class VcsTool(SimpleRockerExtension):
@@ -9,7 +10,7 @@ class VcsTool(SimpleRockerExtension):
 
     def __init__(self) -> None:
         super().__init__()
-        self.empy_user_args["depend_repos"] = []
+        self.empy_args["depend_repos"] = []
         self.output_files = self.generate_files()
 
     def generate_files(self):
@@ -25,7 +26,7 @@ class VcsTool(SimpleRockerExtension):
                 with r.open(encoding="utf-8") as f:
                     rel_path = r.relative_to(Path.cwd()).as_posix()
                     output_files[rel_path] = f.read()
-                    self.empy_user_args["depend_repos"].append(
+                    self.empy_args["depend_repos"].append(
                         dict(dep=rel_path, path=Path(rel_path).parent.as_posix())
                     )
         return output_files
@@ -33,8 +34,8 @@ class VcsTool(SimpleRockerExtension):
     def get_files(self, cliargs) -> dict:
         return self.output_files
 
-    def invoke_after(self, cliargs):
-        return set(["cwd", "user"])
+    # def invoke_after(self, cliargs):
+    #     return set(["cwd", "user"])
 
     @staticmethod
     def register_arguments(parser, defaults=None):
