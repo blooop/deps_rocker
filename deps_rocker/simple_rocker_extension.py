@@ -15,18 +15,16 @@ class SimpleRockerExtension(RockerExtension):
         return cls.name
 
     def get_snippet(self, cliargs) -> str:
-        return self.get_and_expand_empy_template(cliargs, self.empy_args)
+        return self.get_and_expand_empy_template(self.empy_args)
 
     def get_user_snippet(self, cliargs) -> str:
         return self.get_and_expand_empy_template(
-            cliargs,
             self.empy_user_args,
             "user_",
         )
 
     def get_and_expand_empy_template(
         self,
-        cliargs,
         empy_args,
         snippet_prefix: str = "",
     ) -> str:
