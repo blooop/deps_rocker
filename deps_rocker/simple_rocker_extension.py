@@ -11,13 +11,13 @@ class SimpleRockerExtension(RockerExtension):
     empy_user_args = {}
 
     @classmethod
-    def get_name(cls):
+    def get_name(cls) -> str:
         return cls.name
 
-    def get_snippet(self, cliargs):
+    def get_snippet(self, cliargs) -> str:
         return self.get_and_expand_empy_template(cliargs, self.empy_args)
 
-    def get_user_snippet(self, cliargs):
+    def get_user_snippet(self, cliargs) -> str:
         return self.get_and_expand_empy_template(
             cliargs,
             self.empy_user_args,
@@ -29,7 +29,7 @@ class SimpleRockerExtension(RockerExtension):
         cliargs,
         empy_args,
         snippet_prefix: str = "",
-    ):
+    ) -> str:
         try:
             snippet_name = f"templates/{self.name}_{snippet_prefix}snippet.Dockerfile"
             dat = pkgutil.get_data(self.pkg, snippet_name)
@@ -50,7 +50,7 @@ class SimpleRockerExtension(RockerExtension):
         raise NotImplementedError
 
     @staticmethod
-    def register_arguments_helper(name: str, parser, defaults=None):
+    def register_arguments_helper(name: str, parser, defaults=None) -> None:
         arg_name = name.replace("_", "-")
         docs_name = name.replace("_", " ")
         if defaults is None:
