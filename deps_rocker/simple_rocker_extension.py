@@ -1,11 +1,14 @@
 import pkgutil
 import logging
 from rocker.extensions import RockerExtension
+import em
 
 
 class SimpleRockerExtension(RockerExtension):
     name = "simple_rocker_extension"
     pkg = "deps_rocker"
+    empy_args = {}
+    empy_user_args = {}
 
     @classmethod
     def get_name(cls):
@@ -15,18 +18,28 @@ class SimpleRockerExtension(RockerExtension):
         try:
             dat = pkgutil.get_data(self.pkg, f"templates/{self.name}_snippet.Dockerfile")
             if dat is not None:
-                return dat.decode("utf-8")
-        except FileNotFoundError as e:
+                snippet = dat.decode("utf-8")
+                print("empy_snippet", snippet)
+                print("empy_args", self.empy_args)
+                expanded = em.expand(snippet, self.empy_args)
+                print("expanded\n", expanded)
+                return expanded
+        except FileNotFoundError as _:
             logging.info(f"no snippet found templates/{self.name}_snippet.Dockerfile")
         return ""
 
     def get_user_snippet(self, cliargs):
         try:
-            dat = pkgutil.get_data(self.pkg, f"templates/{self.name}_snippet_user.Dockerfile")
+            dat = pkgutil.get_data(self.pkg, f"templates/{self.name}_suer_snippet.Dockerfile")
             if dat is not None:
-                return dat.decode("utf-8")
-        except FileNotFoundError as e:
-            logging.info(f"no snippet found templates/{self.name}_user_snippet.Dockerfile")
+                snippet = dat.decode("utf-8")
+                print("empy_user_snippet", snippet)
+                print("empy_user_args", self.empy_user_args)
+                expanded = em.expand(snippet, self.empy_user_args)
+                print("expanded\n", expanded)
+                return expanded
+        except FileNotFoundError as _:
+            logging.info(f"no user snippet found templates/{self.name}_user_snippet.Dockerfile")
         return ""
 
     @staticmethod
