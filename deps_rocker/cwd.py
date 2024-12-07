@@ -12,7 +12,7 @@ class CWD(SimpleRockerExtension):
 
     def invoke_after(self, cliargs):
         # return set(["vcstool"])
-        return set(["user"])
+        return {"user"}
 
     @staticmethod
     def register_arguments(parser, defaults=None):
