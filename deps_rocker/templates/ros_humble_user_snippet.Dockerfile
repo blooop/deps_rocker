@@ -10,6 +10,7 @@ RUN  rosdep update; rosdep install --from-paths /dependencies --ignore-src -r -y
 # source install/setup.bash
 
 RUN echo "source /opt/ros/humble/setup.bash" >> $HOME/.bashrc
-RUN echo "source /usr/share/vcstool-completion/vcs.bash" >> $HOME/.bashrc
+
+
 # RUN echo "alias colcon='colcon --defaults-file ~/.colcon/defaults.yaml'" >> $HOME/.bashrc
 
