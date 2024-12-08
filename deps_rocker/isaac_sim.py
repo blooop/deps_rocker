@@ -1,6 +1,4 @@
-import pkgutil
 from typing import Set
-from rocker.extensions import RockerExtension
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 # to run:
