@@ -18,27 +18,26 @@ RUN ln -fs /usr/share/zoneinfo/UTC /etc/localtime \
   && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && apt-get -y upgrade \
-    && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/*
 
 # Install common programs
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    gnupg2 \
-    lsb-release \
-    sudo \
-    software-properties-common \
-    wget \
-    python3-pip \
-    && rm -rf /var/lib/apt/lists/*
+  curl \
+  gnupg2 \
+  lsb-release \
+  sudo \
+  software-properties-common \
+  wget \
+  python3-pip \
+  && rm -rf /var/lib/apt/lists/*
 
 # Install ROS2
 RUN sudo add-apt-repository universe \
   && curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg \
   && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null \
   && apt-get update && apt-get install -y --no-install-recommends \
-    ros-humble-ros-core \
-    python3-argcomplete \
-    python3-vcstool \
+  ros-humble-ros-core \
+  python3-argcomplete \
   && rm -rf /var/lib/apt/lists/*
 
 RUN pip install colcon-common-extensions colcon-spawn-shell uv rosdep
@@ -53,4 +52,4 @@ ENV ROS_PYTHON_VERSION=3
 ENV ROS_VERSION=2
 
 
-RUN rosdep init
+RUN rosdep init; rosdep update
