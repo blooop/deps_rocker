@@ -40,7 +40,7 @@ RUN sudo add-apt-repository universe \
   python3-argcomplete \
   && rm -rf /var/lib/apt/lists/*
 
-RUN pip install colcon-common-extensions colcon-spawn-shell uv rosdep
+RUN pip install colcon-common-extensions colcon-defaults colcon-spawn-shell uv rosdep
 
 ENV ROS_DISTRO=humble
 ENV AMENT_PREFIX_PATH=/opt/ros/humble
@@ -51,5 +51,4 @@ ENV PYTHONPATH=/opt/ros/humble/local/lib/python3.10/dist-packages:/opt/ros/humbl
 ENV ROS_PYTHON_VERSION=3
 ENV ROS_VERSION=2
 
-
-RUN rosdep init; rosdep update
+RUN rosdep init 
