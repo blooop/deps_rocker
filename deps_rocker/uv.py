@@ -11,6 +11,11 @@ class UV(SimpleRockerExtension):
     def invoke_after(self, cliargs):
         return set(["curl"])
 
+    def get_docker_args(self, cliargs):
+        # abs = Path("$HOME/.cache/uv").absolute().as_posix()
+        abs = "$HOME/.cache/uv"
+        return f"-v {abs}:{abs}"
+
     @staticmethod
     def register_arguments(parser, defaults=None):
         SimpleRockerExtension.register_arguments_helper(UV.name, parser, defaults)
