@@ -1,6 +1,6 @@
 [project]
 name = "deps_rocker"
-version = "0.4.0"
+version = "0.5.0"
 authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
 description = "A rocker plugin to help installing apt and pip dependencies"
 readme = "README.md"
@@ -62,6 +62,7 @@ odeps_dependencies = "deps_rocker.dependencies:Dependencies"
 vcstool = "deps_rocker.vcstool:VcsTool"
 cwd = "deps_rocker.cwd:CWD"
 cwd_name = "deps_rocker.cwd:CWDName"
+fzf = "deps_rocker.fzf:Fzf"
 
 # Environments
 [tool.pixi.environments]
