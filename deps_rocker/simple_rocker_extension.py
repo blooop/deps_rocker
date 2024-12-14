@@ -70,7 +70,8 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
 
     @staticmethod
     def register_arguments(parser: ArgumentParser, defaults: dict = None):
-        raise NotImplementedError
+        """This gets dynamically defined by the metaclass"""
+        pass
 
     @staticmethod
     def register_arguments_helper(
