@@ -2,7 +2,8 @@ import pkgutil
 import logging
 import em
 from rocker.extensions import RockerExtension
-
+from typing import Type
+from argparse import ArgumentParser
 
 class SimpleRockerExtension(RockerExtension):
     name = "simple_rocker_extension"
@@ -47,15 +48,43 @@ class SimpleRockerExtension(RockerExtension):
     def register_arguments(parser, defaults=None):
         raise NotImplementedError
 
+   
+
     @staticmethod
-    def register_arguments_helper(name: str, parser, defaults=None) -> None:
-        arg_name = name.replace("_", "-")
-        docs_name = name.replace("_", " ")
+    def register_arguments_helper(
+        class_type: Type, 
+        parser: ArgumentParser, 
+        defaults: dict = None
+    ) -> None:
+        """
+        Registers arguments for a given class type to an `ArgumentParser` instance.
+
+        Args:
+            class_type (Type): The class whose name and docstring are used to define the argument.
+                               The class must have a `name` attribute (str) and a docstring.
+            parser (ArgumentParser): The `argparse.ArgumentParser` object to which the argument is added.
+            defaults (dict): A dictionary of default values for the arguments.
+                                                            If `None`, defaults to an empty dictionary.
+
+        Returns:
+            None: This method does not return any value. It modifies the `parser` in place.
+
+        Raises:
+            AttributeError: If the `class_type` does not have a `name` attribute.
+        """
+        # Replace underscores with dashes in the class name for argument naming
+        arg_name = class_type.name.replace("_", "-")
+        
+        # Ensure defaults is initialized as an empty dictionary if not provided
         if defaults is None:
             defaults = {}
+
+        assert(len(class_type.__doc__)>0)
+
+        # Add the argument to the parser
         parser.add_argument(
             f"--{arg_name}",
             action="store_true",
             default=defaults.get("deps_rocker"),
-            help=f"add {docs_name} to your docker image",
+            help=class_type.__doc__,  # Use the class docstring as the help text
         )
