@@ -5,11 +5,12 @@ from rocker.extensions import RockerExtension
 from typing import Type
 from argparse import ArgumentParser
 
-from argparse import ArgumentParser
-from typing import Type, Dict, Optional
+from typing import Dict, Optional
+
 
 class SimpleRockerExtensionMeta(type):
     """Use a metaclass to dynamically create the static register_argument() function based on the class name and docstring"""
+
     def __new__(cls, name, bases, class_dict):
         # Create the class as usual
         new_class = super().__new__(cls, name, bases, class_dict)
@@ -26,7 +27,7 @@ class SimpleRockerExtensionMeta(type):
         return new_class
 
 
-class SimpleRockerExtension(RockerExtension,metaclass=SimpleRockerExtensionMeta):
+class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta):
     """A class to take care of most of the boilerplace required for a rocker extension"""
 
     name = "simple_rocker_extension"
@@ -68,10 +69,9 @@ class SimpleRockerExtension(RockerExtension,metaclass=SimpleRockerExtensionMeta)
         return ""
 
     @staticmethod
-    def register_arguments(parser:ArgumentParser, defaults:dict=None):
+    def register_arguments(parser: ArgumentParser, defaults: dict = None):
         raise NotImplementedError
 
- 
     @staticmethod
     def register_arguments_helper(
         class_type: Type, parser: ArgumentParser, defaults: dict = None

@@ -15,7 +15,6 @@ class CWD(SimpleRockerExtension):
         return {"user"}
 
 
-
 class CWDName(SimpleRockerExtension):
     """Set the name of the container to the name of the folder of the current working directory"""
 
@@ -23,4 +22,3 @@ class CWDName(SimpleRockerExtension):
 
     def get_docker_args(self, cliargs) -> str:
         return f" --name {Path.cwd().stem}"
-
