@@ -3,6 +3,7 @@ from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
 class VcsTool(SimpleRockerExtension):
+    """Add vcstool to the container and clones any repos found in *.repos files"""
     name = "vcstool"
 
     def __init__(self) -> None:
@@ -33,6 +34,4 @@ class VcsTool(SimpleRockerExtension):
     # def invoke_after(self, cliargs):
     #     return set(["cwd", "user"])
 
-    @staticmethod
-    def register_arguments(parser, defaults=None):
-        SimpleRockerExtension.register_arguments_helper(VcsTool.name, parser, defaults)
+   

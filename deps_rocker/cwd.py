@@ -14,9 +14,7 @@ class CWD(SimpleRockerExtension):
         # return set(["vcstool"])
         return {"user"}
 
-    @staticmethod
-    def register_arguments(parser, defaults=None) -> None:
-        SimpleRockerExtension.register_arguments_helper(CWD, parser, defaults)
+
 
 class CWDName(SimpleRockerExtension):
     """Set the name of the container to the name of the folder of the current working directory"""
@@ -26,6 +24,3 @@ class CWDName(SimpleRockerExtension):
     def get_docker_args(self, cliargs) -> str:
         return f" --name {Path.cwd().stem}"
 
-    @staticmethod
-    def register_arguments(parser, defaults=None) -> None:
-        SimpleRockerExtension.register_arguments_helper(CWDName, parser, defaults)
