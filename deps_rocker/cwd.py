@@ -24,7 +24,7 @@ class CWDName(SimpleRockerExtension):
     def get_docker_args(self, cliargs) -> str:
         return f" --name {Path.cwd().stem}"
 
-     @staticmethod
+    @staticmethod
     def sanitize_container_name(name: str) -> str:
         """
         Sanitizes the container name to conform to Docker's requirements.
