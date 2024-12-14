@@ -655,8 +655,8 @@ packages:
   requires_python: '>=3.9'
 - pypi: .
   name: deps-rocker
-  version: 0.3.1
-  sha256: ba7466f7cb6e00ad783d275eb711c63f7e0255ee7ae7401096d887953ab183b5
+  version: 0.4.0
+  sha256: 4966080e41ac4208d7b5108b7e1ebe616ce93ac04f4dce24ba0126f84f1933e6
   requires_dist:
   - rocker>=0.2.17
   - off-your-rocker>=0.1.0
