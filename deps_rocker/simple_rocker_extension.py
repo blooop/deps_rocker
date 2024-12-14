@@ -5,7 +5,30 @@ from rocker.extensions import RockerExtension
 from typing import Type
 from argparse import ArgumentParser
 
-class SimpleRockerExtension(RockerExtension):
+from argparse import ArgumentParser
+from typing import Type, Dict, Optional
+
+class SimpleRockerExtensionMeta(type):
+    """Use a metaclass to dynamically create the static register_argument() function based on the class name and docstring"""
+    def __new__(cls, name, bases, class_dict):
+        # Create the class as usual
+        new_class = super().__new__(cls, name, bases, class_dict)
+
+        # Skip the base class itself
+        if name != "BaseExtension":
+            # Dynamically add the register_arguments method
+            @staticmethod
+            def register_arguments(parser: ArgumentParser, defaults: Optional[Dict] = None) -> None:
+                new_class.register_arguments_helper(new_class, parser, defaults)
+
+            new_class.register_arguments = register_arguments
+
+        return new_class
+
+
+class SimpleRockerExtension(RockerExtension,metaclass=SimpleRockerExtensionMeta):
+    """A class to take care of most of the boilerplace required for a rocker extension"""
+
     name = "simple_rocker_extension"
     pkg = "deps_rocker"
     empy_args = {}
@@ -45,16 +68,13 @@ class SimpleRockerExtension(RockerExtension):
         return ""
 
     @staticmethod
-    def register_arguments(parser, defaults=None):
+    def register_arguments(parser:ArgumentParser, defaults:dict=None):
         raise NotImplementedError
 
-   
-
+ 
     @staticmethod
     def register_arguments_helper(
-        class_type: Type, 
-        parser: ArgumentParser, 
-        defaults: dict = None
+        class_type: Type, parser: ArgumentParser, defaults: dict = None
     ) -> None:
         """
         Registers arguments for a given class type to an `ArgumentParser` instance.
@@ -72,14 +92,17 @@ class SimpleRockerExtension(RockerExtension):
         Raises:
             AttributeError: If the `class_type` does not have a `name` attribute.
         """
-        # Replace underscores with dashes in the class name for argument naming
-        arg_name = class_type.name.replace("_", "-")
-        
         # Ensure defaults is initialized as an empty dictionary if not provided
         if defaults is None:
             defaults = {}
 
-        assert(len(class_type.__doc__)>0)
+        # Check if __doc__ is not None and has content
+        if not class_type.__doc__:
+            raise ValueError(
+                f"The class '{class_type.__name__}' must have a docstring to use as the argument help text."
+            )
+        # Replace underscores with dashes in the class name for argument naming
+        arg_name = class_type.name.replace("_", "-")
 
         # Add the argument to the parser
         parser.add_argument(
