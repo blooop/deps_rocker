@@ -61,6 +61,7 @@ deps-rocker = "deps_rocker.dep_rocker_cli:gen_dockerfile"
 odeps_dependencies = "deps_rocker.dependencies:Dependencies"
 vcstool = "deps_rocker.vcstool:VcsTool"
 cwd = "deps_rocker.cwd:CWD"
+cwd_name = "deps_rocker.cwd:CWDName"
 
 # Environments
 [tool.pixi.environments]
