@@ -11,4 +11,4 @@ class Fzf(SimpleRockerExtension):
         return {"user"}
 
     def required(self, cliargs):
-        return {"git","git-clone"}
+        return {"git","git_clone","curl"}
