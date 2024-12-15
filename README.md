@@ -179,7 +179,7 @@ env_base:
   - DEPS_ROCKER=1
 
 apt_base: #lowest level of dependency that changes very infrequently
-  - build-essentials
+  - build-essential
 
 apt_io: #graphics sound, input devices etc
   - libasound2
