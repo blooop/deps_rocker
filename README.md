@@ -30,6 +30,9 @@ rocker --deps ubuntu:22.04
 
 Docker enables easy isolation of dependencies from the host system, but it is not easy to dynamically combine docker files from separate projects into a single unified environment.
 
+## Documentation
+
+Find documentation for all the rocker extensions this module provides [here](https://deps-rocker.readthedocs.io/en/latest/intro.html)
 
 ## Intro
 
