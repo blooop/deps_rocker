@@ -121,7 +121,7 @@ for file in glob(*.deps.yaml):
     add 
 ```
 
-If two packages have unqiue layers that depend on a common layer
+If two packages have unique layers that depend on a common layer
 
 pkg_a.deps.yaml:
 
