@@ -16,6 +16,3 @@ class UV(SimpleRockerExtension):
         abs = "$HOME/.cache/uv"
         return f"-v {abs}:{abs}"
 
-    @staticmethod
-    def register_arguments(parser, defaults=None):
-        SimpleRockerExtension.register_arguments_helper(UV.name, parser, defaults)
