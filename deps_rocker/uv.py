@@ -9,7 +9,7 @@ class UV(SimpleRockerExtension):
         return {"curl"}
 
     def invoke_after(self, cliargs):
-        return set(["curl"])
+        return {"curl"}
     
     #TODO enable use of cache on host machine
     # def get_docker_args(self, cliargs):
