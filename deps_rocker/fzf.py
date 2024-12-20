@@ -1,4 +1,3 @@
-from pathlib import Path
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
@@ -11,4 +10,4 @@ class Fzf(SimpleRockerExtension):
         return {"user"}
 
     def required(self, cliargs):
-        return {"git","git_clone","curl"}
+        return {"git", "git_clone", "curl"}
