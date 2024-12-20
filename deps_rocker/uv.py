@@ -1,4 +1,3 @@
-from pathlib import Path
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
@@ -12,10 +11,9 @@ class UV(SimpleRockerExtension):
 
     def invoke_after(self, cliargs):
         return {"curl"}
-    
-    #TODO enable use of cache on host machine
+
+    # TODO enable use of cache on host machine
     # def get_docker_args(self, cliargs):
     #     # abs = Path("$HOME/.cache/uv").absolute().as_posix()
     #     abs = "$HOME/.cache/uv"
     #     return f"-v {abs}:{abs}"
-
