@@ -6,7 +6,7 @@ class UV(SimpleRockerExtension):
     name = "uv"
 
     def required(self, cliargs):
-        return set(["curl"])
+        return {"curl"}
 
     def invoke_after(self, cliargs):
         return set(["curl"])
