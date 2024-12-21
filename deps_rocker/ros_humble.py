@@ -14,6 +14,10 @@ class RosHumble(SimpleRockerExtension):
     def required(self, cliargs):
         return {"vcstool"}
 
+    def get_files(self, cliargs)->dict[str,str]:
+        dat =self.get_config_file("configs/ros_humble/defaults.yaml")
+        return {"defaults.yaml":dat}
+
     def get_docker_args(self, cliargs) -> str:
         """Set the ROS_DOMAIN_ID env var from the host machine if it exists, otherwise generate one from a hash of the username"""
         ROS_DOMAIN_ID = os.environ.get("ROS_DOMAIN_ID")
