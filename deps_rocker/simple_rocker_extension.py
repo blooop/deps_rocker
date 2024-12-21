@@ -71,7 +71,7 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
     def register_arguments(parser: ArgumentParser, defaults: dict = None):
         """This gets dynamically defined by the metaclass"""
 
-    def get_config_file(self, path: str) -> bytes | None:
+    def get_config_file(self, path: str) -> Optional[bytes]:
         return pkgutil.get_data(self.pkg, path)
 
     @staticmethod
