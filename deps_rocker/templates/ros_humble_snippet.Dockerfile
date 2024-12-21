@@ -29,6 +29,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   software-properties-common \
   wget \
   python3-pip \
+  cmake \
+  build-essential \
   && rm -rf /var/lib/apt/lists/*
 
 # Install ROS2
