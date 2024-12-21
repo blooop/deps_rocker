@@ -1,6 +1,10 @@
 
 #ROS user snippet
-RUN  rosdep update; rosdep install --from-paths /dependencies --ignore-src -r -y
+
+RUN if [ -d "/dependencies" ]; then \
+    rosdep update && \
+    rosdep install --from-paths /dependencies --ignore-src -r -y; \
+fi
 
 # RUN rosdep update
 # vcs import /opt/ros/kinisi/src < dependencies.repos --recursive
