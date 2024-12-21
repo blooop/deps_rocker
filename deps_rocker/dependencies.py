@@ -5,6 +5,7 @@ import yaml
 import toml
 from rocker.extensions import RockerExtension
 from .command_layer import CommandLayer
+import typing
 
 
 class Dependencies(RockerExtension):
@@ -25,6 +26,14 @@ class Dependencies(RockerExtension):
     @classmethod
     def get_name(cls):
         return cls.name
+
+    def invoke_after(self, cliargs) -> typing.Set[str]:
+        """
+        This extension should be loaded after the extensions in the returned
+        set. These extensions are not required to be present, but if they are,
+        they will be loaded before this extension.
+        """
+        return {"ros_humble"}
 
     def setup_deps(self, cliargs):
         if not self.parsed:
