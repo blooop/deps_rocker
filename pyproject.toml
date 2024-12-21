@@ -67,6 +67,7 @@ cwd_name = "deps_rocker.cwd:CWDName"
 fzf = "deps_rocker.fzf:Fzf"
 git_clone = "deps_rocker.git_clone:GitClone"
 curl = "deps_rocker.curl:Curl"
+neovim = "deps_rocker.neovim:NeoVim"
 
 # Environments
 [tool.pixi.environments]
