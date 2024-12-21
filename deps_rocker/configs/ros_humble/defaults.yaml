@@ -1,0 +1,15 @@
+# Build options
+cmake-args:
+  - -DCMAKE_BUILD_TYPE=Release
+  - -DBUILD_TESTING=ON
+
+"": #applies to all colcon subcommands
+  log-base: /workspaces/colcon/log   
+
+build: 
+  build-base: /workspaces/colcon/build
+  install-base: /workspaces/colcon/install
+  test-result-base: /workspaces/colcon/test_results
+  symlink-install: true
+
+executor: multi-threaded
