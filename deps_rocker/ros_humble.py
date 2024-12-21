@@ -1,4 +1,3 @@
-import pkgutil
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
