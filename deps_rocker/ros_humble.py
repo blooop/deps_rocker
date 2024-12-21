@@ -10,6 +10,6 @@ class RosHumble(SimpleRockerExtension):
         return set(["vcstool"])
 
     def required(self, cliargs):
-        return set(["vcstool"])
+        return {"vcstool"}
 
  
