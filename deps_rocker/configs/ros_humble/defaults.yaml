@@ -4,12 +4,16 @@ cmake-args:
   - -DBUILD_TESTING=ON
 
 "": #applies to all colcon subcommands
-  log-base: /workspaces/colcon/log   
+  log-base: /workspaces/ros_ws/log   
 
 build: 
-  build-base: /workspaces/colcon/build
-  install-base: /workspaces/colcon/install
-  test-result-base: /workspaces/colcon/test_results
+  build-base: /workspaces/ros_ws/build
+  install-base: /workspaces/ros_ws/install
   symlink-install: true
+
+test: 
+  build-base: /workspaces/ros_ws/build
+  install-base: /workspaces/ros_ws/install
+  test-result-base: /workspaces/ros_ws/test_results
 
 executor: multi-threaded
