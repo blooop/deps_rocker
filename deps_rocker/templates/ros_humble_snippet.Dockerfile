@@ -42,7 +42,7 @@ RUN sudo add-apt-repository universe \
   python3-argcomplete \
   && rm -rf /var/lib/apt/lists/*
 
-RUN pip install colcon-common-extensions colcon-defaults colcon-spawn-shell uv rosdep
+RUN pip install colcon-common-extensions colcon-defaults colcon-spawn-shell colcon-clean uv rosdep
 
 ENV ROS_DISTRO=humble
 ENV AMENT_PREFIX_PATH=/opt/ros/humble
