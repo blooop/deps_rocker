@@ -51,4 +51,7 @@ ENV PYTHONPATH=/opt/ros/humble/local/lib/python3.10/dist-packages:/opt/ros/humbl
 ENV ROS_PYTHON_VERSION=3
 ENV ROS_VERSION=2
 
+#Chosen by a fair dice roll
+ENV ROS_DOMAIN_ID=4 
+
 RUN rosdep init 
