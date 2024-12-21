@@ -4,7 +4,6 @@ import em
 from rocker.extensions import RockerExtension
 from typing import Type
 from argparse import ArgumentParser
-from pathlib import Path
 from typing import Dict, Optional
 
 
@@ -72,7 +71,7 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
     def register_arguments(parser: ArgumentParser, defaults: dict = None):
         """This gets dynamically defined by the metaclass"""
 
-    def get_config_file(self,path:str)->bytes|None:
+    def get_config_file(self, path: str) -> bytes | None:
         return pkgutil.get_data(self.pkg, path)
 
     @staticmethod
