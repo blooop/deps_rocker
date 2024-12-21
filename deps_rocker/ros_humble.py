@@ -7,7 +7,7 @@ class RosHumble(SimpleRockerExtension):
     name = "ros_humble"
 
     def invoke_after(self, cliargs):
-        return set(["vcstool"])
+        return {"vcstool"}
 
     def required(self, cliargs):
         return {"vcstool"}
