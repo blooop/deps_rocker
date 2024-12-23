@@ -12,8 +12,8 @@ class IsaacSim(SimpleRockerExtension):
     def required(self, cliargs) -> Set[str]:
         return set(["nvidia", "privileged", "x11"])
 
-    def get_docker_args(self, cliargs):
-        return " --runtime=nvidia"
+    # def get_docker_args(self, cliargs):
+    #     return " --runtime=nvidia"
 
     def get_docker_args(self, cliargs):
         volumes = [
