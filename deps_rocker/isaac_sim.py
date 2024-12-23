@@ -7,13 +7,12 @@ from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
 class IsaacSim(SimpleRockerExtension):
-    """Add isaacsim to your docker container"""
+    """Add isaacsim to your docker container""" 
 
     name = "isaacsim"
 
     def required(self, cliargs) -> Set[str]:
         return set(["nvidia", "privileged", "x11"])
-
 
     def get_docker_args(self, cliargs):
         volumes = [
