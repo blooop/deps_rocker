@@ -1,9 +1,11 @@
 from pathlib import Path
 from collections import defaultdict
+import logging
 import yaml
 import toml
 from rocker.extensions import RockerExtension
 from .command_layer import CommandLayer
+import typing
 
 
 class Dependencies(RockerExtension):
@@ -24,6 +26,14 @@ class Dependencies(RockerExtension):
     @classmethod
     def get_name(cls):
         return cls.name
+
+    def invoke_after(self, cliargs) -> typing.Set[str]:
+        """
+        This extension should be loaded after the extensions in the returned
+        set. These extensions are not required to be present, but if they are,
+        they will be loaded before this extension.
+        """
+        return {"ros_humble"}
 
     def setup_deps(self, cliargs):
         if not self.parsed:
@@ -130,14 +140,17 @@ class Dependencies(RockerExtension):
         scripts_deps = self.get_deps(name)
         if len(scripts_deps) > 0:
             for s in scripts_deps.split(" "):
-                with open(s, encoding="utf-8") as f:
-                    scripts.extend(f.readlines())
+                script_path = Path(s)
+                if script_path.is_file():
+                    with script_path.open(encoding="utf-8") as f:
+                        scripts.extend(f.readlines())
 
         if len(scripts) > 1:
             combined = "\n".join(scripts)
             combined = combined.replace("sudo ", "")
             combined = combined.replace("sudo", "")
             return combined
+        logging.warning("No deps were found to install")
         return ""
 
     def get_pyproject_toml_deps(self) -> str:

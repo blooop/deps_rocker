@@ -9,8 +9,9 @@
 [![GitHub release](https://img.shields.io/github/release/blooop/deps_rocker.svg)](https://GitHub.com/blooop/deps_rocker/releases/)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/deps-rocker)](https://pypistats.org/packages/deps-rocker)
 [![License](https://img.shields.io/pypi/l/deps-rocker)](https://opensource.org/license/mit/)
-[![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://www.python.org/downloads/)
-
+[![Python](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/downloads/)
+[![Pixi Badge](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/prefix-dev/pixi/main/assets/badge/v0.json)](https://pixi.sh)
+[![Documentation Status](https://readthedocs.org/projects/deps-rocker/badge/?version=latest)](https://deps-rocker.readthedocs.io/en/latest/?badge=latest)
 
 ## Installation
 
@@ -29,6 +30,9 @@ rocker --deps ubuntu:22.04
 
 Docker enables easy isolation of dependencies from the host system, but it is not easy to dynamically combine docker files from separate projects into a single unified environment.
 
+## Documentation
+
+Find documentation for all the rocker extensions this module provides [here](https://deps-rocker.readthedocs.io/en/latest/intro.html)
 
 ## Intro
 
@@ -117,7 +121,7 @@ for file in glob(*.deps.yaml):
     add 
 ```
 
-If two packages have unqiue layers that depend on a common layer
+If two packages have unique layers that depend on a common layer
 
 pkg_a.deps.yaml:
 
@@ -175,7 +179,7 @@ env_base:
   - DEPS_ROCKER=1
 
 apt_base: #lowest level of dependency that changes very infrequently
-  - build-essentials
+  - build-essential
 
 apt_io: #graphics sound, input devices etc
   - libasound2
