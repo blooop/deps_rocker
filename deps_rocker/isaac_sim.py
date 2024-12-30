@@ -34,7 +34,7 @@ class IsaacSim(SimpleRockerExtension):
         ]
 
         #create the commands for mounting all the volume folders
-        vols = ["-v " + Path(p).absolute().as_posix() for p in volumes]
+        vols = [f"-v {Path(p).absolute().as_posix()}" for p in volumes]
 
         args = [
             "--runtime=nvidia",
