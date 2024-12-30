@@ -58,6 +58,11 @@ class IsaacSim(SimpleRockerExtension):
             # "../../ros:/root/ros:rw",
             # "-v",
             # "../../bin/docker/fastdds_localhost.xml:/fastdds_localhost.xml",
+            # SYS_ADMIN capability and FUSE device are required by NVIDIA Container Toolkit
+            # to enable GPU support and container runtime features needed by Isaac Sim.
+            # These permissions allow:
+            # - GPU device mounting and management
+            # - Container runtime operations for graphics/simulation
             "--cap-add",
             "SYS_ADMIN",
             "--device",
