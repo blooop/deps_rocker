@@ -12,7 +12,7 @@ class IsaacSim(SimpleRockerExtension):
     name = "isaacsim"
 
     def required(self, cliargs) -> Set[str]:
-        return set(["nvidia", "privileged", "x11"])
+        return {"nvidia", "privileged", "x11"}
 
     def get_docker_args(self, cliargs):
         isaac_docker_root = Path().home()/"docker/isaac-sim"
