@@ -13,5 +13,7 @@ args:
   - pull 
   - deps
   - git 
+  - cwd
   - pixi
   - uv
+  - isaacsim
