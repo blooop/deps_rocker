@@ -9,8 +9,6 @@ RUN pip install isaacsim==4.2.0.2 isaacsim-extscache-kit==4.2.0.2 isaacsim-extsc
 
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libxext6 \
-    # libsm6 \
     libglib2.0-0 \
     libglu1-mesa \
     libxmu-dev \
