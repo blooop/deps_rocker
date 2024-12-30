@@ -36,8 +36,8 @@ class IsaacSim(SimpleRockerExtension):
             "host",
             # "-e",
             # "DISPLAY",
-            # "-e",
-            # "LD_LIBRARY_PATH=/isaac-sim/exts/omni.isaac.ros2_bridge/humble/lib",
+            "-e",
+            "LD_LIBRARY_PATH=/isaac-sim/exts/omni.isaac.ros2_bridge/humble/lib",
             # "-e",
             # "ROS_DISTRO=humble",
             # "-e",
@@ -57,6 +57,7 @@ class IsaacSim(SimpleRockerExtension):
         ] + vols
 
         run_args = " " + " ".join(args)
+        print("isaac run args")
         print(run_args)
         return run_args
 
