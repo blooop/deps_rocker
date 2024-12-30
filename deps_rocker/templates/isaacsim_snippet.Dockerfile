@@ -15,17 +15,5 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libglib2.0-0 \
     libxrender1 \
     libglu1-mesa \
-    libxi-dev \
     libxmu-dev \
-    # libglu1-mesa-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-    # apt_vulkan:
-#   - libgtk-3-dev 
-#   - libxkbcommon-x11-0 
-#   - vulkan-tools 
-#   - mesa-vulkan-drivers
-
-# libgtk-3-dev libxkbcommon-x11-0 vulkan-tools mesa-vulkan-drivers
-
-# apt-get install libglu1-mesa libxi-dev libxmu-dev libglu1-mesa-dev
