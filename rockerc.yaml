@@ -16,4 +16,4 @@ args:
   - cwd
   - pixi
   - uv
-  - isaacsim
+  # - isaacsim
