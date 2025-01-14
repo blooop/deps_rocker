@@ -84,15 +84,7 @@ apt:
 
 Each heading in the yaml file produces a docker layer based on the command and the label.  The format of the labels is {command_name}_{command-label}.  The layer names are delimited by _ so layer names should use - eg: language-toolchain. 
 
-<<<<<<< HEAD
 This makes it easy to define the dependencies for a single project, but enable reuse of common dependencies across multiple projects. However, deps rocker does not restrict what is defined in each layer and so relies on a common convention for multiple packages to play nicely with eachother.  If one package adds "make" to apt_sources and other package adds "make" to apt_langage_toolchain, the deps-rocker will not complain and will not deduplicate that install step.   
-=======
-    
-3. Update the `get_name()` function in the extension class. e.g. Updating the name to `lazygit` would mean that it would be activated by passing --lazygit to rocker   
-   
-4. Add/update the docker snippets in the templates folder.  Officially the extension is supposed to be .Dockerfile.em to indicate it's passed to the empy library, but I have left them as .Dockerfile as I get Dockerfile highlighting out of the box that way. 
-5. Develop your extension.  I find that using `pip install -e .` and running the extension with rocker on my host system is the easiest way to get started.  
->>>>>>> template/main
 
 ## Methodology:
 
@@ -155,11 +147,7 @@ Here apt_pkg_b_custom and apt_pkg_a_custom both need to be run after apt_sources
 
 ## Commands
 
-<<<<<<< HEAD
 Commands are defined in templates/commandname_snippet.Dockerfile.
-=======
-The main pixi tasks are related to CI.  Github actions runs the pixi task "ci".  The CI is mostly likely to fail from a lockfile mismatch.  Use `pixi run fix` to fix any lockfile related problems. 
->>>>>>> template/main
 
 They use the [empy](https://pypi.org/project/empy/) templating langage that is used by [rocker](https://github.com/tfoote/rocker).  deps-rocker has some basic commands already implemented but adding a new command is as simple as adding a _snippet.Dockerfile.  
 
@@ -177,7 +165,6 @@ script:
 
 If you have sudo inside your script deps-rocker will automatically remove them.  This is so that you can run the script on the host machine where sudo is required. 
 
-<<<<<<< HEAD
 ## Layer conventions
 
 As mentioned above, deps-rocker does not enforce any particular layer order so the user can define them as they see fit, however to enhance interoperation of packages we define a suggested layer order.  Examples of deps.yaml can be found in [manifest_rocker](https://github.com/blooop/manifest_rocker/tree/all/pkgs)
@@ -242,7 +229,3 @@ script_test:
 ## limitations/TODO
 
 This has only been tested on the ubuntu base image. It assumes you have access to apt-get.
-
-=======
-    This runs python with the file set in \<cfg\>
->>>>>>> template/main
