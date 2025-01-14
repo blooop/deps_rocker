@@ -90,7 +90,7 @@ This makes it easy to define the dependencies for a single project, but enable r
     
 3. Update the `get_name()` function in the extension class. e.g. Updating the name to `lazygit` would mean that it would be activated by passing --lazygit to rocker   
    
-4. Add/update the docker snippets in the templates folder.  Officially the extension is supposed to be .Dockerfile.em to indicate it's passed to the empty library, but I have left them as .Dockerfile as I get Dockerfile highlighting out of the box that way. 
+4. Add/update the docker snippets in the templates folder.  Officially the extension is supposed to be .Dockerfile.em to indicate it's passed to the empy library, but I have left them as .Dockerfile as I get Dockerfile highlighting out of the box that way. 
 5. Develop your extension.  I find that using `pip install -e .` and running the extension with rocker on my host system is the easiest way to get started.  
 >>>>>>> template/main
 
