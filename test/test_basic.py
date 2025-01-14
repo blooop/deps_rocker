@@ -15,7 +15,7 @@ class TestBasicClass(TestCase):
 
     @pytest.mark.skip
     def test_single(self):
-        """a1.deps_test.yaml and a2.deps_test.yaml are the same. Check they result in the same output as eachother, and also the same output when both files are loaded at the same time"""
+        """a1.deps_test.yaml and a2.deps_test.yaml are the same. Check they result in the same output as each other, and also the same output when both files are loaded at the same time"""
 
         deps1 = Dependencies()
         deps1.setup_deps(dict(deps="a1.deps_test.yaml"))
@@ -49,7 +49,7 @@ class TestBasicClass(TestCase):
         self.assertEqual(deps1.get_snippet(), deps_both.get_snippet())
 
     def test_filter(self):
-        """a1.deps_test.yaml and a2.deps_test.yaml are the same. Check they result in the same output as eachother, and also the same output when both files are loaded at the same time"""
+        """a1.deps_test.yaml and a2.deps_test.yaml are the same. Check they result in the same output as each other, and also the same output when both files are loaded at the same time"""
 
         deps1 = Dependencies()
         deps1.setup_deps(dict(deps="a1.deps_test.yaml"))

@@ -38,13 +38,13 @@ deps_rocker = { path = ".", editable = true }
 
 [project.optional-dependencies]
 test = [
-  "black>=23,<=24.10.0",
   "pylint>=3.2.5,<=3.3.3",
   "pytest-cov>=4.1,<=6.0.0",
   "pytest>=7.4,<=8.3.4",
   "hypothesis>=6.104.2,<=6.123.2",
-  "ruff>=0.5.0,<=0.8.4",
+  "ruff>=0.5.0,<=0.8.6",
   "coverage>=7.5.4,<=7.6.10",
+  "pre-commit<=4.0.1",
 ]
 
 [build-system]
@@ -81,30 +81,32 @@ py313 = ["py313", "test"]
 
 
 [tool.pixi.tasks]
-format = "black ."
+pre-commit = "pre-commit run -a"
+pre-commit-update = "pre-commit autoupdate"
+format = "ruff format ."
 check-clean-workspace = "git diff --exit-code"
 ruff-lint = "ruff check . --fix"
 pylint = "pylint --version && echo 'running pylint...' && pylint $(git ls-files '*.py')"
-lint = { depends_on = ["ruff-lint", "pylint"] }
-style = { depends_on = ["format", "lint"] }
+lint = { depends-on = ["ruff-lint", "pylint"] }
+style = { depends-on = ["format", "lint"] }
 commit-format = "git commit -a -m'autoformat code' || true"
 test = "pytest"
 coverage = "coverage run -m pytest && coverage xml -o coverage.xml"
 coverage-report = "coverage report -m"
 update-lock = "pixi update && git commit -a -m'update pixi.lock' || true"
 push = "git push"
-update-lock-push = { depends_on = ["update-lock", "push"] }
-fix = { depends_on = ["update-lock", "format", "ruff-lint"] }
-fix-commit-push = { depends_on = ["fix", "commit-format", "update-lock-push"] }
-ci-no-cover = { depends_on = ["style", "test"] }
-ci = { depends_on = [
+update-lock-push = { depends-on = ["update-lock", "push"] }
+fix = { depends-on = ["update-lock", "format", "ruff-lint"] }
+fix-commit-push = { depends-on = ["fix", "commit-format", "update-lock-push"] }
+ci-no-cover = { depends-on = ["style", "test"] }
+ci = { depends-on = [
   "format",
   "ruff-lint",
   "pylint",
   "coverage",
   "coverage-report",
 ] }
-ci-push = { depends_on = ["format", "ruff-lint", "update-lock", "ci", "push"] }
+ci-push = { depends-on = ["format", "ruff-lint", "update-lock", "ci", "push"] }
 clear-pixi = "rm -rf .pixi pixi.lock"
 setup-git-merge-driver = "git config merge.ourslock.driver true"
 update-from-template-repo = "./scripts/update_from_template.sh"
@@ -116,26 +118,6 @@ jobs = 16                           #detect number of cores
 [tool.pylint.'MESSAGES CONTROL']
 disable = "C,logging-fstring-interpolation,line-too-long,fixme,broad-exception-caught,missing-module-docstring,too-many-instance-attributes,too-few-public-methods,too-many-arguments,too-many-locals,too-many-branches,too-many-statements,use-dict-literal,cyclic-import,duplicate-code,too-many-public-methods"
 enable = "no-else-return,consider-using-in"
-
-[tool.black]
-line-length = 100
-
-[tool.ruff]
-line-length = 100 # Same as Black.
-
-target-version = "py310"
-
-[tool.ruff.lint]
-# Never enforce `E501` (line length violations).
-#"F841" will auto remove unused variables which is annoying during development, pylint catches this anyway
-ignore = ["E501", "E902", "F841"]
-# Allow unused variables when underscore-prefixed.
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
-
-# Ignore `E402` (import violations) in all `__init__.py` files, and in `path/to/file.py`.
-[tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["E402", "F401"]
-
 
 [tool.coverage.run]
 omit = ["*/test/*", "__init__.py"]
