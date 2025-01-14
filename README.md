@@ -84,7 +84,7 @@ apt:
 
 Each heading in the yaml file produces a docker layer based on the command and the label.  The format of the labels is {command_name}_{command-label}.  The layer names are delimited by _ so layer names should use - eg: language-toolchain. 
 
-This makes it easy to define the dependencies for a single project, but enable reuse of common dependencies across multiple projects. However, deps rocker does not restrict what is defined in each layer and so relies on a common convention for multiple packages to play nicely with eachother.  If one package adds "make" to apt_sources and other package adds "make" to apt_langage_toolchain, the deps-rocker will not complain and will not deduplicate that install step.   
+This makes it easy to define the dependencies for a single project, but enable reuse of common dependencies across multiple projects. However, deps rocker does not restrict what is defined in each layer and so relies on a common convention for multiple packages to play nicely with each other.  If one package adds "make" to apt_sources and other package adds "make" to apt_langage_toolchain, the deps-rocker will not complain and will not deduplicate that install step.   
 
 ## Methodology:
 
@@ -149,7 +149,7 @@ Here apt_pkg_b_custom and apt_pkg_a_custom both need to be run after apt_sources
 
 Commands are defined in templates/commandname_snippet.Dockerfile.
 
-They use the [empy](https://pypi.org/project/empy/) templating langage that is used by [rocker](https://github.com/tfoote/rocker).  deps-rocker has some basic commands already implemented but adding a new command is as simple as adding a _snippet.Dockerfile.  
+They use the [empy](https://pypi.org/project/empy/) templating language that is used by [rocker](https://github.com/tfoote/rocker).  deps-rocker has some basic commands already implemented but adding a new command is as simple as adding a _snippet.Dockerfile.  
 
 Existing Commands:
   - apt: apt install packages
@@ -196,7 +196,7 @@ apt_sources: #apt dependencies for setting up software sources
 script_sources: #scripts for adding repositories or repo keys
   - sources.sh
 
-apt_language-toolchain: #packges related to setting up languages e.g. c++,python,rust etc
+apt_language-toolchain: #packages related to setting up languages e.g. c++,python,rust etc
   - python3-pip
   - make
   - gcc
