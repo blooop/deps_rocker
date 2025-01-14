@@ -7,7 +7,7 @@ from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
 class IsaacSim(SimpleRockerExtension):
-    """Add isaacsim to your docker container""" 
+    """Add isaacsim to your docker container"""
 
     name = "isaacsim"
 
@@ -15,12 +15,10 @@ class IsaacSim(SimpleRockerExtension):
         return {"nvidia", "privileged", "x11"}
 
     def get_docker_args(self, cliargs):
-        isaac_docker_root = Path().home()/"docker/isaac-sim"
+        isaac_docker_root = Path().home() / "docker/isaac-sim"
 
-        #create the isaac docker cache folder if it does not already exist
-        isaac_docker_root.mkdir(exist_ok=True,parents=True)
-
-
+        # create the isaac docker cache folder if it does not already exist
+        isaac_docker_root.mkdir(exist_ok=True, parents=True)
 
         volumes = [
             f"{isaac_docker_root}/cache/kit:/isaac-sim/kit/cache:rw",
@@ -33,7 +31,7 @@ class IsaacSim(SimpleRockerExtension):
             f"{isaac_docker_root}/documents:/root/Documents:rw",
         ]
 
-        #create the commands for mounting all the volume folders
+        # create the commands for mounting all the volume folders
         vols = [f"-v {Path(p).absolute().as_posix()}" for p in volumes]
 
         args = [
