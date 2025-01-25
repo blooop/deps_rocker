@@ -33,7 +33,7 @@ class Dependencies(RockerExtension):
         set. These extensions are not required to be present, but if they are,
         they will be loaded before this extension.
         """
-        return {"ros_humble","tzdata"}
+        return {"ros_humble", "tzdata"}
 
     def setup_deps(self, cliargs):
         if not self.parsed:
