@@ -70,6 +70,7 @@ curl = "deps_rocker.curl:Curl"
 neovim = "deps_rocker.neovim:NeoVim"
 locales = "deps_rocker.locales:Locales"
 isaac_sim = "deps_rocker.isaac_sim:IsaacSim"
+tzdata = "deps_rocker.tzdata:TzData"
 
 # Environments
 [tool.pixi.environments]
