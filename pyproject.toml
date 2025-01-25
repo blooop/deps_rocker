@@ -1,6 +1,6 @@
 [project]
 name = "deps_rocker"
-version = "0.6.0"
+version = "0.7.0"
 authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
 description = "A rocker plugin to help installing apt and pip dependencies"
 readme = "README.md"
@@ -68,6 +68,7 @@ fzf = "deps_rocker.fzf:Fzf"
 git_clone = "deps_rocker.git_clone:GitClone"
 curl = "deps_rocker.curl:Curl"
 neovim = "deps_rocker.neovim:NeoVim"
+locales = "deps_rocker.locales:Locales"
 isaac_sim = "deps_rocker.isaac_sim:IsaacSim"
 
 # Environments
