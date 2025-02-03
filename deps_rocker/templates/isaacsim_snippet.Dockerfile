@@ -11,4 +11,4 @@ ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=all
 ENV OMNI_KIT_ACCEPT_EULA=YES
 
-RUN pip install isaacsim==4.2.0.2 isaacsim-extscache-kit==4.2.0.2 isaacsim-extscache-kit-sdk==4.2.0.2 isaacsim-extscache-physics==4.2.0.2
+RUN pip install isaacsim[all,extscache]==4.5.0
