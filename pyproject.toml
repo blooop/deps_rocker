@@ -1,6 +1,6 @@
 [project]
 name = "deps_rocker"
-version = "0.8.0"
+version = "0.9.0"
 authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
 description = "A rocker plugin to help installing apt and pip dependencies"
 readme = "README.md"
@@ -71,6 +71,7 @@ neovim = "deps_rocker.neovim:NeoVim"
 locales = "deps_rocker.locales:Locales"
 isaac_sim = "deps_rocker.isaac_sim:IsaacSim"
 tzdata = "deps_rocker.tzdata:TzData"
+urdf_viz = "deps_rocker.urdf_viz:UrdfViz"
 
 # Environments
 [tool.pixi.environments]
