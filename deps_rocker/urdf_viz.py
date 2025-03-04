@@ -7,7 +7,7 @@ class UrdfViz(SimpleRockerExtension):
     name = "urdf_viz"
 
     def required(self, cliargs):
-        return {"curl"}
+        return {"curl", "ros_humble"}
 
     def invoke_after(self, cliargs):
-        return {"curl"}
+        return {"curl", "ros_humble"}
