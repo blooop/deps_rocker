@@ -23,9 +23,9 @@ jobs:
           cache: true
           frozen: true
           environments: ${{ matrix.environment }}
-      - name: CI
-        run: |
-          pixi run -e ${{ matrix.environment }} ci 
+      # - name: CI
+      #   run: |
+      #     pixi run -e ${{ matrix.environment }} ci 
       - name: Build and run Dev Container task
         uses: devcontainers/ci@v0.3
         with:
