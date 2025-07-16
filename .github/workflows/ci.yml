@@ -31,11 +31,9 @@ jobs:
         with:
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'always' || 'never' }}
           skipContainerUserIdUpdate: ${{ github.event_name == 'pull_request' }}
-          env: |
-            ROS_DISTRO=${{ env.ROS_DISTRO }}
           runCmd: |
             ${{ github.event_name == 'pull_request' && '# Run build and test script
-            .devcontainer/scripts/devtools/CI.sh' || '# Main branch build - no additional commands needed' }}
+            pixi run -e ${{ matrix.environment }} ci 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         env:
