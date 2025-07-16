@@ -26,6 +26,16 @@ jobs:
       - name: CI
         run: |
           pixi run -e ${{ matrix.environment }} ci 
+      - name: Build and run Dev Container task
+        uses: devcontainers/ci@v0.3
+        with:
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'always' || 'never' }}
+          skipContainerUserIdUpdate: ${{ github.event_name == 'pull_request' }}
+          env: |
+            ROS_DISTRO=${{ env.ROS_DISTRO }}
+          runCmd: |
+            ${{ github.event_name == 'pull_request' && '# Run build and test script
+            .devcontainer/scripts/devtools/CI.sh' || '# Main branch build - no additional commands needed' }}
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         env:
