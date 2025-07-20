@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]  
+    branches: ["main"]
 
 permissions:
   contents: read
@@ -14,18 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        environment: [py309, py310, py311, py312, py313]
+        environment: [py310, py311, py312, py313]
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
-      - uses: prefix-dev/setup-pixi@v0.8.10
+      - name: Build and run Dev Container task
+        uses: devcontainers/ci@v0.3
         with:
-          cache: true
-          frozen: true
-          environments: ${{ matrix.environment }}
-      - name: CI
-        run: |
-          pixi run -e ${{ matrix.environment }} ci 
+          runCmd: |
+            pixi run -e ${{ matrix.environment }} ci
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         env:
