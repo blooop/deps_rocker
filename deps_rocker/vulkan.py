@@ -1,4 +1,6 @@
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
+import subprocess
+import os
 
 
 class Vulkan(SimpleRockerExtension):
@@ -12,6 +14,19 @@ class Vulkan(SimpleRockerExtension):
 
     name = "vulkan"
 
+    def precondition_environment(self, cliargs):
+        """Set up host environment for GPU/X11 access"""
+        try:
+            # Allow X11 connections from local containers
+            subprocess.run(['xhost', '+local:'], check=False, capture_output=True)
+            print("Enabled X11 access for local containers")
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            print("Warning: Could not run xhost - X11 forwarding may not work")
+        
+        # Disable Wayland display to force X11 for better compatibility
+        if 'WAYLAND_DISPLAY' in os.environ:
+            print("Note: Disabling Wayland display for container compatibility")
+
     def invoke_after(self, cliargs) -> set:
         """Vulkan should be loaded after nvidia extension if present
         
@@ -22,12 +37,45 @@ class Vulkan(SimpleRockerExtension):
         return {"nvidia"}
 
     def get_docker_args(self, cliargs) -> str:
-        """Add DRI device access for Vulkan applications
+        """Add comprehensive GPU device access for Vulkan applications
         
         Note: This complements the nvidia extension's GPU access. The nvidia extension
         provides --gpus all or --runtime=nvidia for CUDA/OpenGL access, while this
-        adds --device /dev/dri for direct rendering interface access needed by some
-        Vulkan applications.
+        adds broader device access needed for Vulkan hardware acceleration.
         """
         _ = cliargs  # Suppress unused argument warning
-        return "--device /dev/dri"
+        import os
+        import grp
+        
+        # Build device arguments only for devices that exist
+        devices = []
+        if os.path.exists("/dev/dri"):
+            devices.append("--device /dev/dri")
+        if os.path.exists("/dev/kfd"):  # AMD GPU device
+            devices.append("--device /dev/kfd")
+        if os.path.exists("/dev/dxg"):  # WSL GPU device
+            devices.append("--device /dev/dxg")
+        
+        # Build volume mounts only for paths that exist
+        volumes = []
+        if os.path.exists("/usr/lib/x86_64-linux-gnu/dri"):
+            volumes.append("-v /usr/lib/x86_64-linux-gnu/dri:/usr/lib/x86_64-linux-gnu/dri:ro")
+        if os.path.exists("/usr/share/libdrm"):
+            volumes.append("-v /usr/share/libdrm:/usr/share/libdrm:ro")
+        
+        # Add groups only if they exist on the host system
+        groups = []
+        try:
+            grp.getgrnam("video")
+            groups.append("--group-add video")
+        except KeyError:
+            pass
+        try:
+            grp.getgrnam("render")
+            groups.append("--group-add render")
+        except KeyError:
+            pass
+        
+        # Combine all arguments
+        args = devices + volumes + groups
+        return " ".join(args)
