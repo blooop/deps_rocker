@@ -44,7 +44,6 @@ class Vulkan(SimpleRockerExtension):
         adds broader device access needed for Vulkan hardware acceleration.
         """
         _ = cliargs  # Suppress unused argument warning
-        import os
         import grp
 
         # Build device arguments only for devices that exist, are character devices, and are accessible

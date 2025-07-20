@@ -52,7 +52,7 @@ CMD vulkaninfo --summary
             dockerfile_tag = "testfixture_%s_vulkan" % distro_version
             iof = StringIO((dockerfile % locals()).encode())
             im = client.build(fileobj=iof, tag=dockerfile_tag)
-            for e in im:
+            for _ in im:
                 pass
                 # print(e)
             cls.dockerfile_tags.append(dockerfile_tag)
@@ -66,7 +66,7 @@ CMD vulkaninfo --summary
         # between instances of the Interpreter class
         # empy will error with the exception
         # "em.Error: interpreter stdout proxy lost"
-        em.Interpreter._wasProxyInstalled = False
+        em.Interpreter._wasProxyInstalled = False  # pylint: disable=protected-access
 
     def test_vulkan_extension_basic(self):
         plugins = list_plugins()
