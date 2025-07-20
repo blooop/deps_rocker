@@ -73,8 +73,6 @@ CMD [\"sh\", \"-c\", \"echo 'Contents of /workspaces:' && ls -la /workspaces && 
         client = get_docker_client()
         iof = io.BytesIO(cls.dockerfile.encode())
         im = client.build(fileobj=iof, tag=cls.dockerfile_tag)
-        for _ in im:
-            pass
 
     def test_cwd_mount_present(self):
         # Use the CWD extension
