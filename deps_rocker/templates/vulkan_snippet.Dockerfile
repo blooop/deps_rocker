@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     gnupg2 \
     software-properties-common \
-    && wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | apt-key add - \
+    && wget -qO /etc/apt/trusted.gpg.d/lunarg.asc https://packages.lunarg.com/lunarg-signing-key-pub.asc \
     && . /etc/os-release \
     && if [ "$VERSION_CODENAME" = "noble" ]; then \
         wget -qO /etc/apt/sources.list.d/lunarg-vulkan-noble.list https://packages.lunarg.com/vulkan/lunarg-vulkan-noble.list; \
