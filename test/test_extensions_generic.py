@@ -39,11 +39,14 @@ CMD ["echo", "Extension test complete"]
         all_plugins = list_plugins()
         deps_rocker_plugins = {}
 
-        # Filter to only deps_rocker extensions
+        # Filter to only deps_rocker extensions, excluding isaac_sim
         for name, plugin_class in all_plugins.items():
             if hasattr(plugin_class, "__module__") and plugin_class.__module__.startswith(
                 "deps_rocker"
             ):
+                # Skip isaac_sim extensions for testing - they require special setup
+                if name.startswith("isaac"):
+                    continue
                 deps_rocker_plugins[name] = plugin_class
 
         return deps_rocker_plugins
@@ -256,8 +259,10 @@ CMD ["echo", "Extension test complete"]
             active_extensions = []
             cliargs = {"base_image": self.base_dockerfile_tag}
 
-            # Enable all extensions
+            # Enable all extensions except isaac_sim
             for ext_name, ext_class in self.plugins.items():
+                if ext_name == "isaac_sim":
+                    continue
                 active_extensions.append(ext_class())
                 cliargs[ext_name] = True
                 
