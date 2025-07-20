@@ -2,7 +2,6 @@ FROM mcr.microsoft.com/devcontainers/base:jammy
 
 # Copy uv and uvx from the official image
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
 ARG PIXI_VERSION=v0.48.2
 
