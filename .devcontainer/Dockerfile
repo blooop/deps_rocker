@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/devcontainers/base:jammy
 # Copy uv and uvx from the official image
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-ARG PIXI_VERSION=v0.48.2
+ARG PIXI_VERSION=v0.49.0
 
 RUN curl -L -o /usr/local/bin/pixi -fsSL --compressed "https://github.com/prefix-dev/pixi/releases/download/${PIXI_VERSION}/pixi-$(uname -m)-unknown-linux-musl" \
     && chmod +x /usr/local/bin/pixi \
