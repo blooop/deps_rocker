@@ -79,20 +79,36 @@ CMD [\"sh\", \"-c\", \"echo 'Contents of /workspaces:' && ls -la /workspaces && 
     def test_cwd_mount_present(self):
         # Use the CWD extension
         import tempfile
-        plugins = list_plugins()
-        cwd_plugin = plugins['cwd']
-        active_extensions = [cwd_plugin()]
-        dig = DockerImageGenerator(active_extensions, {}, self.dockerfile_tag)
-        self.assertEqual(dig.build(), 0)
-        # Run the container and check that /workspaces contains the mounted directory contents
-        with tempfile.NamedTemporaryFile(mode="r+") as tmpfile:
-            exit_code = dig.run(console_output_file=tmpfile.name)
-            self.assertEqual(exit_code, 0)
-            tmpfile.seek(0)
-            output = tmpfile.read()
-            # Check that the mount worked - /workspaces should be accessible and exist
-            self.assertIn("Contents of /workspaces:", output)
-            self.assertIn("Mount test complete", output)
+        import os
+        import uuid
+
+        # Create a unique test file in the current working directory
+        test_filename = f"testfile_{uuid.uuid4().hex}.txt"
+        test_file_content = "mount test file content"
+        with open(test_filename, "w") as f:
+            f.write(test_file_content)
+
+        try:
+            plugins = list_plugins()
+            cwd_plugin = plugins['cwd']
+            active_extensions = [cwd_plugin()]
+            dig = DockerImageGenerator(active_extensions, {}, self.dockerfile_tag)
+            self.assertEqual(dig.build(), 0)
+            # Run the container and check that /workspaces contains the mounted directory contents
+            with tempfile.NamedTemporaryFile(mode="r+") as tmpfile:
+                exit_code = dig.run(console_output_file=tmpfile.name)
+                self.assertEqual(exit_code, 0)
+                tmpfile.seek(0)
+                output = tmpfile.read()
+                # Check that the mount worked - /workspaces should be accessible and exist
+                self.assertIn("Contents of /workspaces:", output)
+                self.assertIn("Mount test complete", output)
+                # Check that the test file is present in /workspaces
+                self.assertIn(test_filename, output)
+        finally:
+            # Clean up the test file
+            if os.path.exists(test_filename):
+                os.remove(test_filename)
 
     @classmethod
     def tearDownClass(cls):
