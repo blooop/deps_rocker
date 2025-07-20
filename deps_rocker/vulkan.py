@@ -47,14 +47,24 @@ class Vulkan(SimpleRockerExtension):
         import os
         import grp
 
-        # Build device arguments only for devices that exist
+        # Build device arguments only for devices that exist, are character devices, and are accessible
+        import stat
+
+        def is_char_device_and_accessible(path):
+            try:
+                st = os.stat(path)
+                # Check if it's a character device
+                if not stat.S_ISCHR(st.st_mode):
+                    return False
+                # Check read and write permissions for the current user
+                return os.access(path, os.R_OK | os.W_OK)
+            except Exception:
+                return False
+
         devices = []
-        if os.path.exists("/dev/dri"):
-            devices.append("--device /dev/dri")
-        if os.path.exists("/dev/kfd"):  # AMD GPU device
-            devices.append("--device /dev/kfd")
-        if os.path.exists("/dev/dxg"):  # WSL GPU device
-            devices.append("--device /dev/dxg")
+        for dev_path in ["/dev/dri", "/dev/kfd", "/dev/dxg"]:
+            if os.path.exists(dev_path) and is_char_device_and_accessible(dev_path):
+                devices.append(f"--device {dev_path}")
 
         # Build volume mounts only for paths that exist
         volumes = []
