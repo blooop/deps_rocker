@@ -1,0 +1,31 @@
+{
+    "name": "deps_rocker",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": "..",
+        "args": {
+            "PIXI_VERSION": "v0.41.4"
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "settings": {},
+            "extensions": [
+                "jjjermiah.pixi-vscode",
+                "ms-python.python",
+                "charliermarsh.ruff",
+                "tamasfe.even-better-toml",
+                "mhutchie.git-graph",
+                "GitHub.copilot",
+                "ryanluker.vscode-coverage-gutters"
+              ]
+        }
+    },
+	"features": {
+        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    },
+    "mounts": [
+        "source=${localWorkspaceFolderBasename}-pixi,target=${containerWorkspaceFolder}/.pixi,type=volume"
+    ],
+    "postCreateCommand": "sudo chown vscode .pixi && pixi install"
+}

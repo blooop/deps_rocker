@@ -2,6 +2,7 @@ apt_tools:
   - git
   - git-lfs
   - python3-pip
+  - pipx
   - jq #for auto installing extensions in container
 
 pip_language-toolchain:
