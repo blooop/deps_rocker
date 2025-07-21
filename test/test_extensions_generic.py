@@ -1,4 +1,3 @@
-
 import unittest
 import pytest
 import io
@@ -7,23 +6,31 @@ from rocker.core import DockerImageGenerator, list_plugins, get_docker_client
 
 
 @pytest.mark.docker
-
 class TestExtensionsGeneric(unittest.TestCase):
     """Simplified tests for deps_rocker extensions"""
 
-    EXTENSIONS_TO_TEST = ["uv", "tzdata"]
+    EXTENSIONS_TO_TEST = [
+        "uv",
+        "tzdata",
+        "curl",
+        "git_clone",
+        "locales",
+        "neovim",
+        # "urdf_viz",
+        # "fzf",
+        "cwd",
+        # "isaac_sim",
+    ]
 
     @classmethod
     def setUpClass(cls):
         """Build a simple base image for testing extensions"""
         cls.base_dockerfile_tag = "testfixture_extensions_base"
-        cls.base_dockerfile = (
-            """
+        cls.base_dockerfile = """
 FROM ubuntu:22.04
 RUN apt-get update && apt-get install -y coreutils curl && apt-get clean
 CMD [\"echo\", \"Extension test complete\"]
 """
-        )
         client = get_docker_client()
         iof = io.BytesIO(cls.base_dockerfile.encode())
         im = client.build(fileobj=iof, tag=cls.base_dockerfile_tag)
@@ -49,7 +56,9 @@ CMD [\"echo\", \"Extension test complete\"]
         for name in self.EXTENSIONS_TO_TEST:
             if name in all_plugins:
                 plugin_class = all_plugins[name]
-                if hasattr(plugin_class, "__module__") and plugin_class.__module__.startswith("deps_rocker"):
+                if hasattr(plugin_class, "__module__") and plugin_class.__module__.startswith(
+                    "deps_rocker"
+                ):
                     working_extensions.append(name)
         return working_extensions
 
@@ -98,6 +107,30 @@ CMD [\"echo\", \"Extension test complete\"]
 
     def test_tzdata_extension(self):
         self.run_extension_build_and_test("tzdata")
+
+    def test_curl_extension(self):
+        self.run_extension_build_and_test("curl")
+
+    def test_git_clone_extension(self):
+        self.run_extension_build_and_test("git_clone")
+
+    def test_locales_extension(self):
+        self.run_extension_build_and_test("locales")
+
+    def test_neovim_extension(self):
+        self.run_extension_build_and_test("neovim")
+
+    # def test_urdf_viz_extension(self):
+    #     self.run_extension_build_and_test("urdf_viz")
+
+    # def test_fzf_extension(self):
+    #     self.run_extension_build_and_test("fzf")
+
+    def test_cwd_extension(self):
+        self.run_extension_build_and_test("cwd")
+
+    # def test_isaac_sim_extension(self):
+    #     self.run_extension_build_and_test("isaac_sim")
 
     def test_all_extensions_together(self):
         if not self.working_extension_names:
