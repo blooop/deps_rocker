@@ -325,17 +325,5 @@ CMD ["echo", "Extension test complete"]
     #                 pass
 
 
-# Dynamic test generation for hypothesis
-def generate_extension_tests():
-    """Generate individual tests for each extension"""
-    # This function can be used to dynamically update tests based on discovered extensions
-    # For now, we use hardcoded extension names to avoid hypothesis sampling issues
-    pass
-
-
-# Generate tests when module is imported
-generate_extension_tests()
-
-
 if __name__ == "__main__":
     unittest.main()
