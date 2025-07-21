@@ -38,17 +38,19 @@ CMD ["echo", "Extension test complete"]
         """Get list of working extensions, only testing uv extension"""
         all_plugins = list_plugins()
         working_extensions = []
-        
+
         # Only test the uv extension
         extension_names = ["uv"]
-        
+
         for name in extension_names:
             if name in all_plugins:
                 plugin_class = all_plugins[name]
                 # Verify it's from deps_rocker package
-                if hasattr(plugin_class, "__module__") and plugin_class.__module__.startswith("deps_rocker"):
+                if hasattr(plugin_class, "__module__") and plugin_class.__module__.startswith(
+                    "deps_rocker"
+                ):
                     working_extensions.append(name)
-        
+
         return working_extensions
 
     def setUp(self):
@@ -65,7 +67,7 @@ CMD ["echo", "Extension test complete"]
 
         # Use hypothesis to sample an extension from the list
         extension_name = data.draw(st.sampled_from(self.working_extension_names))
-        
+
         try:
             extension_class = self.all_plugins[extension_name]
             extension_instance = extension_class()
@@ -100,16 +102,12 @@ CMD ["echo", "Extension test complete"]
             dig = DockerImageGenerator(active_extensions, cliargs, self.base_dockerfile_tag)
             build_result = dig.build()
 
-            self.assertEqual(
-                build_result, 0, f"Extension '{extension_name}' failed to build"
-            )
+            self.assertEqual(build_result, 0, f"Extension '{extension_name}' failed to build")
 
             # Test run
             with tempfile.NamedTemporaryFile(mode="r+") as tmpfile:
                 run_result = dig.run(console_output_file=tmpfile.name)
-                self.assertEqual(
-                    run_result, 0, f"Extension '{extension_name}' failed to run"
-                )
+                self.assertEqual(run_result, 0, f"Extension '{extension_name}' failed to run")
 
                 # Check output
                 tmpfile.seek(0)
@@ -136,23 +134,23 @@ CMD ["echo", "Extension test complete"]
         try:
             active_extensions = []
             cliargs = {"base_image": self.base_dockerfile_tag}
-            
+
             # Collect all dependencies first
             all_deps = set()
             for ext_name in self.working_extension_names:
                 if ext_name in self.all_plugins:
                     extension_class = self.all_plugins[ext_name]
                     extension_instance = extension_class()
-                    
+
                     temp_cliargs = {
                         "base_image": self.base_dockerfile_tag,
                         ext_name: True,
                     }
-                    
+
                     if ext_name == "odeps_dependencies":
                         temp_cliargs["deps"] = "deps_rocker.deps.yaml"
                         cliargs["deps"] = "deps_rocker.deps.yaml"
-                    
+
                     required_deps = extension_instance.required(temp_cliargs)
                     all_deps.update(required_deps)
 
