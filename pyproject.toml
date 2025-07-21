@@ -133,3 +133,8 @@ exclude_also = [
   "pass",
   "(_):",
 ]
+
+[tool.pytest.ini_options]
+markers = [
+    "docker: marks tests as requiring docker (deselect with '-m \"not docker\"')",
+]
