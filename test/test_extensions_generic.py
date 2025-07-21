@@ -34,15 +34,14 @@ CMD ["echo", "Extension test complete"]
         except Exception:
             pass
 
+    # Define the list of extensions to test only once
+    EXTENSIONS_TO_TEST = ["uv", "tzdata"]
+
     def get_working_extensions(self):
-        """Get list of working extensions, only testing uv extension"""
+        """Get list of working extensions, only those in EXTENSIONS_TO_TEST"""
         all_plugins = list_plugins()
         working_extensions = []
-
-        # Only test the uv extension
-        extension_names = ["uv"]
-
-        for name in extension_names:
+        for name in self.EXTENSIONS_TO_TEST:
             if name in all_plugins:
                 plugin_class = all_plugins[name]
                 # Verify it's from deps_rocker package
@@ -50,7 +49,6 @@ CMD ["echo", "Extension test complete"]
                     "deps_rocker"
                 ):
                     working_extensions.append(name)
-
         return working_extensions
 
     def setUp(self):
@@ -58,15 +56,12 @@ CMD ["echo", "Extension test complete"]
         self.all_plugins = list_plugins()
         self.working_extension_names = self.get_working_extensions()
 
-    @given(st.data())
-    @settings(max_examples=20, deadline=None)
-    def test_extensions_in_isolation(self, data):
+    @given(st.sampled_from(EXTENSIONS_TO_TEST))
+    @settings(deadline=None)
+    def test_extensions_in_isolation(self, extension_name):
         """Test each extension individually with its dependencies"""
         if not self.working_extension_names:
             self.skipTest("No working extensions found")
-
-        # Use hypothesis to sample an extension from the list
-        extension_name = data.draw(st.sampled_from(self.working_extension_names))
 
         try:
             extension_class = self.all_plugins[extension_name]
@@ -124,9 +119,7 @@ CMD ["echo", "Extension test complete"]
         except Exception as e:
             self.fail(f"Extension '{extension_name}' raised an exception: {e}")
 
-    @given(st.sampled_from(["all_extensions_together"]))
-    @settings(max_examples=1, deadline=None)
-    def test_all_extensions_together(self, _):
+    def test_all_extensions_together(self):
         """Test all working extensions together"""
         if not self.working_extension_names:
             self.skipTest("No working extensions found")
@@ -137,7 +130,7 @@ CMD ["echo", "Extension test complete"]
 
             # Collect all dependencies first
             all_deps = set()
-            for ext_name in self.working_extension_names:
+            for ext_name in self.EXTENSIONS_TO_TEST:
                 if ext_name in self.all_plugins:
                     extension_class = self.all_plugins[ext_name]
                     extension_instance = extension_class()
@@ -162,7 +155,7 @@ CMD ["echo", "Extension test complete"]
                     cliargs[dep_name] = True
 
             # Add all main extensions
-            for ext_name in self.working_extension_names:
+            for ext_name in self.EXTENSIONS_TO_TEST:
                 if ext_name in self.all_plugins:
                     extension_class = self.all_plugins[ext_name]
                     active_extensions.append(extension_class())
