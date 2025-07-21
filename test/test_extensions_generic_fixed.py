@@ -38,12 +38,14 @@ CMD ["echo", "Extension test complete"]
         """Get only plugins from deps_rocker package"""
         all_plugins = list_plugins()
         deps_rocker_plugins = {}
-        
+
         # Filter to only deps_rocker extensions
         for name, plugin_class in all_plugins.items():
-            if hasattr(plugin_class, '__module__') and plugin_class.__module__.startswith('deps_rocker'):
+            if hasattr(plugin_class, "__module__") and plugin_class.__module__.startswith(
+                "deps_rocker"
+            ):
                 deps_rocker_plugins[name] = plugin_class
-        
+
         return deps_rocker_plugins
 
     def setUp(self):
@@ -54,21 +56,21 @@ CMD ["echo", "Extension test complete"]
     def _prepare_cliargs(self, extension_name):
         """Prepare cliargs with special handling for specific extensions"""
         cliargs = {
-            'base_image': self.base_dockerfile_tag,
+            "base_image": self.base_dockerfile_tag,
             extension_name: True,
         }
-        
+
         # Add special handling for dependencies extension
-        if extension_name == 'dependencies':
-            cliargs['deps'] = []  # Empty list for testing
-            
+        if extension_name == "dependencies":
+            cliargs["deps"] = []  # Empty list for testing
+
         return cliargs
 
     def test_single_extension_builds(self):
         """Test that each extension can build successfully in isolation"""
         if not self.plugin_names:
             self.skipTest("No deps_rocker extensions found")
-            
+
         for extension_name in self.plugin_names:
             with self.subTest(extension=extension_name):
                 self._test_single_extension_build(extension_name)
@@ -79,15 +81,15 @@ CMD ["echo", "Extension test complete"]
             extension_class = self.plugins[extension_name]
             active_extensions = [extension_class()]
             cliargs = self._prepare_cliargs(extension_name)
-            
+
             dig = DockerImageGenerator(active_extensions, cliargs, self.base_dockerfile_tag)
             build_result = dig.build()
-            
+
             # Clean up the built image
             dig.clear_image()
-            
+
             self.assertEqual(build_result, 0, f"Extension '{extension_name}' failed to build")
-            
+
         except Exception as e:
             self.fail(f"Extension '{extension_name}' raised an exception during build: {e}")
 
@@ -95,7 +97,7 @@ CMD ["echo", "Extension test complete"]
         """Test each extension builds successfully in isolation"""
         if not self.plugin_names:
             self.skipTest("No deps_rocker extensions found")
-            
+
         for extension_name in self.plugin_names:
             with self.subTest(extension=extension_name):
                 self._test_single_extension_build(extension_name)
@@ -104,7 +106,7 @@ CMD ["echo", "Extension test complete"]
         """Test each extension can run successfully in isolation"""
         if not self.plugin_names:
             self.skipTest("No deps_rocker extensions found")
-            
+
         for extension_name in self.plugin_names:
             with self.subTest(extension=extension_name):
                 self._test_single_extension_run(extension_name)
@@ -115,24 +117,26 @@ CMD ["echo", "Extension test complete"]
             extension_class = self.plugins[extension_name]
             active_extensions = [extension_class()]
             cliargs = self._prepare_cliargs(extension_name)
-            
+
             dig = DockerImageGenerator(active_extensions, cliargs, self.base_dockerfile_tag)
             build_result = dig.build()
-            self.assertEqual(build_result, 0, f"Extension '{extension_name}' failed to build for run test")
-            
+            self.assertEqual(
+                build_result, 0, f"Extension '{extension_name}' failed to build for run test"
+            )
+
             # Test running the container
             with tempfile.NamedTemporaryFile(mode="r+") as tmpfile:
                 run_result = dig.run(console_output_file=tmpfile.name)
                 self.assertEqual(run_result, 0, f"Extension '{extension_name}' failed to run")
-                
+
                 # Check that we got expected output
                 tmpfile.seek(0)
                 output = tmpfile.read()
                 self.assertIn("Extension test complete", output)
-            
+
             # Clean up the built image
             dig.clear_image()
-            
+
         except Exception as e:
             self.fail(f"Extension '{extension_name}' raised an exception during run: {e}")
 
@@ -140,16 +144,16 @@ CMD ["echo", "Extension test complete"]
         """Test that extensions follow proper Docker argument formats"""
         if not self.plugin_names:
             self.skipTest("No deps_rocker extensions found")
-            
+
         for extension_name in self.plugin_names:
             with self.subTest(extension=extension_name):
                 extension_class = self.plugins[extension_name]
                 extension = extension_class()
-                
+
                 # Test basic properties exist
-                self.assertTrue(hasattr(extension, 'get_name'))
+                self.assertTrue(hasattr(extension, "get_name"))
                 self.assertTrue(callable(extension.get_name))
-                
+
                 # Test name format (should be valid for docker)
                 name = extension.get_name()
                 self.assertIsInstance(name, str)
@@ -159,10 +163,10 @@ CMD ["echo", "Extension test complete"]
         """Test various combinations of extensions work together"""
         if len(self.plugin_names) < 2:
             self.skipTest("Need at least 2 extensions for combination tests")
-            
+
         # Test pairs of extensions
         for i, ext1 in enumerate(self.plugin_names):
-            for ext2 in self.plugin_names[i+1:i+3]:  # Test with a few combinations
+            for ext2 in self.plugin_names[i + 1 : i + 3]:  # Test with a few combinations
                 with self.subTest(combination=[ext1, ext2]):
                     self._test_extension_combination([ext1, ext2])
 
@@ -170,25 +174,27 @@ CMD ["echo", "Extension test complete"]
         """Helper method to test a combination of extensions"""
         try:
             active_extensions = []
-            cliargs = {'base_image': self.base_dockerfile_tag}
-            
+            cliargs = {"base_image": self.base_dockerfile_tag}
+
             for ext_name in extension_names:
                 ext_class = self.plugins[ext_name]
                 active_extensions.append(ext_class())
                 cliargs[ext_name] = True
-                
+
                 # Add special handling for dependencies extension
-                if ext_name == 'dependencies':
-                    cliargs['deps'] = []  # Empty list for testing
-            
+                if ext_name == "dependencies":
+                    cliargs["deps"] = []  # Empty list for testing
+
             dig = DockerImageGenerator(active_extensions, cliargs, self.base_dockerfile_tag)
             build_result = dig.build()
-            
+
             # Clean up the built image
             dig.clear_image()
-            
-            self.assertEqual(build_result, 0, f"Extension combination {extension_names} failed to build")
-            
+
+            self.assertEqual(
+                build_result, 0, f"Extension combination {extension_names} failed to build"
+            )
+
         except Exception as e:
             self.fail(f"Extension combination {extension_names} raised an exception: {e}")
 
@@ -196,19 +202,19 @@ CMD ["echo", "Extension test complete"]
         """Test that all extensions can be used together"""
         if not self.plugin_names:
             self.skipTest("No deps_rocker extensions found")
-            
+
         try:
             active_extensions = []
-            cliargs = {'base_image': self.base_dockerfile_tag}
+            cliargs = {"base_image": self.base_dockerfile_tag}
 
             # Enable all extensions
             for ext_name, ext_class in self.plugins.items():
                 active_extensions.append(ext_class())
                 cliargs[ext_name] = True
-                
+
                 # Add special handling for dependencies extension
-                if ext_name == 'dependencies':
-                    cliargs['deps'] = []  # Empty list for testing
+                if ext_name == "dependencies":
+                    cliargs["deps"] = []  # Empty list for testing
 
             dig = DockerImageGenerator(active_extensions, cliargs, self.base_dockerfile_tag)
             build_result = dig.build()

@@ -65,23 +65,23 @@ CMD ["echo", "Extension test complete"]
             with self.subTest(extension=extension_name):
                 extension_class = self.plugins[extension_name]
                 extension_instance = extension_class()
-                
+
                 # Check if extension has required dependencies
                 cliargs = {
                     "base_image": self.base_dockerfile_tag,
                     extension_name: True,
                 }
-                
+
                 # Add special cliargs for specific extensions
                 if extension_name == "odeps_dependencies":
                     cliargs["deps"] = "deps_rocker.deps.yaml"
-                
+
                 required_deps = extension_instance.required(cliargs)
-                
+
                 # Skip extensions that have required dependencies for isolation test
                 if required_deps:
                     self.skipTest(f"Extension '{extension_name}' has dependencies: {required_deps}")
-                
+
                 try:
                     active_extensions = [extension_instance]
                     dig = DockerImageGenerator(active_extensions, cliargs, self.base_dockerfile_tag)
@@ -89,51 +89,55 @@ CMD ["echo", "Extension test complete"]
 
                     # Extension should build without error
                     self.assertEqual(
-                        build_result, 0, f"Extension '{extension_name}' failed to build in isolation"
+                        build_result,
+                        0,
+                        f"Extension '{extension_name}' failed to build in isolation",
                     )
 
                     # Clean up the built image
                     dig.clear_image()
 
                 except Exception as e:
-                    self.fail(f"Extension '{extension_name}' raised an exception during isolated build: {e}")
+                    self.fail(
+                        f"Extension '{extension_name}' raised an exception during isolated build: {e}"
+                    )
 
     def test_all_extensions_build_individually(self):
         """Test each extension builds successfully with its dependencies"""
         all_plugins = list_plugins()  # Get all available plugins including rocker ones
-        
+
         for extension_name in self.plugin_names:
             # Skip isaac_sim extension as it requires special runtime environment
             if extension_name == "isaac_sim":
                 continue
-                
+
             with self.subTest(extension=extension_name):
                 try:
                     extension_class = self.plugins[extension_name]
                     extension_instance = extension_class()
-                    
+
                     # Get required dependencies
                     cliargs = {
                         "base_image": self.base_dockerfile_tag,
                         extension_name: True,  # Enable the extension
                     }
-                    
+
                     # Add special cliargs for specific extensions
                     if extension_name == "odeps_dependencies":
                         cliargs["deps"] = "deps_rocker.deps.yaml"
-                    
+
                     required_deps = extension_instance.required(cliargs)
-                    
+
                     # Build list of active extensions including dependencies
                     active_extensions = []
-                    
+
                     # Add required dependencies first
                     for dep_name in required_deps:
                         if dep_name in all_plugins:
                             dep_class = all_plugins[dep_name]
                             active_extensions.append(dep_class())
                             cliargs[dep_name] = True
-                    
+
                     # Add the main extension
                     active_extensions.append(extension_instance)
 
@@ -154,39 +158,39 @@ CMD ["echo", "Extension test complete"]
     def test_all_extensions_run_individually(self):
         """Test each extension can run successfully with its dependencies"""
         all_plugins = list_plugins()  # Get all available plugins including rocker ones
-        
+
         for extension_name in self.plugin_names:
             # Skip isaac_sim extension as it requires special runtime environment
             if extension_name == "isaac_sim":
                 continue
-                
+
             with self.subTest(extension=extension_name):
                 try:
                     extension_class = self.plugins[extension_name]
                     extension_instance = extension_class()
-                    
+
                     # Get required dependencies
                     cliargs = {
                         "base_image": self.base_dockerfile_tag,
                         extension_name: True,  # Enable the extension
                     }
-                    
+
                     # Add special cliargs for specific extensions
                     if extension_name == "odeps_dependencies":
                         cliargs["deps"] = "deps_rocker.deps.yaml"
-                    
+
                     required_deps = extension_instance.required(cliargs)
-                    
+
                     # Build list of active extensions including dependencies
                     active_extensions = []
-                    
+
                     # Add required dependencies first
                     for dep_name in required_deps:
                         if dep_name in all_plugins:
                             dep_class = all_plugins[dep_name]
                             active_extensions.append(dep_class())
                             cliargs[dep_name] = True
-                    
+
                     # Add the main extension
                     active_extensions.append(extension_instance)
 
@@ -265,7 +269,7 @@ CMD ["echo", "Extension test complete"]
                     continue
                 active_extensions.append(ext_class())
                 cliargs[ext_name] = True
-                
+
                 # Add special cliargs for specific extensions
                 if ext_name == "odeps_dependencies":
                     cliargs["deps"] = "deps_rocker.deps.yaml"
