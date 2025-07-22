@@ -70,6 +70,7 @@ CMD [\"sh\", \"-c\", \"echo 'Contents of /workspaces:' && ls -la /workspaces && 
 """
         import io
         from rocker.core import get_docker_client
+
         client = get_docker_client()
         iof = io.BytesIO(cls.dockerfile.encode())
         im = client.build(fileobj=iof, tag=cls.dockerfile_tag)
@@ -88,7 +89,7 @@ CMD [\"sh\", \"-c\", \"echo 'Contents of /workspaces:' && ls -la /workspaces && 
 
         try:
             plugins = list_plugins()
-            cwd_plugin = plugins['cwd']
+            cwd_plugin = plugins["cwd"]
             active_extensions = [cwd_plugin()]
             dig = DockerImageGenerator(active_extensions, {}, self.dockerfile_tag)
             self.assertEqual(dig.build(), 0)
@@ -111,6 +112,7 @@ CMD [\"sh\", \"-c\", \"echo 'Contents of /workspaces:' && ls -la /workspaces && 
     @classmethod
     def tearDownClass(cls):
         from rocker.core import get_docker_client
+
         client = get_docker_client()
         try:
             client.remove_image(cls.dockerfile_tag, force=True)
