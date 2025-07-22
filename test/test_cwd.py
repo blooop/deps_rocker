@@ -73,7 +73,7 @@ CMD [\"sh\", \"-c\", \"echo 'Contents of /workspaces:' && ls -la /workspaces && 
 
         client = get_docker_client()
         iof = io.BytesIO(cls.dockerfile.encode())
-        im = client.build(fileobj=iof, tag=cls.dockerfile_tag)
+        client.build(fileobj=iof, tag=cls.dockerfile_tag)
 
     def test_cwd_mount_present(self):
         # Use the CWD extension
@@ -84,7 +84,7 @@ CMD [\"sh\", \"-c\", \"echo 'Contents of /workspaces:' && ls -la /workspaces && 
         # Create a unique test file in the current working directory
         test_filename = f"testfile_{uuid.uuid4().hex}.txt"
         test_file_content = "mount test file content"
-        with open(test_filename, "w") as f:
+        with open(test_filename, "w", encoding="utf-8") as f:
             f.write(test_file_content)
 
         try:
