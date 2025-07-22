@@ -132,7 +132,7 @@ CMD [\"echo\", \"Extension test complete\"]
     # def test_isaac_sim_extension(self):
     #     self.run_extension_build_and_test("isaac_sim")
 
-    def test_all_extensions_together(self):
+    def test_z_all_extensions_together(self):
         if not self.working_extension_names:
             self.skipTest("No working extensions found")
         try:
