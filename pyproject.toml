@@ -81,6 +81,7 @@ py312 = ["py312", "test"]
 py313 = ["py313", "test"]
 
 
+
 [tool.pixi.tasks]
 pre-commit = "pre-commit run -a"
 pre-commit-update = "pre-commit autoupdate"
@@ -91,8 +92,8 @@ pylint = "pylint --version && echo 'running pylint...' && pylint $(git ls-files 
 lint = { depends-on = ["ruff-lint", "pylint"] }
 style = { depends-on = ["format", "lint"] }
 commit-format = "git commit -a -m'autoformat code' || true"
-test = "pytest"
-coverage = "coverage run -m pytest && coverage xml -o coverage.xml"
+test = "pytest -v"
+coverage = "coverage run -m pytest -v && coverage xml -o coverage.xml"
 coverage-report = "coverage report -m"
 update-lock = "pixi update && git commit -a -m'update pixi.lock' || true"
 push = "git push"
@@ -133,4 +134,9 @@ exclude_also = [
   "if __name__ == .__main__.:",
   "pass",
   "(_):",
+]
+
+[tool.pytest.ini_options]
+markers = [
+    "docker: marks tests as requiring docker (deselect with '-m \"not docker\"')",
 ]
