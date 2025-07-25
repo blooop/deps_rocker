@@ -53,7 +53,7 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         snippet_prefix: str = "",
     ) -> str:
         try:
-            snippet_name = f"templates/{self.name}_{snippet_prefix}snippet.Dockerfile"
+            snippet_name = f"{self.name}_{snippet_prefix}snippet.Dockerfile"
             dat = pkgutil.get_data(self.pkg, snippet_name)
             if dat is not None:
                 snippet = dat.decode("utf-8")

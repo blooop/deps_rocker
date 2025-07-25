@@ -5,3 +5,4 @@ class Locales(SimpleRockerExtension):
     """Sets up locales in your docker container. Defaults to US locale"""
 
     name = "locales"
+    pkg = "deps_rocker.extensions.locales"

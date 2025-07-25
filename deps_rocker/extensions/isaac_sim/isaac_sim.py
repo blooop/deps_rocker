@@ -9,7 +9,8 @@ from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 class IsaacSim(SimpleRockerExtension):
     """Add isaacsim to your docker container"""
 
-    name = "isaacsim"
+    name = "isaac_sim"
+    pkg = "deps_rocker.extensions.isaac_sim"
 
     def required(self, cliargs) -> Set[str]:
         return {"nvidia", "privileged", "x11"}

@@ -7,6 +7,7 @@ class RosHumble(SimpleRockerExtension):
     """Adds ros-humble to your docker container"""
 
     name = "ros_humble"
+    pkg = "deps_rocker.extensions.ros_humble"
 
     def invoke_after(self, cliargs):
         return {"vcstool"}
@@ -15,7 +16,7 @@ class RosHumble(SimpleRockerExtension):
         return {"vcstool"}
 
     def get_files(self, cliargs) -> dict[str, str]:
-        dat = self.get_config_file("configs/ros_humble/defaults.yaml")
+        dat = self.get_config_file("configs/defaults.yaml")
         return {"defaults.yaml": dat}
 
     def get_docker_args(self, cliargs) -> str:

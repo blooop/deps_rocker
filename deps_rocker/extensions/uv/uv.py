@@ -5,6 +5,7 @@ class UV(SimpleRockerExtension):
     """Add the uv package manager to your docker image"""
 
     name = "uv"
+    pkg = "deps_rocker.extensions.uv"
 
     def required(self, cliargs):
         return {"curl"}
