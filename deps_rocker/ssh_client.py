@@ -27,11 +27,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends openssh-client 
 
         # Determine the container home directory by checking the same arguments
         # the 'user' extension would use.
-        container_home = cliargs.get("user_home_dir")
-        if not container_home:
-            # Fallback to the current user's home directory, which is
-            # the default behavior of the 'user' extension.
-            container_home = pwd.getpwuid(os.getuid()).pw_dir
+        container_home = cliargs.get("user_home_dir") or pwd.getpwuid(os.getuid()).pw_dir
+
 
         if not container_home:
             print(
