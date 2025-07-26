@@ -22,13 +22,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends openssh-client 
         ssh_dir_host = os.path.expanduser("~/.ssh")
         if not os.path.exists(ssh_dir_host):
             import logging
-            logging.warning("Host ~/.ssh directory does not exist. SSH keys will not be mounted into the container.")
+
+            logging.warning(
+                "Host ~/.ssh directory does not exist. SSH keys will not be mounted into the container."
+            )
             return ""
 
         # Determine the container home directory by checking the same arguments
         # the 'user' extension would use.
         container_home = cliargs.get("user_home_dir") or pwd.getpwuid(os.getuid()).pw_dir
-
 
         if not container_home:
             print(
