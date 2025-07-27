@@ -5,3 +5,4 @@ class GitClone(SimpleRockerExtension):
     """Adds support for git cloning"""
 
     name = "git_clone"
+    depends_on_extension = ["git"]
