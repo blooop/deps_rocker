@@ -5,9 +5,4 @@ class UrdfViz(SimpleRockerExtension):
     """Add the urdf-viz to your docker image"""
 
     name = "urdf_viz"
-
-    def required(self, cliargs):
-        return {"curl", "ros_humble"}
-
-    def invoke_after(self, cliargs):
-        return {"curl", "ros_humble"}
+    depends_on_extensions = ["curl", "ros_humble"]
