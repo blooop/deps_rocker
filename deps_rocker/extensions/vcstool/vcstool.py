@@ -6,7 +6,6 @@ class VcsTool(SimpleRockerExtension):
     """Add vcstool to the container and clones any repos found in *.repos files"""
 
     name = "vcstool"
-    pkg = "deps_rocker.extensions.vcstool"
 
     def __init__(self) -> None:
         self.empy_args["depend_repos"] = []

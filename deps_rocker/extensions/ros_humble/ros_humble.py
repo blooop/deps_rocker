@@ -7,7 +7,6 @@ class RosHumble(SimpleRockerExtension):
     """Adds ros-humble to your docker container"""
 
     name = "ros_humble"
-    pkg = "deps_rocker.extensions.ros_humble"
 
     def invoke_after(self, cliargs):
         return {"vcstool"}

@@ -5,7 +5,6 @@ class Fzf(SimpleRockerExtension):
     """Adds fzf autocomplete to your container"""
 
     name = "fzf"
-    pkg = "deps_rocker.extensions.fzf"
 
     def invoke_after(self, cliargs) -> set:
         return {"user"}
