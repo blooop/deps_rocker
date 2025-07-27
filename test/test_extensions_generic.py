@@ -2,9 +2,8 @@ import unittest
 import pytest
 import io
 import tempfile
-import subprocess
-import shutil
 from rocker.core import DockerImageGenerator, list_plugins, get_docker_client
+from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
 @pytest.mark.docker
@@ -195,33 +194,17 @@ CMD [\"echo\", \"Extension test complete\"]
         pass  # replaced by generic test.sh logic
 
 
-class ScriptInjectionExtension:
-    """Dynamically injects a test.sh script into the Docker image and runs it as the final step."""
+class ScriptInjectionExtension(SimpleRockerExtension):
+    """Injects a test.sh script into the Docker image and runs it as the final step."""
+
+    name = "test_script"
 
     def __init__(self, script_path):
-        self.name = "test_script"
         self.script_path = script_path
         self.context_name = "test.sh"
 
-    def get_name(self):
-        return self.name
-
-    def get_preamble(self, cliargs):
-        return ""
-
     def get_snippet(self, cliargs):
-        snippet = f"COPY {self.context_name} /tmp/test.sh\nRUN chmod +x /tmp/test.sh"
-        snippet += '\nCMD ["/tmp/test.sh"]'
-        return snippet
-
-    def get_user_snippet(self, cliargs):
-        return ""
-
-    def required(self, cliargs):
-        return []
-
-    def get_docker_args(self, cliargs):
-        return ""
+        return f'COPY {self.context_name} /tmp/test.sh\nRUN chmod +x /tmp/test.sh\nCMD ["/tmp/test.sh"]'
 
     def get_files(self, cliargs):
         with open(self.script_path, "r") as f:
@@ -231,9 +214,6 @@ class ScriptInjectionExtension:
                 f"Error: test.sh script '{self.script_path}' is missing a shebang (e.g., #!/bin/bash) at the top."
             )
         return {self.context_name: content}
-
-    def precondition_environment(self, cliargs):
-        pass
 
 
 if __name__ == "__main__":
