@@ -95,32 +95,6 @@ CMD [\"echo\", \"Extension test complete\"]
             active_extensions.append(ScriptInjectionExtension(test_sh_path))
             cliargs["command"] = "/tmp/test.sh"
 
-    def test_test_sh_missing_shebang_raises(self):
-        """Test that a test.sh script without a shebang raises a RuntimeError."""
-        import tempfile
-        import os
-        import shutil
-
-        # Create a temporary extension directory
-        with tempfile.TemporaryDirectory() as ext_dir:
-            extension_name = "dummy_extension"
-            extension_path = os.path.join(ext_dir, extension_name)
-            os.makedirs(extension_path, exist_ok=True)
-            test_sh_path = os.path.join(extension_path, "test.sh")
-            # Write a test.sh without a shebang
-            with open(test_sh_path, "w") as f:
-                f.write("echo Hello, world!\n")
-
-            # Patch the extension lookup to point to our temp dir
-            original_cwd = os.getcwd()
-            try:
-                os.chdir(ext_dir)
-                # The method under test should raise RuntimeError due to missing shebang
-                with self.assertRaises(RuntimeError):
-                    self._build_run_check_extension(extension_name)
-            finally:
-                os.chdir(original_cwd)
-
         dig = DockerImageGenerator(active_extensions, cliargs, self.base_dockerfile_tag)
         build_result = dig.build()
         self.assertEqual(build_result, 0, f"Extension '{extension_name}' failed to build")
