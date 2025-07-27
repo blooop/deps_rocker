@@ -3,7 +3,7 @@ import pwd
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
-class ssh_client(SimpleRockerExtension):
+class SshClient(SimpleRockerExtension):
     """Install openssh-client and mount the user's ~/.ssh directory into the container."""
 
     name = "ssh_client"

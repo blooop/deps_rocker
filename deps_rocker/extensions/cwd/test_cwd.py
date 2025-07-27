@@ -1,5 +1,5 @@
 import unittest
-from deps_rocker.cwd import CWD, CWDName
+from deps_rocker.extensions.cwd.cwd import CWD, CWDName
 from pathlib import Path
 import re
 
