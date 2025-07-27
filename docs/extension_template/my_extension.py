@@ -5,7 +5,6 @@ class MyExtension(SimpleRockerExtension):
     """My custom extension description"""
 
     name = "my_extension"
-    pkg = "my_package.extensions.my_extension"
 
     def required(self, cliargs):
         """List any required extensions that should be installed first"""
