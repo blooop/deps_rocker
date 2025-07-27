@@ -7,7 +7,7 @@ class SshClient(SimpleRockerExtension):
     """Install openssh-client and mount the user's ~/.ssh directory into the container."""
 
     name = "ssh_client"
-    depends = ["ssh", "user"]
+    depends_on_extension = ["ssh", "user"]
 
     def get_snippet(self, cliargs):
         # Install openssh-client and ensure the parent directory for the mount exists
