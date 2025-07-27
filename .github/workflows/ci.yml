@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Generate SSH key for CI
+        run: ssh-keygen -t ed25519 -N "" -f ~/.ssh/id_ed25519 -q
       - name: Build and run Dev Container task
         uses: devcontainers/ci@v0.3
         with:
