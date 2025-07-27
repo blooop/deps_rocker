@@ -32,7 +32,7 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
     name = "simple_rocker_extension"
     empy_args = {}
     empy_user_args = {}
-    depends_on_extension: list[str] = []  # List of dependencies required by the extension
+    depends_on_extension: tuple[str, ...] = ()  # Tuple of dependencies required by the extension
 
     @classmethod
     def get_name(cls) -> str:
