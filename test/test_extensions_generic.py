@@ -2,6 +2,8 @@ import unittest
 import pytest
 import io
 import tempfile
+import subprocess
+import shutil
 from rocker.core import DockerImageGenerator, list_plugins, get_docker_client
 
 
@@ -63,7 +65,7 @@ CMD [\"echo\", \"Extension test complete\"]
         return working_extensions
 
     def run_extension_build_and_test(self, extension_name):
-        """Shared logic to build, run, and check an extension"""
+        """Shared logic to build, run, and check an extension, including running test.sh if present"""
         if extension_name not in self.working_extension_names:
             self.skipTest(f"Extension '{extension_name}' not available or not from deps_rocker")
 
@@ -86,20 +88,34 @@ CMD [\"echo\", \"Extension test complete\"]
                 cliargs[dep_name] = True
         active_extensions.append(extension_instance)
 
+        import os
+
+        test_sh_path = f"deps_rocker/extensions/{extension_name}/test.sh"
+        if os.path.isfile(test_sh_path):
+            # Add the test script extension as the last extension
+            active_extensions.append(ScriptInjectionExtension(test_sh_path))
+            cliargs["command"] = "/tmp/test.sh"
+
         dig = DockerImageGenerator(active_extensions, cliargs, self.base_dockerfile_tag)
         build_result = dig.build()
         self.assertEqual(build_result, 0, f"Extension '{extension_name}' failed to build")
 
         with tempfile.NamedTemporaryFile(mode="r+") as tmpfile:
             run_result = dig.run(console_output_file=tmpfile.name)
-            self.assertEqual(run_result, 0, f"Extension '{extension_name}' failed to run")
             tmpfile.seek(0)
             output = tmpfile.read()
-            self.assertIn(
-                "Extension test complete",
-                output,
-                f"Extension '{extension_name}' did not produce expected output",
+            print(f"DEBUG: run_result={run_result}\nContainer output:\n{output}")
+            self.assertEqual(
+                run_result, 0, f"Extension '{extension_name}' failed to run. Output: {output}"
             )
+            if os.path.isfile(test_sh_path):
+                self.assertIn("uv is installed and working", output)
+            else:
+                self.assertIn(
+                    "Extension test complete",
+                    output,
+                    f"Extension '{extension_name}' did not produce expected output",
+                )
         dig.clear_image()
 
     def test_uv_extension(self):
@@ -174,6 +190,50 @@ CMD [\"echo\", \"Extension test complete\"]
             dig.clear_image()
         except Exception as e:
             self.fail(f"All extensions together raised an exception: {e}")
+
+    def test_uv_installed_in_container(self):
+        pass  # replaced by generic test.sh logic
+
+
+class ScriptInjectionExtension:
+    """Dynamically injects a test.sh script into the Docker image and runs it as the final step."""
+
+    def __init__(self, script_path):
+        self.name = "test_script"
+        self.script_path = script_path
+        self.context_name = "test.sh"
+
+    def get_name(self):
+        return self.name
+
+    def get_preamble(self, cliargs):
+        return ""
+
+    def get_snippet(self, cliargs):
+        snippet = f"COPY {self.context_name} /tmp/test.sh\nRUN chmod +x /tmp/test.sh"
+        snippet += '\nCMD ["/tmp/test.sh"]'
+        return snippet
+
+    def get_user_snippet(self, cliargs):
+        return ""
+
+    def required(self, cliargs):
+        return []
+
+    def get_docker_args(self, cliargs):
+        return ""
+
+    def get_files(self, cliargs):
+        with open(self.script_path, "r") as f:
+            content = f.read()
+        if not content.lstrip().startswith("#!/"):
+            raise RuntimeError(
+                f"Error: test.sh script '{self.script_path}' is missing a shebang (e.g., #!/bin/bash) at the top."
+            )
+        return {self.context_name: content}
+
+    def precondition_environment(self, cliargs):
+        pass
 
 
 if __name__ == "__main__":
