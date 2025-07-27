@@ -30,13 +30,21 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
     """A class to take care of most of the boilerplace required for a rocker extension"""
 
     name = "simple_rocker_extension"
-    pkg = "deps_rocker"
     empy_args = {}
     empy_user_args = {}
 
     @classmethod
     def get_name(cls) -> str:
         return cls.name
+
+    def _get_pkg(self):
+        # Dynamically determine the package/module path for the extension
+        # e.g. 'deps_rocker.extensions.curl' for Curl
+        module = self.__class__.__module__
+        # If running as __main__, fallback to base package
+        if module == "__main__":
+            return "deps_rocker"
+        return module
 
     def get_snippet(self, cliargs) -> str:
         return self.get_and_expand_empy_template(self.empy_args)
@@ -54,7 +62,8 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
     ) -> str:
         try:
             snippet_name = f"{self.name}_{snippet_prefix}snippet.Dockerfile"
-            dat = pkgutil.get_data(self.pkg, snippet_name)
+            pkg = self._get_pkg()
+            dat = pkgutil.get_data(pkg, snippet_name)
             if dat is not None:
                 snippet = dat.decode("utf-8")
                 logging.warning(self.name)
@@ -65,6 +74,8 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
                 return expanded
         except FileNotFoundError as _:
             logging.info(f"no user snippet found {snippet_name}")
+        except Exception as e:
+            logging.error(f"Error reading empy template: {e}")
         return ""
 
     @staticmethod
@@ -72,7 +83,8 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         """This gets dynamically defined by the metaclass"""
 
     def get_config_file(self, path: str) -> Optional[bytes]:
-        return pkgutil.get_data(self.pkg, path)
+        pkg = self._get_pkg()
+        return pkgutil.get_data(pkg, path)
 
     @staticmethod
     def register_arguments_helper(
