@@ -70,7 +70,7 @@ locales = "deps_rocker.extensions.locales.locales:Locales"
 isaac_sim = "deps_rocker.extensions.isaac_sim.isaac_sim:IsaacSim"
 tzdata = "deps_rocker.extensions.tzdata.tzdata:TzData"
 urdf_viz = "deps_rocker.extensions.urdf_viz.urdf_viz:UrdfViz"
-ssh_client = "deps_rocker.extensions.ssh_client:ssh_client"
+ssh_client = "deps_rocker.extensions.ssh_client.ssh_client:SshClient"
 
 # Environments
 [tool.pixi.environments]
