@@ -7,7 +7,6 @@ class CWD(SimpleRockerExtension):
     """Add the current working directory as a volume in your docker container"""
 
     name = "cwd"
-    pkg = "deps_rocker.extensions.cwd"
 
     def get_docker_args(self, cliargs) -> str:
         return " -v %s:%s " % (Path.cwd(), "/workspaces")
@@ -21,7 +20,6 @@ class CWDName(SimpleRockerExtension):
     """Set the name of the container to the name of the folder of the current working directory"""
 
     name = "cwd_name"
-    pkg = "deps_rocker.extensions.cwd"
 
     def get_docker_args(self, cliargs) -> str:
         return f" --name {Path.cwd().stem}"
