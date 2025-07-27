@@ -216,9 +216,6 @@ CMD [\"echo\", \"Extension test complete\"]
         except Exception as e:
             self.fail(f"All extensions together raised an exception: {e}")
 
-    def test_uv_installed_in_container(self):
-        pass  # replaced by generic test.sh logic
-
 
 class ScriptInjectionExtension(SimpleRockerExtension):
     """Injects a test.sh script into the Docker image and runs it as the final step."""
