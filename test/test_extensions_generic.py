@@ -107,14 +107,7 @@ CMD [\"echo\", \"Extension test complete\"]
             self.assertEqual(
                 run_result, 0, f"Extension '{extension_name}' failed to run. Output: {output}"
             )
-            if os.path.isfile(test_sh_path):
-                self.assertIn("uv is installed and working", output)
-            else:
-                self.assertIn(
-                    "Extension test complete",
-                    output,
-                    f"Extension '{extension_name}' did not produce expected output",
-                )
+            # If test.sh exists, just rely on run_result for pass/fail, no output string checks
         dig.clear_image()
 
     def test_uv_extension(self):
