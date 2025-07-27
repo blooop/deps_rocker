@@ -5,11 +5,4 @@ class GitClone(SimpleRockerExtension):
     """Adds support for git cloning"""
 
     name = "git_clone"
-
-    # deps = ["git"]
-
-    # def invoke_after(self, cliargs):
-    #     return set(["git"])
-
-    # def required(self, cliargs):
-    #     return set(["git"])
+    depends_on = ["git"]

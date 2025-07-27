@@ -32,6 +32,7 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
     name = "simple_rocker_extension"
     empy_args = {}
     empy_user_args = {}
+    depends_on: list[str] = []  # List of dependencies required by the extension
 
     @classmethod
     def get_name(cls) -> str:
@@ -125,3 +126,21 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
             default=defaults.get("deps_rocker"),
             help=class_type.__doc__,  # Use the class docstring as the help text
         )
+
+    def invoke_after(self, cliargs: dict) -> set[str]:
+        """
+        Returns a set of dependencies that should be invoked after this extension.
+        If deps is defined, returns it as a set.
+        """
+        if self.depends_on:
+            return set(self.depends_on)
+        return set()
+
+    def required(self, cliargs: dict) -> set[str]:
+        """
+        Returns a set of dependencies required by this extension.
+        If deps is defined, returns it as a set.
+        """
+        if self.depends_on:
+            return set(self.depends_on)
+        return set()
