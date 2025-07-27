@@ -139,6 +139,4 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         Returns a set of dependencies required by this extension.
         If deps is defined, returns it as a set.
         """
-        if self.depends_on_extension:
-            return set(self.depends_on_extension)
-        return set()
+        return set(self.depends_on_extension) if self.depends_on_extension else set()
