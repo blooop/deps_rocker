@@ -207,7 +207,7 @@ class ScriptInjectionExtension(SimpleRockerExtension):
         return f'COPY {self.context_name} /tmp/test.sh\nRUN chmod +x /tmp/test.sh\nCMD ["/tmp/test.sh"]'
 
     def get_files(self, cliargs):
-        with open(self.script_path, "r") as f:
+        with open(self.script_path, "r", encoding="utf-8") as f:
             content = f.read()
         if not content.lstrip().startswith("#!/"):
             raise RuntimeError(
