@@ -18,7 +18,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         "locales",
         "neovim",
         # "urdf_viz",
-        # "fzf",
+        "fzf",
         "cwd",
         # "isaac_sim",
     ]
@@ -131,8 +131,8 @@ CMD [\"echo\", \"Extension test complete\"]
     # def test_urdf_viz_extension(self):
     #     self.run_extension_build_and_test("urdf_viz")
 
-    # def test_fzf_extension(self):
-    #     self.run_extension_build_and_test("fzf")
+    def test_fzf_extension(self):
+        self.run_extension_build_and_test("fzf")
 
     def test_cwd_extension(self):
         self.run_extension_build_and_test("cwd")
