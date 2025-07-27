@@ -99,7 +99,7 @@ update-lock = "pixi update && git commit -a -m'update pixi.lock' || true"
 push = "git push"
 update-lock-push = { depends-on = ["update-lock", "push"] }
 fix = { depends-on = ["update-lock", "format", "ruff-lint"] }
-fix-commit-push = { depends-on = ["fix", "commit-format", "update-lock-push"] }
+fix-commit-push = { depends-on = ["fix","pre-commit", "commit-format", "update-lock-push"] }
 ci-no-cover = { depends-on = ["style", "test"] }
 ci = { depends-on = [
   "format",
