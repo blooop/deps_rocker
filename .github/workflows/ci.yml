@@ -17,7 +17,7 @@ jobs:
         environment: [py310, py311, py312, py313]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Build and run Dev Container task
         uses: devcontainers/ci@v0.3
         with:
