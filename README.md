@@ -19,6 +19,12 @@
 pip install deps-rocker
 ```
 
+development
+```
+pipx inject rockerc -e .
+```
+
+
 ## Usage
 
 ```
