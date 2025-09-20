@@ -67,8 +67,7 @@ class Claude(SimpleRockerExtension):
         envs.append(f' -e "XDG_CONFIG_HOME={container_home}/.config"')
         envs.append(f' -e "XDG_CACHE_HOME={container_home}/.cache"')
         envs.append(f' -e "XDG_DATA_HOME={container_home}/.local/share"')
-        # Ensure ~/.local/bin is in PATH inside the container to suppress PATH warnings
-        envs.append(f' -e "PATH={container_home}/.local/bin:\$PATH"')
+        # Do not override PATH globally here; a wrapper ensures ~/.local/bin for claude process
 
         # Supplemental mounts
         extra_paths = [
