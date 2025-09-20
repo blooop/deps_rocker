@@ -94,6 +94,7 @@ lint = { depends-on = ["ruff-lint", "pylint"] }
 style = { depends-on = ["format", "lint"] }
 commit-format = "git commit -a -m'autoformat code' || true"
 test = "pytest -v -s"
+test-claude = "pytest -v -s -m claude"
 coverage = "coverage run -m pytest -v -s && coverage xml -o coverage.xml"
 coverage-report = "coverage report -m"
 update-lock = "pixi update && git commit -a -m'update pixi.lock' || true"
@@ -140,4 +141,5 @@ exclude_also = [
 [tool.pytest.ini_options]
 markers = [
     "docker: marks tests as requiring docker (deselect with '-m \"not docker\"')",
+    "claude: claude-specific tests (run with '-m claude')",
 ]
