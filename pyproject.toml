@@ -72,10 +72,6 @@ tzdata = "deps_rocker.extensions.tzdata.tzdata:TzData"
 urdf_viz = "deps_rocker.extensions.urdf_viz.urdf_viz:UrdfViz"
 ssh_client = "deps_rocker.extensions.ssh_client.ssh_client:SshClient"
 pixi = "deps_rocker.extensions.pixi.pixi:Pixi"
-conda = "deps_rocker.extensions.conda.conda:Conda"
-cargo = "deps_rocker.extensions.cargo.cargo:Cargo"
-palanteer = "deps_rocker.extensions.palanteer.palanteer:Palanteer"
-lazygit = "deps_rocker.extensions.lazygit.lazygit:Lazygit"
 
 # Environments
 [tool.pixi.environments]
