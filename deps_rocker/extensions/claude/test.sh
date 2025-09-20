@@ -4,4 +4,3 @@
 set -e
 
 claude --version 
-
