@@ -53,7 +53,7 @@ deps_rocker/extensions/npm/
 ├── __init__.py                    # Import and expose main class
 ├── npm.py                         # Main extension class
 ├── npm_snippet.Dockerfile         # Docker installation commands
-└── test.sh                        # Test script (optional)
+└── test.sh                        # Test script 
 ```
 
 ## Common Patterns
