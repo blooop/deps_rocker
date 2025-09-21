@@ -17,6 +17,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         "git_clone",
         "locales",
         "neovim",
+        "pixi",
         # "urdf_viz",
         "fzf",
         "cwd",
@@ -129,6 +130,9 @@ CMD [\"echo\", \"Extension test complete\"]
 
     def test_neovim_extension(self):
         self.run_extension_build_and_test("neovim")
+
+    def test_pixi_extension(self):
+        self.run_extension_build_and_test("pixi")
 
     # def test_urdf_viz_extension(self):
     #     self.run_extension_build_and_test("urdf_viz")
