@@ -1,0 +1,1 @@
+"""Claude extension package"""

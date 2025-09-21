@@ -71,6 +71,7 @@ isaac_sim = "deps_rocker.extensions.isaac_sim.isaac_sim:IsaacSim"
 tzdata = "deps_rocker.extensions.tzdata.tzdata:TzData"
 urdf_viz = "deps_rocker.extensions.urdf_viz.urdf_viz:UrdfViz"
 ssh_client = "deps_rocker.extensions.ssh_client.ssh_client:SshClient"
+claude = "deps_rocker.extensions.claude.claude:Claude"
 
 # Environments
 [tool.pixi.environments]
@@ -93,6 +94,7 @@ lint = { depends-on = ["ruff-lint", "pylint"] }
 style = { depends-on = ["format", "lint"] }
 commit-format = "git commit -a -m'autoformat code' || true"
 test = "pytest -v -s"
+test-claude = "pytest -v -s -m claude"
 coverage = "coverage run -m pytest -v -s && coverage xml -o coverage.xml"
 coverage-report = "coverage report -m"
 update-lock = "pixi update && git commit -a -m'update pixi.lock' || true"
@@ -139,4 +141,5 @@ exclude_also = [
 [tool.pytest.ini_options]
 markers = [
     "docker: marks tests as requiring docker (deselect with '-m \"not docker\"')",
+    "claude: claude-specific tests (run with '-m claude')",
 ]
