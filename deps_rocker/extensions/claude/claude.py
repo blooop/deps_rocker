@@ -43,9 +43,13 @@ class Claude(SimpleRockerExtension):
         host_xdg = os.environ.get("XDG_CONFIG_HOME")
         candidates: list[tuple[str, str]] = []
         if host_xdg:
-            candidates.append((os.path.join(host_xdg, "claude"), f"{container_home}/.config/claude"))
+            candidates.append(
+                (os.path.join(host_xdg, "claude"), f"{container_home}/.config/claude")
+            )
         candidates.append((os.path.expanduser("~/.claude"), f"{container_home}/.claude"))
-        candidates.append((os.path.expanduser("~/.config/claude"), f"{container_home}/.config/claude"))
+        candidates.append(
+            (os.path.expanduser("~/.config/claude"), f"{container_home}/.config/claude")
+        )
 
         host_config = None
         container_config = None

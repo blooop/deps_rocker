@@ -23,9 +23,7 @@ class ScriptInjectionExtension(SimpleRockerExtension):
         with open(self.script_path, "r", encoding="utf-8") as f:
             content = f.read()
         if not content.lstrip().startswith("#!/"):
-            raise RuntimeError(
-                f"Error: test.sh script '{self.script_path}' is missing a shebang."
-            )
+            raise RuntimeError(f"Error: test.sh script '{self.script_path}' is missing a shebang.")
         return {self.context_name: content}
 
 
@@ -89,4 +87,3 @@ CMD [\"echo\", \"Claude integration test complete\"]
                 self.assertIn("No stale root Claude config found", output)
         finally:
             dig.clear_image()
-

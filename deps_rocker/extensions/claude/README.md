@@ -56,4 +56,3 @@ Troubleshooting
   - `CLAUDE_CONFIG_DIR` is set automatically. If you are overriding entrypoints or run args, ensure you don’t unset it.
 - Permissions
   - If the mount path isn’t writable, confirm your host directory ownership matches your UID/GID and that the `user` extension is active.
-
