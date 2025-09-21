@@ -72,6 +72,7 @@ tzdata = "deps_rocker.extensions.tzdata.tzdata:TzData"
 urdf_viz = "deps_rocker.extensions.urdf_viz.urdf_viz:UrdfViz"
 ssh_client = "deps_rocker.extensions.ssh_client.ssh_client:SshClient"
 claude = "deps_rocker.extensions.claude.claude:Claude"
+npm = "deps_rocker.extensions.npm.npm:Npm"
 
 # Environments
 [tool.pixi.environments]
