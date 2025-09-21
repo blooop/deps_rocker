@@ -1,6 +1,6 @@
 [project]
 name = "deps_rocker"
-version = "0.10.0"
+version = "0.11.0"
 authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
 description = "A rocker plugin to help installing apt and pip dependencies"
 readme = "README.md"
@@ -8,7 +8,7 @@ license = "MIT"
 
 requires-python = ">= 3.9"
 dependencies = [
-  "rocker>=0.2.17",
+  "rocker>=0.2.19",
   "off-your-rocker>=0.1.0",
   "pyyaml>=5.0",
   "toml>=0.10",
@@ -72,6 +72,7 @@ tzdata = "deps_rocker.extensions.tzdata.tzdata:TzData"
 urdf_viz = "deps_rocker.extensions.urdf_viz.urdf_viz:UrdfViz"
 ssh_client = "deps_rocker.extensions.ssh_client.ssh_client:SshClient"
 claude = "deps_rocker.extensions.claude.claude:Claude"
+pixi = "deps_rocker.extensions.pixi.pixi:Pixi"
 
 # Environments
 [tool.pixi.environments]

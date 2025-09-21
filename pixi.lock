@@ -496,10 +496,10 @@ packages:
   requires_python: '>=3.9'
 - pypi: ./
   name: deps-rocker
-  version: 0.10.0
-  sha256: e15fc5878e5282be9c0ce63d8feed49c6e69e34ef7a4c56d35fb7ab487abc9a9
+  version: 0.11.0
+  sha256: a1aaef74483edb1ecdab66ddbf7a490a61134cdc69f3c9bcb1022cb6d959db20
   requires_dist:
-  - rocker>=0.2.17
+  - rocker>=0.2.19
   - off-your-rocker>=0.1.0
   - pyyaml>=5.0
   - toml>=0.10
