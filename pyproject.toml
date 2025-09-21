@@ -1,6 +1,6 @@
 [project]
 name = "deps_rocker"
-version = "0.11.0"
+version = "0.12.0"
 authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
 description = "A rocker plugin to help installing apt and pip dependencies"
 readme = "README.md"
@@ -74,6 +74,7 @@ ssh_client = "deps_rocker.extensions.ssh_client.ssh_client:SshClient"
 claude = "deps_rocker.extensions.claude.claude:Claude"
 npm = "deps_rocker.extensions.npm.npm:Npm"
 pixi = "deps_rocker.extensions.pixi.pixi:Pixi"
+gemini = "deps_rocker.extensions.gemini.gemini:Gemini"
 
 # Environments
 [tool.pixi.environments]
