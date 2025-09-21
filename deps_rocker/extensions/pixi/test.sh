@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e 
+set -e
 
 pixi --version
 echo "pixi is installed and working"
