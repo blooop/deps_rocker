@@ -10,6 +10,7 @@ class IsaacSim(SimpleRockerExtension):
     """Add isaacsim to your docker container"""
 
     name = "isaacsim"
+    apt_packages = ["python3-pip", "cmake", "build-essential", "libglib2.0-0", "libglu1-mesa", "libxmu-dev"]
 
     def required(self, cliargs) -> Set[str]:
         return {"nvidia", "privileged", "x11"}
