@@ -1,0 +1,6 @@
+name: locales
+class_name: Locales
+description: "Sets up locales in your docker container. Defaults to US locale"
+apt_packages:
+  - locales
+dockerfile: locales.Dockerfile

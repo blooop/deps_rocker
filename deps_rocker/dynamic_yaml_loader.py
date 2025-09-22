@@ -102,16 +102,32 @@ class DynamicYamlLoader:
             config['name'] = extension_name
 
         # Handle dockerfile configuration
-        dockerfile_path = yaml_file.parent / f"{extension_name}.Dockerfile"
-        if dockerfile_path.exists():
-            # If there's a companion Dockerfile, reference it
-            config.setdefault('dockerfile', str(dockerfile_path))
+        if 'dockerfile' not in config:
+            # Look for companion Dockerfile if not specified in config
+            dockerfile_path = yaml_file.parent / f"{extension_name}.Dockerfile"
+            if dockerfile_path.exists():
+                # If there's a companion Dockerfile, reference it
+                config['dockerfile'] = str(dockerfile_path)
+        elif config['dockerfile'] and not Path(config['dockerfile']).is_absolute():
+            # Handle relative paths by making them absolute relative to the YAML file
+            dockerfile_path = yaml_file.parent / config['dockerfile']
+            if dockerfile_path.exists():
+                config['dockerfile'] = str(dockerfile_path)
+
+        # Check for Docker Compose configuration
+        docker_compose_config = None
+        for compose_filename in ['docker-compose.yml', 'docker-compose.yaml', f'{extension_name}-docker-compose.yml', f'{extension_name}-docker-compose.yaml']:
+            compose_path = yaml_file.parent / compose_filename
+            if compose_path.exists():
+                with open(compose_path, 'r', encoding='utf-8') as f:
+                    docker_compose_config = yaml.safe_load(f)
+                break
 
         # Create dynamic class
         class DynamicYamlExtension(YamlRockerExtension):
             def __init__(self, *args, **kwargs):
                 # Initialize the base classes properly
-                super().__init__(yaml_config=config)
+                super().__init__(yaml_config=config, docker_compose_config=docker_compose_config)
 
             def _get_dockerfile_path(self):
                 """Get path to companion Dockerfile if it exists"""
