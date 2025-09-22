@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  app:
+    environment:
+      # Pixi cache configuration
+      PIXI_CACHE_DIR: /root/.cache/pixi
+      PIXI_HOME: /root/.pixi
+      # Add pixi to PATH
+      PATH: "/root/.pixi/bin:${PATH}"
+    volumes:
+      # Cache directories for persistent storage across container rebuilds
+      - pixi-cache:/root/.cache/pixi
+      - pixi-home:/root/.pixi
+
+volumes:
+  pixi-cache:
+    driver: local
+  pixi-home:
+    driver: local

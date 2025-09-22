@@ -1,0 +1,7 @@
+name: pixi
+class_name: Pixi
+description: "Install pixi package manager with cache support and shell completion"
+depends_on_extension:
+  - curl
+dockerfile: pixi.Dockerfile
+user_dockerfile: pixi-user.Dockerfile

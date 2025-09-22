@@ -114,6 +114,18 @@ class DynamicYamlLoader:
             if dockerfile_path.exists():
                 config['dockerfile'] = str(dockerfile_path)
 
+        # Handle user dockerfile configuration
+        if 'user_dockerfile' not in config:
+            # Look for companion user Dockerfile if not specified in config
+            user_dockerfile_path = yaml_file.parent / f"{extension_name}-user.Dockerfile"
+            if user_dockerfile_path.exists():
+                config['user_dockerfile'] = str(user_dockerfile_path)
+        elif config.get('user_dockerfile') and not Path(config['user_dockerfile']).is_absolute():
+            # Handle relative paths by making them absolute relative to the YAML file
+            user_dockerfile_path = yaml_file.parent / config['user_dockerfile']
+            if user_dockerfile_path.exists():
+                config['user_dockerfile'] = str(user_dockerfile_path)
+
         # Check for Docker Compose configuration
         docker_compose_config = None
         for compose_filename in ['docker-compose.yml', 'docker-compose.yaml', f'{extension_name}-docker-compose.yml', f'{extension_name}-docker-compose.yaml']:

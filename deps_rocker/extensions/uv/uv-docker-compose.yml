@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  app:
+    environment:
+      # UV cache configuration
+      UV_CACHE_DIR: /root/.cache/uv
+      UV_TOOL_DIR: /root/.local/bin
+      UV_TOOL_BIN_DIR: /root/.local/bin
+    volumes:
+      # Cache directories for persistent storage across container rebuilds
+      - uv-cache:/root/.cache/uv
+      - uv-tools:/root/.local
+
+volumes:
+  uv-cache:
+    driver: local
+  uv-tools:
+    driver: local

@@ -1,0 +1,5 @@
+name: uv
+class_name: UV
+description: "Add the uv package manager to your docker image with cache support"
+dockerfile: uv.Dockerfile
+user_dockerfile: uv-user.Dockerfile

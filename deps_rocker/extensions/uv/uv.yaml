@@ -1,3 +1,0 @@
-name: uv
-class_name: UV
-description: "Add the uv package manager to your docker image"

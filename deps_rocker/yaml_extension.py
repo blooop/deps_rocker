@@ -15,6 +15,7 @@ class YamlRockerExtension(SimpleRockerExtension):
         self._yaml_config = yaml_config or {}
         self._docker_compose_config = docker_compose_config or {}
         self._dockerfile_path = None
+        self._user_dockerfile_path = None
         self._docker_compose_commands = []
 
         if yaml_config:
@@ -55,6 +56,8 @@ class YamlRockerExtension(SimpleRockerExtension):
             self.empy_user_args = config["empy_user_args"]
         if "dockerfile" in config:
             self._dockerfile_path = config["dockerfile"]
+        if "user_dockerfile" in config:
+            self._user_dockerfile_path = config["user_dockerfile"]
 
     def _load_from_docker_compose(self, docker_compose_config: Dict[str, Any]):
         """Load configuration from Docker Compose and convert to Dockerfile commands"""
@@ -73,17 +76,21 @@ class YamlRockerExtension(SimpleRockerExtension):
                 for key, value in env_vars.items():
                     self._docker_compose_commands.append(f"ENV {key} {value}")
 
-            # Convert volumes (working directory setup)
+            # Convert volumes (working directory setup and cache directories)
             volumes = service_config.get('volumes', [])
             for volume in volumes:
                 if isinstance(volume, str) and ':' in volume:
-                    # Format: "./local/path:/container/path"
+                    # Format: "local_path:/container/path" or "volume_name:/container/path"
                     local_path, container_path = volume.split(':', 1)
-                    if not local_path.startswith('.'):
-                        # Skip bind mounts for now, focus on working directories
-                        continue
-                    self._docker_compose_commands.append(f"WORKDIR {container_path}")
-                    break  # Only set one working directory
+                    if local_path.startswith('./'):
+                        # Relative bind mount - set as working directory
+                        self._docker_compose_commands.append(f"WORKDIR {container_path}")
+                        break  # Only set one working directory
+                    elif not local_path.startswith('/'):
+                        # Named volume - create directory and add comment
+                        self._docker_compose_commands.append(f"RUN mkdir -p {container_path}")
+                        self._docker_compose_commands.append(f"# Volume mount: {local_path} -> {container_path}")
+                    # Skip absolute bind mounts as they're runtime concerns
 
             # Convert working directory
             working_dir = service_config.get('working_dir')
@@ -157,6 +164,41 @@ class YamlRockerExtension(SimpleRockerExtension):
                 snippet = f"{snippet}\n\n# Docker Compose configuration\n{compose_snippet}"
             else:
                 snippet = f"# Docker Compose configuration\n{compose_snippet}"
+
+        return snippet
+
+    def get_user_snippet(self, cliargs) -> str:
+        """Override to include custom user Dockerfile"""
+        # Get the original user snippet from parent class
+        snippet = super().get_user_snippet(cliargs)
+
+        # Add custom user Dockerfile content if specified
+        if getattr(self, '_user_dockerfile_path', None):
+            try:
+                from pathlib import Path
+                dockerfile_path = Path(self._user_dockerfile_path)
+                if not dockerfile_path.is_absolute():
+                    # Relative path - resolve relative to the extension package
+                    pkg = self._get_pkg()
+                    import pkgutil
+                    dat = pkgutil.get_data(pkg, self._user_dockerfile_path)
+                    if dat is not None:
+                        dockerfile_content = dat.decode("utf-8").strip()
+                        if snippet:
+                            snippet = f"{snippet}\n\n{dockerfile_content}"
+                        else:
+                            snippet = dockerfile_content
+                elif dockerfile_path.exists():
+                    # Absolute path
+                    with open(dockerfile_path, 'r', encoding='utf-8') as f:
+                        dockerfile_content = f.read().strip()
+                        if snippet:
+                            snippet = f"{snippet}\n\n{dockerfile_content}"
+                        else:
+                            snippet = dockerfile_content
+            except Exception:
+                # If we can't read the user Dockerfile, continue without it
+                pass
 
         return snippet
 
