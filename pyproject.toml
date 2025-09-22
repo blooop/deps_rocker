@@ -62,11 +62,8 @@ cwd = "deps_rocker.extensions.cwd.cwd:CWD"
 ros_humble = "deps_rocker.extensions.ros_humble.ros_humble:RosHumble"
 cwd_name = "deps_rocker.extensions.cwd.cwd:CWDName"
 fzf = "deps_rocker.extensions.fzf.fzf:Fzf"
-# YAML-based extensions
-git_clone = "deps_rocker.dynamic_entry_points:GitClone"
-curl = "deps_rocker.dynamic_entry_points:Curl"
-neovim = "deps_rocker.dynamic_entry_points:NeoVim"
-uv = "deps_rocker.dynamic_entry_points:UV"
+# Dynamic YAML-based extensions (auto-discovered from *.deps_rocker.yaml files)
+# These are now loaded automatically - no need for manual entry points
 # Python-based extensions (more complex ones)
 locales = "deps_rocker.extensions.locales.locales:Locales"
 isaac_sim = "deps_rocker.extensions.isaac_sim.isaac_sim:IsaacSim"

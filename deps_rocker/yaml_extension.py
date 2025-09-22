@@ -11,6 +11,10 @@ class YamlRockerExtension(SimpleRockerExtension):
         # Initialize parent class first
         super().__init__()
 
+        # Store config for later use
+        self._yaml_config = yaml_config or {}
+        self._dockerfile_path = None
+
         if yaml_config:
             self._load_from_dict(yaml_config)
         else:
@@ -44,6 +48,12 @@ class YamlRockerExtension(SimpleRockerExtension):
             self.empy_args = config["empy_args"]
         if "empy_user_args" in config:
             self.empy_user_args = config["empy_user_args"]
+        if "dockerfile" in config:
+            self._dockerfile_path = config["dockerfile"]
+
+    def get_dockerfile_path(self):
+        """Get path to companion Dockerfile if it exists"""
+        return getattr(self, '_dockerfile_path', None)
 
 
 def create_extension_from_yaml(yaml_path: str) -> type:
