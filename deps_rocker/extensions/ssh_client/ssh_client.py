@@ -12,8 +12,9 @@ class SshClient(SimpleRockerExtension):
     def get_snippet(self, cliargs):
         # Install openssh-client and ensure the parent directory for the mount exists
         return """
-RUN apt-get update && apt-get install -y --no-install-recommends openssh-client \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends openssh-client
 """
 
     def get_docker_args(self, cliargs):
