@@ -152,6 +152,12 @@ class DynamicYamlLoader:
         DynamicYamlExtension.name = extension_name
         DynamicYamlExtension.__module__ = f"deps_rocker.dynamic.{extension_name}"
 
+        # Set docstring from YAML description
+        if 'description' in config:
+            DynamicYamlExtension.__doc__ = config['description']
+        else:
+            DynamicYamlExtension.__doc__ = f"YAML-based extension for {extension_name}"
+
         # Store source file for debugging
         DynamicYamlExtension._yaml_source = str(yaml_file)
 

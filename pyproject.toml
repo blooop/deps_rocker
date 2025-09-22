@@ -71,6 +71,10 @@ tzdata = "deps_rocker.extensions.tzdata.tzdata:TzData"
 urdf_viz = "deps_rocker.extensions.urdf_viz.urdf_viz:UrdfViz"
 ssh_client = "deps_rocker.extensions.ssh_client.ssh_client:SshClient"
 claude = "deps_rocker.extensions.claude.claude:Claude"
+# YAML-based extensions (dynamically discovered)
+curl = "deps_rocker.dynamic_registry:Curl"
+uv = "deps_rocker.dynamic_registry:UV"
+# Python-based extensions
 npm = "deps_rocker.extensions.npm.npm:Npm"
 pixi = "deps_rocker.extensions.pixi.pixi:Pixi"
 gemini = "deps_rocker.extensions.gemini.gemini:Gemini"
