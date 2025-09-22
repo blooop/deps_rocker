@@ -1,0 +1,5 @@
+name: neovim
+class_name: NeoVim
+description: "Add neovim to your docker image"
+apt_packages:
+  - neovim

@@ -1,0 +1,9 @@
+name: git_clone
+class_name: GitClone
+description: "Adds support for git cloning"
+depends_on_extension:
+  - git
+apt_packages:
+  - git
+  - git-lfs
+  - ca-certificates

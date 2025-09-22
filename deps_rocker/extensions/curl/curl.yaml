@@ -1,0 +1,6 @@
+name: curl
+class_name: Curl
+description: "Adds curl to your docker container"
+apt_packages:
+  - curl
+  - ca-certificates
