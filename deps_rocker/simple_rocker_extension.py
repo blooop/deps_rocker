@@ -33,6 +33,7 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
     empy_args = {}
     empy_user_args = {}
     depends_on_extension: tuple[str, ...] = ()  # Tuple of dependencies required by the extension
+    apt_packages: list[str] = []  # List of apt packages required by the extension
 
     @classmethod
     def get_name(cls) -> str:
@@ -48,7 +49,18 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         return module
 
     def get_snippet(self, cliargs) -> str:
-        return self.get_and_expand_empy_template(self.empy_args)
+        snippet = self.get_and_expand_empy_template(self.empy_args)
+
+        # If apt_packages is defined, generate apt install command
+        if self.apt_packages:
+            apt_snippet = self.get_apt_command(self.apt_packages, use_cache_mount=True)
+            # If there's an existing snippet, append the apt command
+            if snippet:
+                snippet = f"{apt_snippet}\n\n{snippet}"
+            else:
+                snippet = apt_snippet
+
+        return snippet
 
     def get_user_snippet(self, cliargs) -> str:
         return self.get_and_expand_empy_template(
@@ -140,3 +152,30 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         If deps is defined, returns it as a set.
         """
         return set(self.depends_on_extension) if self.depends_on_extension else set()
+
+    @staticmethod
+    def get_apt_command(packages: list[str], use_cache_mount: bool = True) -> str:
+        """
+        Generate an apt install command with optional cache mount for BuildKit.
+
+        Args:
+            packages: List of apt packages to install
+            use_cache_mount: Whether to use BuildKit cache mounts (default True)
+
+        Returns:
+            Complete RUN command string for Dockerfile
+        """
+        if not packages:
+            return ""
+
+        packages_str = " \\\n    ".join(packages)
+
+        if use_cache_mount:
+            return f"""RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \\
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \\
+    apt-get update && apt-get install -y --no-install-recommends \\
+    {packages_str}"""
+        else:
+            return f"""RUN apt-get update && apt-get install -y --no-install-recommends \\
+    {packages_str} \\
+    && apt-get clean && rm -rf /var/lib/apt/lists/*"""
