@@ -14,11 +14,7 @@
 		{
 			"label": "run <cfg>",
 			"type": "shell",
-<<<<<<< HEAD
-			"command": "RUNFILE=$(cat ${workspaceFolder}/.vscode/active_file.cfg); echo Running file: $RUNFILE; python3 $RUNFILE",
-=======
 			"command": "RUNFILE=$(cat ${workspaceFolder}/.vscode/active_file.cfg); echo Running file: $RUNFILE; pixi run python3 $RUNFILE",
->>>>>>> template/main
 			"problemMatcher": [],
 			"group": {
 				"kind": "build",
@@ -29,7 +25,6 @@
 			"label": "autoformat",
 			"detail": "Use ruff and black to automatically fix and format the code",
 			"type": "shell",
-<<<<<<< HEAD
 			"command": "ruff check . --fix && black ."
 		},
 		{
@@ -46,25 +41,12 @@
 			"detail": "Run pylint on files tracked by git",
 			"type": "shell",
 			"command": "pylint $(git ls-files '*.py') "
-=======
-			"command": "pixi run fmt"
-		},		
-		{
-			"label": "lint",
-			"detail": "Run pylint on files tracked by git",
-			"type": "shell",
-			"command": "pixi run lint"
->>>>>>> template/main
 		},
 		{
 			"label": "code coverage",
 			"detail": "Run code coverage and print a coverage report, also update coverage.xml for in the in-editor coverage gutter",
 			"type": "shell",
-<<<<<<< HEAD
 			"command": "coverage run -m pytest; coverage xml -o coverage.xml"
-=======
-			"command": "pixi run coverage"
->>>>>>> template/main
 		},
 		{
 			"label": "code coverage report",
@@ -73,11 +55,7 @@
 			"dependsOn": [
 				"code coverage"
 			],
-<<<<<<< HEAD
 			"command": "coverage report -m"
-=======
-			"command": "pixi run coverage-report"
->>>>>>> template/main
 		},
 		{
 			"label": "pytest duration",
@@ -87,7 +65,6 @@
 		},
 		{
 			"label": "check CI",
-<<<<<<< HEAD
 			"detail": "Runs the basic formatting and linting checks performed by CI",
 			"type": "shell",
 			"dependsOn": [
@@ -96,11 +73,6 @@
 				"code coverage report"
 			],
 			"dependsOrder": "sequence",
-=======
-			"detail": "Runs the basic formatting and linting and tests performed by CI",
-			"type": "shell",
-			"command": "pixi run ci-no-cover"
->>>>>>> template/main
 		},
 		{
 			"label": "check CI, commit and push",
