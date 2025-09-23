@@ -74,6 +74,7 @@ claude = "deps_rocker.extensions.claude.claude:Claude"
 # YAML-based extensions (dynamically discovered)
 curl = "deps_rocker.dynamic_registry:Curl"
 uv = "deps_rocker.dynamic_registry:UV"
+git_clone = "deps_rocker.dynamic_registry:GitClone"
 # Python-based extensions
 npm = "deps_rocker.extensions.npm.npm:Npm"
 pixi = "deps_rocker.extensions.pixi.pixi:Pixi"

@@ -38,6 +38,7 @@ Curl = _get_cached_extension("curl")
 UV = _get_cached_extension("uv")
 LocalesYaml = _get_cached_extension("locales")
 PixiYaml = _get_cached_extension("pixi")
+GitClone = _get_cached_extension("git_clone")
 
 
 # For debugging - function to list all available YAML extensions
