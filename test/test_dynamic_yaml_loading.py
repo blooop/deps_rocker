@@ -2,7 +2,6 @@
 Tests for dynamic YAML extension loading system
 """
 
-import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -91,7 +90,7 @@ RUN echo "Custom installation step" && \\
         extension_class = DynamicYamlLoader.load_extension_from_file(yaml_file)
 
         # Check that dockerfile path is stored
-        self.assertEqual(extension_class._dockerfile_path, str(dockerfile_file))
+        self.assertEqual(extension_class._dockerfile_path, str(dockerfile_file))  # pylint: disable=protected-access,no-member
 
         instance = extension_class()
         self.assertEqual(instance.get_dockerfile_path(), str(dockerfile_file))
@@ -214,7 +213,7 @@ empy_user_args:
 
         extension_class = DynamicYamlLoader.load_extension_from_file(yaml_file)
 
-        self.assertIsNone(extension_class._dockerfile_path)
+        self.assertIsNone(extension_class._dockerfile_path)  # pylint: disable=protected-access,no-member
 
         instance = extension_class()
         self.assertIsNone(instance.get_dockerfile_path())

@@ -2,7 +2,6 @@
 Integration tests for dynamic YAML extension system with rocker
 """
 
-import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -53,7 +52,7 @@ RUN echo "Running integration test installation..." && \\
         # Verify all properties are set correctly
         self.assertEqual(extension_class.__name__, "IntegrationTest")
         self.assertEqual(extension_class.name, "integration_test")
-        self.assertEqual(extension_class._dockerfile_path, str(dockerfile_file))
+        self.assertEqual(extension_class._dockerfile_path, str(dockerfile_file))  # pylint: disable=protected-access,no-member
 
         # Create instance and verify functionality
         instance = extension_class()
@@ -65,6 +64,7 @@ RUN echo "Running integration test installation..." && \\
 
         # Verify it's a proper rocker extension
         from deps_rocker.simple_rocker_extension import SimpleRockerExtension
+
         self.assertIsInstance(instance, SimpleRockerExtension)
 
     def test_integrated_loader_functionality(self):
@@ -83,7 +83,7 @@ apt_packages:
         # We need to temporarily override the search paths
         original_discover = DynamicYamlLoader.discover_yaml_extensions
 
-        def mock_discover(search_paths=None):
+        def mock_discover(search_paths=None):  # pylint: disable=unused-argument
             return original_discover([str(self.test_dir)])
 
         DynamicYamlLoader.discover_yaml_extensions = staticmethod(mock_discover)
@@ -160,14 +160,19 @@ ENV PAGER=less
     def test_multiple_extensions_discovery(self):
         """Test discovering multiple extensions in the same directory"""
         extensions_configs = [
-            ("python_dev.deps_rocker.yaml", """
+            (
+                "python_dev.deps_rocker.yaml",
+                """
 name: python_dev
 description: "Python development environment"
 apt_packages:
   - python3-pip
   - python3-venv
-"""),
-            ("node_dev.deps_rocker.yaml", """
+""",
+            ),
+            (
+                "node_dev.deps_rocker.yaml",
+                """
 name: node_dev
 description: "Node.js development environment"
 apt_packages:
@@ -175,13 +180,17 @@ apt_packages:
   - npm
 depends_on_extension:
   - curl
-"""),
-            ("rust_dev.deps_rocker.yaml", """
+""",
+            ),
+            (
+                "rust_dev.deps_rocker.yaml",
+                """
 name: rust_dev
 description: "Rust development environment"
 depends_on_extension:
   - curl
-""")
+""",
+            ),
         ]
 
         # Create all extensions

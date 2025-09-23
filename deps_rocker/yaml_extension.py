@@ -1,13 +1,16 @@
 import yaml
-import pkgutil
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
 class YamlRockerExtension(SimpleRockerExtension):
     """Extension that loads configuration from YAML files"""
 
-    def __init__(self, yaml_config: Optional[Dict[str, Any]] = None, docker_compose_config: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self,
+        yaml_config: Optional[Dict[str, Any]] = None,
+        docker_compose_config: Optional[Dict[str, Any]] = None,
+    ):
         # Initialize parent class first
         super().__init__()
 
@@ -29,13 +32,15 @@ class YamlRockerExtension(SimpleRockerExtension):
     def _load_from_yaml(self):
         """Load configuration from YAML file in the extension package"""
         try:
+            import pkgutil
+
             pkg = self._get_pkg()
             yaml_file = f"{self.name}.yaml"
             dat = pkgutil.get_data(pkg, yaml_file)
             if dat is not None:
                 config = yaml.safe_load(dat.decode("utf-8"))
                 self._load_from_dict(config)
-        except Exception as e:
+        except Exception:
             # Fallback to default behavior if YAML loading fails
             pass
 
@@ -61,15 +66,15 @@ class YamlRockerExtension(SimpleRockerExtension):
 
     def _load_from_docker_compose(self, docker_compose_config: Dict[str, Any]):
         """Load configuration from Docker Compose and convert to Dockerfile commands"""
-        services = docker_compose_config.get('services', {})
+        services = docker_compose_config.get("services", {})
 
         for service_config in services.values():
             # Convert environment variables
-            env_vars = service_config.get('environment', {})
+            env_vars = service_config.get("environment", {})
             if isinstance(env_vars, list):
                 # Handle list format: ["VAR=value", "VAR2=value2"]
                 for env_var in env_vars:
-                    if '=' in env_var:
+                    if "=" in env_var:
                         self._docker_compose_commands.append(f"ENV {env_var}")
             elif isinstance(env_vars, dict):
                 # Handle dict format: {"VAR": "value", "VAR2": "value2"}
@@ -77,33 +82,35 @@ class YamlRockerExtension(SimpleRockerExtension):
                     self._docker_compose_commands.append(f"ENV {key} {value}")
 
             # Convert volumes (working directory setup and cache directories)
-            volumes = service_config.get('volumes', [])
+            volumes = service_config.get("volumes", [])
             for volume in volumes:
-                if isinstance(volume, str) and ':' in volume:
+                if isinstance(volume, str) and ":" in volume:
                     # Format: "local_path:/container/path" or "volume_name:/container/path"
-                    local_path, container_path = volume.split(':', 1)
-                    if local_path.startswith('./'):
+                    local_path, container_path = volume.split(":", 1)
+                    if local_path.startswith("./"):
                         # Relative bind mount - set as working directory
                         self._docker_compose_commands.append(f"WORKDIR {container_path}")
                         break  # Only set one working directory
-                    elif not local_path.startswith('/'):
+                    if not local_path.startswith("/"):
                         # Named volume - create directory and add comment
                         self._docker_compose_commands.append(f"RUN mkdir -p {container_path}")
-                        self._docker_compose_commands.append(f"# Volume mount: {local_path} -> {container_path}")
+                        self._docker_compose_commands.append(
+                            f"# Volume mount: {local_path} -> {container_path}"
+                        )
                     # Skip absolute bind mounts as they're runtime concerns
 
             # Convert working directory
-            working_dir = service_config.get('working_dir')
+            working_dir = service_config.get("working_dir")
             if working_dir:
                 self._docker_compose_commands.append(f"WORKDIR {working_dir}")
 
             # Convert ports (expose them)
-            ports = service_config.get('ports', [])
+            ports = service_config.get("ports", [])
             for port in ports:
                 if isinstance(port, str):
                     # Format: "8080:8080" or "8080"
-                    if ':' in port:
-                        _, container_port = port.split(':', 1)
+                    if ":" in port:
+                        _, container_port = port.split(":", 1)
                         self._docker_compose_commands.append(f"EXPOSE {container_port}")
                     else:
                         self._docker_compose_commands.append(f"EXPOSE {port}")
@@ -111,10 +118,10 @@ class YamlRockerExtension(SimpleRockerExtension):
                     self._docker_compose_commands.append(f"EXPOSE {port}")
 
             # Convert commands
-            command = service_config.get('command')
+            command = service_config.get("command")
             if command:
                 if isinstance(command, list):
-                    cmd_str = ' '.join(command)
+                    cmd_str = " ".join(command)
                 else:
                     cmd_str = command
                 # Store as a comment for now, since RUN executes at build time
@@ -122,7 +129,7 @@ class YamlRockerExtension(SimpleRockerExtension):
 
     def get_dockerfile_path(self):
         """Get path to companion Dockerfile if it exists"""
-        return getattr(self, '_dockerfile_path', None)
+        return getattr(self, "_dockerfile_path", None)
 
     def get_snippet(self, cliargs) -> str:
         """Override to include custom Dockerfile and Docker Compose commands"""
@@ -133,11 +140,14 @@ class YamlRockerExtension(SimpleRockerExtension):
         if self._dockerfile_path:
             try:
                 from pathlib import Path
+
                 dockerfile_path = Path(self._dockerfile_path)
                 if not dockerfile_path.is_absolute():
                     # Relative path - resolve relative to the extension package
-                    pkg = self._get_pkg()
                     import pkgutil
+
+                    pkg = self._get_pkg()
+
                     dat = pkgutil.get_data(pkg, self._dockerfile_path)
                     if dat is not None:
                         dockerfile_content = dat.decode("utf-8").strip()
@@ -147,13 +157,13 @@ class YamlRockerExtension(SimpleRockerExtension):
                             snippet = dockerfile_content
                 elif dockerfile_path.exists():
                     # Absolute path
-                    with open(dockerfile_path, 'r', encoding='utf-8') as f:
+                    with open(dockerfile_path, "r", encoding="utf-8") as f:
                         dockerfile_content = f.read().strip()
                         if snippet:
                             snippet = f"{snippet}\n\n{dockerfile_content}"
                         else:
                             snippet = dockerfile_content
-            except Exception as e:
+            except Exception:
                 # If we can't read the Dockerfile, continue without it
                 pass
 
@@ -173,14 +183,17 @@ class YamlRockerExtension(SimpleRockerExtension):
         snippet = super().get_user_snippet(cliargs)
 
         # Add custom user Dockerfile content if specified
-        if getattr(self, '_user_dockerfile_path', None):
+        if getattr(self, "_user_dockerfile_path", None):
             try:
                 from pathlib import Path
+
                 dockerfile_path = Path(self._user_dockerfile_path)
                 if not dockerfile_path.is_absolute():
                     # Relative path - resolve relative to the extension package
-                    pkg = self._get_pkg()
                     import pkgutil
+
+                    pkg = self._get_pkg()
+
                     dat = pkgutil.get_data(pkg, self._user_dockerfile_path)
                     if dat is not None:
                         dockerfile_content = dat.decode("utf-8").strip()
@@ -190,7 +203,7 @@ class YamlRockerExtension(SimpleRockerExtension):
                             snippet = dockerfile_content
                 elif dockerfile_path.exists():
                     # Absolute path
-                    with open(dockerfile_path, 'r', encoding='utf-8') as f:
+                    with open(dockerfile_path, "r", encoding="utf-8") as f:
                         dockerfile_content = f.read().strip()
                         if snippet:
                             snippet = f"{snippet}\n\n{dockerfile_content}"
@@ -205,7 +218,7 @@ class YamlRockerExtension(SimpleRockerExtension):
 
 def create_extension_from_yaml(yaml_path: str) -> type:
     """Create an extension class from a YAML configuration file"""
-    with open(yaml_path, 'r') as f:
+    with open(yaml_path, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     class_name = config.get("class_name", config["name"].replace("_", "").title())

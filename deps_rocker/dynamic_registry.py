@@ -25,17 +25,19 @@ def _get_yaml_extension(name: str) -> Type:
 # Cache for loaded extensions
 _extension_cache = {}
 
+
 def _get_cached_extension(name: str) -> Type:
     """Get a cached extension or load it if not cached"""
     if name not in _extension_cache:
         _extension_cache[name] = _get_yaml_extension(name)
     return _extension_cache[name]
 
+
 # Individual extension classes that are created dynamically
-Curl = _get_cached_extension('curl')
-UV = _get_cached_extension('uv')
-LocalesYaml = _get_cached_extension('locales')
-PixiYaml = _get_cached_extension('pixi')
+Curl = _get_cached_extension("curl")
+UV = _get_cached_extension("uv")
+LocalesYaml = _get_cached_extension("locales")
+PixiYaml = _get_cached_extension("pixi")
 
 
 # For debugging - function to list all available YAML extensions

@@ -18,16 +18,17 @@ def patch_rocker_extension_discovery():
         import rocker.core
 
         # Store the original function
-        if not hasattr(rocker.core, '_original_list_plugins'):
-            rocker.core._original_list_plugins = rocker.core.list_plugins
+        if not hasattr(rocker.core, "_original_list_plugins"):
+            setattr(rocker.core, "_original_list_plugins", rocker.core.list_plugins)
 
-        def enhanced_list_plugins(extension_point='rocker.extensions'):
+        def enhanced_list_plugins(extension_point="rocker.extensions"):
             """Enhanced version that includes YAML extensions"""
             # Get the original static extensions
-            plugins = rocker.core._original_list_plugins(extension_point)
+            original_func = getattr(rocker.core, "_original_list_plugins")
+            plugins = original_func(extension_point)
 
             # Add YAML extensions if this is the rocker extensions group
-            if extension_point == 'rocker.extensions':
+            if extension_point == "rocker.extensions":
                 try:
                     # Search for YAML extensions in the deps_rocker extensions directory
                     extensions_dir = os.path.join(os.path.dirname(__file__), "extensions")

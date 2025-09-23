@@ -54,10 +54,9 @@ class DynamicYamlLoader:
 
                 try:
                     extension_class = DynamicYamlLoader.load_extension_from_file(yaml_file)
-                    if extension_class:
-                        # Use the extension name from YAML as the key
-                        extensions[extension_class.name] = extension_class
-                except Exception as e:
+                    # Use the extension name from YAML as the key
+                    extensions[extension_class.name] = extension_class
+                except Exception:
                     # Silently continue - don't pollute output with warnings
                     # Users can enable verbose mode if they need debugging
                     continue
@@ -75,7 +74,7 @@ class DynamicYamlLoader:
         Returns:
             Extension class created from YAML configuration
         """
-        with open(yaml_file, 'r', encoding='utf-8') as f:
+        with open(yaml_file, "r", encoding="utf-8") as f:
             config = yaml.safe_load(f)
 
         if not config:
@@ -83,61 +82,66 @@ class DynamicYamlLoader:
 
         # Extract extension name from filename if not specified in config
         filename = yaml_file.stem  # e.g., "myext.deps_rocker" -> "myext"
-        if filename.endswith('.deps_rocker'):
+        if filename.endswith(".deps_rocker"):
             default_name = filename[:-12]  # Remove ".deps_rocker" suffix
         else:
             default_name = filename
 
-        extension_name = config.get('name', default_name)
+        extension_name = config.get("name", default_name)
         # Properly capitalize class name: convert underscores/hyphens to title case
-        if 'class_name' in config:
-            class_name = config['class_name']
+        if "class_name" in config:
+            class_name = config["class_name"]
         else:
             # Split on underscores and hyphens, capitalize each part, then join
-            parts = extension_name.replace('-', '_').split('_')
-            class_name = ''.join(part.capitalize() for part in parts)
+            parts = extension_name.replace("-", "_").split("_")
+            class_name = "".join(part.capitalize() for part in parts)
 
         # Set name in config if not present
-        if 'name' not in config:
-            config['name'] = extension_name
+        if "name" not in config:
+            config["name"] = extension_name
 
         # Handle dockerfile configuration
-        if 'dockerfile' not in config:
+        if "dockerfile" not in config:
             # Look for companion Dockerfile if not specified in config
             dockerfile_path = yaml_file.parent / f"{extension_name}.Dockerfile"
             if dockerfile_path.exists():
                 # If there's a companion Dockerfile, reference it
-                config['dockerfile'] = str(dockerfile_path)
-        elif config['dockerfile'] and not Path(config['dockerfile']).is_absolute():
+                config["dockerfile"] = str(dockerfile_path)
+        elif config["dockerfile"] and not Path(config["dockerfile"]).is_absolute():
             # Handle relative paths by making them absolute relative to the YAML file
-            dockerfile_path = yaml_file.parent / config['dockerfile']
+            dockerfile_path = yaml_file.parent / config["dockerfile"]
             if dockerfile_path.exists():
-                config['dockerfile'] = str(dockerfile_path)
+                config["dockerfile"] = str(dockerfile_path)
 
         # Handle user dockerfile configuration
-        if 'user_dockerfile' not in config:
+        if "user_dockerfile" not in config:
             # Look for companion user Dockerfile if not specified in config
             user_dockerfile_path = yaml_file.parent / f"{extension_name}-user.Dockerfile"
             if user_dockerfile_path.exists():
-                config['user_dockerfile'] = str(user_dockerfile_path)
-        elif config.get('user_dockerfile') and not Path(config['user_dockerfile']).is_absolute():
+                config["user_dockerfile"] = str(user_dockerfile_path)
+        elif config.get("user_dockerfile") and not Path(config["user_dockerfile"]).is_absolute():
             # Handle relative paths by making them absolute relative to the YAML file
-            user_dockerfile_path = yaml_file.parent / config['user_dockerfile']
+            user_dockerfile_path = yaml_file.parent / config["user_dockerfile"]
             if user_dockerfile_path.exists():
-                config['user_dockerfile'] = str(user_dockerfile_path)
+                config["user_dockerfile"] = str(user_dockerfile_path)
 
         # Check for Docker Compose configuration
         docker_compose_config = None
-        for compose_filename in ['docker-compose.yml', 'docker-compose.yaml', f'{extension_name}-docker-compose.yml', f'{extension_name}-docker-compose.yaml']:
+        for compose_filename in [
+            "docker-compose.yml",
+            "docker-compose.yaml",
+            f"{extension_name}-docker-compose.yml",
+            f"{extension_name}-docker-compose.yaml",
+        ]:
             compose_path = yaml_file.parent / compose_filename
             if compose_path.exists():
-                with open(compose_path, 'r', encoding='utf-8') as f:
+                with open(compose_path, "r", encoding="utf-8") as f:
                     docker_compose_config = yaml.safe_load(f)
                 break
 
         # Create dynamic class
         class DynamicYamlExtension(YamlRockerExtension):
-            def __init__(self, *args, **kwargs):
+            def __init__(self):
                 # Initialize the base classes properly
                 super().__init__(yaml_config=config, docker_compose_config=docker_compose_config)
 
@@ -153,17 +157,21 @@ class DynamicYamlLoader:
         DynamicYamlExtension.__module__ = f"deps_rocker.dynamic.{extension_name}"
 
         # Set docstring from YAML description
-        if 'description' in config:
-            DynamicYamlExtension.__doc__ = config['description']
+        if "description" in config:
+            DynamicYamlExtension.__doc__ = config["description"]
         else:
             DynamicYamlExtension.__doc__ = f"YAML-based extension for {extension_name}"
 
         # Store source file for debugging
-        DynamicYamlExtension._yaml_source = str(yaml_file)
+        setattr(DynamicYamlExtension, "_yaml_source", str(yaml_file))
 
         # Store dockerfile path as class attribute
         dockerfile_path = yaml_file.parent / f"{extension_name}.Dockerfile"
-        DynamicYamlExtension._dockerfile_path = str(dockerfile_path) if dockerfile_path.exists() else None
+        setattr(
+            DynamicYamlExtension,
+            "_dockerfile_path",
+            str(dockerfile_path) if dockerfile_path.exists() else None,
+        )
 
         return DynamicYamlExtension
 
@@ -188,11 +196,13 @@ def create_dynamic_extension_getter(extension_name: str):
     Create a function that returns a specific extension class.
     This is used for entry point compatibility.
     """
+
     def get_extension():
         extensions = DynamicYamlLoader.get_all_extensions()
         if extension_name in extensions:
             return extensions[extension_name]
         raise ImportError(f"Dynamic YAML extension '{extension_name}' not found")
+
     return get_extension
 
 

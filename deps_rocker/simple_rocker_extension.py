@@ -180,7 +180,7 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
     --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \\
     apt-get update && apt-get install -y --no-install-recommends \\
     {packages_str}"""
-        else:
-            return f"""RUN apt-get update && apt-get install -y --no-install-recommends \\
+
+        return f"""RUN apt-get update && apt-get install -y --no-install-recommends \\
     {packages_str} \\
     && apt-get clean && rm -rf /var/lib/apt/lists/*"""
