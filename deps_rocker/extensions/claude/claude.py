@@ -27,7 +27,6 @@ class Claude(SimpleRockerExtension):
         # Determine container home directory (provided by user extension) or fallback
         container_home = (
             cliargs.get("user_home_dir")
-            or os.environ.get("DEPS_ROCKER_CONTAINER_HOME")
             or pwd.getpwuid(os.getuid()).pw_dir
         )
         if not container_home:
