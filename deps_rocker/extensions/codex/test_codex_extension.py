@@ -12,7 +12,7 @@ from unittest import mock
 if "em" not in sys.modules:
     em_stub = types.ModuleType("em")
 
-    def expand(template: str, args: dict | None = None):
+    def expand(template: str, args: dict | None = None):  # pylint: disable=unused-argument
         return template
 
     em_stub.expand = expand
