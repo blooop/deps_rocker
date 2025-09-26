@@ -55,11 +55,7 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         if self.apt_packages:
             apt_snippet = self.get_apt_command(self.apt_packages, use_cache_mount=None)
             # If there's an existing snippet, append the apt command
-            if snippet:
-                snippet = f"{apt_snippet}\n\n{snippet}"
-            else:
-                snippet = apt_snippet
-
+            snippet = f"{apt_snippet}\n\n{snippet}" if snippet else apt_snippet
         return snippet
 
     def get_user_snippet(self, cliargs) -> str:
