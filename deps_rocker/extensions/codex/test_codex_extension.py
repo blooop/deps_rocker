@@ -50,8 +50,10 @@ class TestCodexExtension(unittest.TestCase):
         self.assertEqual(docker_args, "")
 
     def test_get_docker_args_missing_user_home_dir(self):
-        with tempfile.TemporaryDirectory() as tmpdir, \
-             mock.patch("deps_rocker.extensions.codex.codex.logging") as mock_logging:
+        with (
+            tempfile.TemporaryDirectory() as tmpdir,
+            mock.patch("deps_rocker.extensions.codex.codex.logging") as mock_logging,
+        ):
             host_home = Path(tmpdir)
             codex_home = host_home / ".codex"
             codex_home.mkdir()
@@ -62,8 +64,10 @@ class TestCodexExtension(unittest.TestCase):
             mock_logging.warning.assert_called()
 
     def test_get_docker_args_invalid_user_home_dir(self):
-        with tempfile.TemporaryDirectory() as tmpdir, \
-             mock.patch("deps_rocker.extensions.codex.codex.logging") as mock_logging:
+        with (
+            tempfile.TemporaryDirectory() as tmpdir,
+            mock.patch("deps_rocker.extensions.codex.codex.logging") as mock_logging,
+        ):
             host_home = Path(tmpdir)
             codex_home = host_home / ".codex"
             codex_home.mkdir()
