@@ -6,3 +6,4 @@ class GitClone(SimpleRockerExtension):
 
     name = "git_clone"
     depends_on_extension = ["git"]
+    apt_packages = ["git", "git-lfs", "ca-certificates"]

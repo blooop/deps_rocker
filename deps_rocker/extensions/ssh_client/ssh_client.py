@@ -8,13 +8,7 @@ class SshClient(SimpleRockerExtension):
 
     name = "ssh_client"
     depends = ["ssh", "user"]
-
-    def get_snippet(self, cliargs):
-        # Install openssh-client and ensure the parent directory for the mount exists
-        return """
-RUN apt-get update && apt-get install -y --no-install-recommends openssh-client \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-"""
+    apt_packages = ["openssh-client"]
 
     def get_docker_args(self, cliargs):
         # Mount the entire ~/.ssh directory from the host to the container
