@@ -75,6 +75,7 @@ claude = "deps_rocker.extensions.claude.claude:Claude"
 npm = "deps_rocker.extensions.npm.npm:Npm"
 pixi = "deps_rocker.extensions.pixi.pixi:Pixi"
 gemini = "deps_rocker.extensions.gemini.gemini:Gemini"
+conda = "deps_rocker.extensions.conda.conda:Conda"
 
 # Environments
 [tool.pixi.environments]
