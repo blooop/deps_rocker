@@ -5,3 +5,4 @@ class Curl(SimpleRockerExtension):
     """Adds curl to your docker container"""
 
     name = "curl"
+    apt_packages = ["curl", "ca-certificates"]
