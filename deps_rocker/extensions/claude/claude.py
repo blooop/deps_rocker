@@ -9,7 +9,7 @@ class Claude(SimpleRockerExtension):
 
     name = "claude"
     # Ensure curl is available for the install script, and user exists for mounting into home
-    depends_on_extension: tuple[str, ...] = ("curl", "user")
+    depends_on_extension: tuple[str, ...] = ("curl", "user", "uv")
 
     def get_docker_args(self, cliargs) -> str:
         """
