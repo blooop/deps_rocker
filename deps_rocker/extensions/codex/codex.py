@@ -12,16 +12,9 @@ class Codex(SimpleRockerExtension):
     name = "codex"
     depends_on_extension = ("npm", "user")
 
-    def _resolve_container_home(self, cliargs) -> str | None:
-        """Resolve container home directory from cliargs and environment."""
-        user_home = cliargs.get("user_home_dir")
-        if user_home:
-            return user_home
-        return pwd.getpwuid(os.getuid()).pw_dir
-
     def get_docker_args(self, cliargs) -> str:
         """Mount host Codex config to reuse authentication inside the container."""
-        container_home = self._resolve_container_home(cliargs)
+        container_home = cliargs.get("user_home_dir") or pwd.getpwuid(os.getuid()).pw_dir
         if not container_home:
             logging.warning(
                 "Codex extension: unable to determine container home directory; skipping config mount."
