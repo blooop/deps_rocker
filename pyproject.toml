@@ -64,6 +64,7 @@ vcstool = "deps_rocker.extensions.vcstool.vcstool:VcsTool"
 uv = "deps_rocker.extensions.uv.uv:UV"
 npm = "deps_rocker.extensions.npm.npm:Npm"
 pixi = "deps_rocker.extensions.pixi.pixi:Pixi"
+cargo = "deps_rocker.extensions.cargo.cargo:Cargo"
 
 #host file system access
 cwd = "deps_rocker.extensions.cwd.cwd:CWD"
