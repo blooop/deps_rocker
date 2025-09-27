@@ -2,6 +2,7 @@
 
 set -e
 
+
 echo "Testing Codex CLI installation..."
 
 # Debug PATH and npm setup
