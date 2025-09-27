@@ -64,6 +64,7 @@ vcstool = "deps_rocker.extensions.vcstool.vcstool:VcsTool"
 uv = "deps_rocker.extensions.uv.uv:UV"
 npm = "deps_rocker.extensions.npm.npm:Npm"
 pixi = "deps_rocker.extensions.pixi.pixi:Pixi"
+cargo = "deps_rocker.extensions.cargo.cargo:Cargo"
 
 #host file system access
 cwd = "deps_rocker.extensions.cwd.cwd:CWD"
@@ -78,6 +79,7 @@ git_clone = "deps_rocker.extensions.git_clone.git_clone:GitClone"
 
 #dev tools
 fzf = "deps_rocker.extensions.fzf.fzf:Fzf"
+lazygit = "deps_rocker.extensions.lazygit.lazygit:Lazygit"
 neovim = "deps_rocker.extensions.neovim.neovim:NeoVim"
 palanteer = "deps_rocker.extensions.palanteer.palanteer:Palanteer"
 

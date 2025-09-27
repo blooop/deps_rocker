@@ -20,10 +20,12 @@ class TestExtensionsGeneric(unittest.TestCase):
         "pixi",
         # "urdf_viz",
         "fzf",
+        "lazygit",
         "cwd",
         "claude",
         "codex",
         "npm",
+        "cargo",
         "gemini",
         "palanteer",
         # "isaac_sim",
@@ -143,6 +145,9 @@ CMD [\"echo\", \"Extension test complete\"]
     def test_fzf_extension(self):
         self.run_extension_build_and_test("fzf")
 
+    def test_lazygit_extension(self):
+        self.run_extension_build_and_test("lazygit")
+
     def test_cwd_extension(self):
         self.run_extension_build_and_test("cwd")
 
@@ -154,6 +159,9 @@ CMD [\"echo\", \"Extension test complete\"]
 
     def test_npm_extension(self):
         self.run_extension_build_and_test("npm")
+
+    def test_cargo_extension(self):
+        self.run_extension_build_and_test("cargo")
 
     def test_gemini_extension(self):
         self.run_extension_build_and_test("gemini")
