@@ -27,6 +27,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         "npm",
         "cargo",
         "gemini",
+        # "palanteer",
         "conda",
         # "isaac_sim",
     ]
@@ -165,6 +166,9 @@ CMD [\"echo\", \"Extension test complete\"]
 
     def test_gemini_extension(self):
         self.run_extension_build_and_test("gemini")
+
+    # def test_palanteer_extension(self):
+    #     self.run_extension_build_and_test("palanteer")
 
     def test_conda_extension(self):
         self.run_extension_build_and_test("conda")

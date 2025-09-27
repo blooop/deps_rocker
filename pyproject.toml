@@ -1,6 +1,6 @@
 [project]
 name = "deps_rocker"
-version = "0.13.0"
+version = "0.14.0"
 authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
 description = "A rocker plugin to help installing apt and pip dependencies"
 readme = "README.md"
@@ -81,6 +81,7 @@ git_clone = "deps_rocker.extensions.git_clone.git_clone:GitClone"
 fzf = "deps_rocker.extensions.fzf.fzf:Fzf"
 lazygit = "deps_rocker.extensions.lazygit.lazygit:Lazygit"
 neovim = "deps_rocker.extensions.neovim.neovim:NeoVim"
+palanteer = "deps_rocker.extensions.palanteer.palanteer:Palanteer"
 
 #robotics
 ros_humble = "deps_rocker.extensions.ros_humble.ros_humble:RosHumble"
