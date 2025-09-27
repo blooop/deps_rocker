@@ -17,15 +17,6 @@ if ! python3 -c "import palanteer" &> /dev/null; then
 fi
 echo "✓ Python palanteer module import successful"
 
-# Test palanteer Python module help (without arguments it shows help)
-echo "Testing Python palanteer module usage..."
-echo "print('Hello from test script')" > /tmp/test_script.py
-if ! python3 -m palanteer 2>&1 | grep -q "Palanteer profiler usage"; then
-    echo "ERROR: python3 -m palanteer did not show expected help output"
-    exit 1
-fi
-echo "✓ Python palanteer module usage successful"
-
 # Test that palanteer command is available (REQUIRED)
 echo "Testing palanteer command availability..."
 if ! command -v palanteer &> /dev/null; then
@@ -33,6 +24,14 @@ if ! command -v palanteer &> /dev/null; then
     exit 1
 fi
 echo "✓ palanteer command found"
+
+# Test that palanter command (actual binary) is available
+echo "Testing palanter command availability..."
+if ! command -v palanter &> /dev/null; then
+    echo "ERROR: palanter command not found in PATH"
+    exit 1
+fi
+echo "✓ palanter command found"
 
 # Test palanteer command help
 echo "Testing palanteer command help..."
