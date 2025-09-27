@@ -17,7 +17,7 @@ class Codex(SimpleRockerExtension):
         user_home = cliargs.get("user_home_dir")
         if user_home:
             return user_home
-        return None
+        return pwd.getpwuid(os.getuid()).pw_dir
 
     def get_docker_args(self, cliargs) -> str:
         """Mount host Codex config to reuse authentication inside the container."""
@@ -38,6 +38,5 @@ class Codex(SimpleRockerExtension):
         container_codex = Path(container_home) / ".codex"
         args = [
             f'-v "{host_codex}:{container_codex}"',
-            f'-e "CODEX_HOME={container_codex}"',
         ]
         return " ".join(args)
