@@ -60,4 +60,20 @@ if [ ! -e "/root/.claude" ]; then
   echo "No stale root Claude config found"
 fi
 
+# Test Claude Code Usage Monitor installation
+if command -v claude-monitor >/dev/null 2>&1; then
+  echo "Claude Code Usage Monitor (claude-monitor) found in PATH"
+  if claude-monitor --help >/dev/null 2>&1; then
+    echo "Claude Code Usage Monitor is working"
+  else
+    echo "ERROR: Claude Code Usage Monitor found but not working properly" >&2
+    exit 1
+  fi
+elif uv tool run claude-monitor --help >/dev/null 2>&1; then
+  echo "Claude Code Usage Monitor works via 'uv tool run claude-monitor'"
+else
+  echo "ERROR: claude-monitor not accessible via PATH or uv tool run" >&2
+  exit 1
+fi
+
 echo "claude is installed and working"
