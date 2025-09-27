@@ -69,8 +69,10 @@ if command -v claude-monitor >/dev/null 2>&1; then
     echo "ERROR: Claude Code Usage Monitor found but not working properly" >&2
     exit 1
   fi
+elif uv tool run claude-monitor --help >/dev/null 2>&1; then
+  echo "Claude Code Usage Monitor works via 'uv tool run claude-monitor'"
 else
-  echo "ERROR: claude-monitor command not found in PATH" >&2
+  echo "ERROR: claude-monitor not accessible via PATH or uv tool run" >&2
   exit 1
 fi
 
