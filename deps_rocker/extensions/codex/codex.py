@@ -1,6 +1,4 @@
 import logging
-import os
-import pwd
 from pathlib import Path
 
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
