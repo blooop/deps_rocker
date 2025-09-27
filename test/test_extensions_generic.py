@@ -22,6 +22,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         "fzf",
         "cwd",
         "claude",
+        "codex",
         "npm",
         "gemini",
         # "isaac_sim",
@@ -146,6 +147,9 @@ CMD [\"echo\", \"Extension test complete\"]
 
     def test_claude_extension(self):
         self.run_extension_build_and_test("claude")
+
+    def test_codex_extension(self):
+        self.run_extension_build_and_test("codex")
 
     def test_npm_extension(self):
         self.run_extension_build_and_test("npm")
