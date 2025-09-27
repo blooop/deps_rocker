@@ -78,6 +78,7 @@ git_clone = "deps_rocker.extensions.git_clone.git_clone:GitClone"
 
 #dev tools
 fzf = "deps_rocker.extensions.fzf.fzf:Fzf"
+lazygit = "deps_rocker.extensions.lazygit.lazygit:Lazygit"
 neovim = "deps_rocker.extensions.neovim.neovim:NeoVim"
 
 #robotics
