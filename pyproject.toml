@@ -56,25 +56,38 @@ include = ["deps_rocker"]
 deps-rocker = "deps_rocker.dep_rocker_cli:gen_dockerfile"
 
 [project.entry-points."rocker.extensions"]
+#dependeny managers
 odeps_dependencies = "deps_rocker.dependencies:Dependencies"
 vcstool = "deps_rocker.extensions.vcstool.vcstool:VcsTool"
-cwd = "deps_rocker.extensions.cwd.cwd:CWD"
-ros_humble = "deps_rocker.extensions.ros_humble.ros_humble:RosHumble"
+
+#package managers
 uv = "deps_rocker.extensions.uv.uv:UV"
-cwd_name = "deps_rocker.extensions.cwd.cwd:CWDName"
-fzf = "deps_rocker.extensions.fzf.fzf:Fzf"
-git_clone = "deps_rocker.extensions.git_clone.git_clone:GitClone"
-curl = "deps_rocker.extensions.curl.curl:Curl"
-neovim = "deps_rocker.extensions.neovim.neovim:NeoVim"
-locales = "deps_rocker.extensions.locales.locales:Locales"
-isaac_sim = "deps_rocker.extensions.isaac_sim.isaac_sim:IsaacSim"
-tzdata = "deps_rocker.extensions.tzdata.tzdata:TzData"
-urdf_viz = "deps_rocker.extensions.urdf_viz.urdf_viz:UrdfViz"
-ssh_client = "deps_rocker.extensions.ssh_client.ssh_client:SshClient"
-claude = "deps_rocker.extensions.claude.claude:Claude"
-codex = "deps_rocker.extensions.codex.codex:Codex"
 npm = "deps_rocker.extensions.npm.npm:Npm"
 pixi = "deps_rocker.extensions.pixi.pixi:Pixi"
+
+#host file system access
+cwd = "deps_rocker.extensions.cwd.cwd:CWD"
+cwd_name = "deps_rocker.extensions.cwd.cwd:CWDName"
+
+#utils
+curl = "deps_rocker.extensions.curl.curl:Curl"
+locales = "deps_rocker.extensions.locales.locales:Locales"
+tzdata = "deps_rocker.extensions.tzdata.tzdata:TzData"
+ssh_client = "deps_rocker.extensions.ssh_client.ssh_client:SshClient"
+git_clone = "deps_rocker.extensions.git_clone.git_clone:GitClone"
+
+#dev tools
+fzf = "deps_rocker.extensions.fzf.fzf:Fzf"
+neovim = "deps_rocker.extensions.neovim.neovim:NeoVim"
+
+#robotics
+ros_humble = "deps_rocker.extensions.ros_humble.ros_humble:RosHumble"
+isaac_sim = "deps_rocker.extensions.isaac_sim.isaac_sim:IsaacSim"
+urdf_viz = "deps_rocker.extensions.urdf_viz.urdf_viz:UrdfViz"
+
+#AI tools
+claude = "deps_rocker.extensions.claude.claude:Claude"
+codex = "deps_rocker.extensions.codex.codex:Codex"
 gemini = "deps_rocker.extensions.gemini.gemini:Gemini"
 
 # Environments
