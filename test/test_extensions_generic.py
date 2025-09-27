@@ -11,6 +11,7 @@ class TestExtensionsGeneric(unittest.TestCase):
     """Simplified tests for deps_rocker extensions"""
 
     EXTENSIONS_TO_TEST = [
+        "apt_update",
         "uv",
         "tzdata",
         "curl",

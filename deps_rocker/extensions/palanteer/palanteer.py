@@ -5,7 +5,7 @@ class Palanteer(SimpleRockerExtension):
     """Install palanteer profiler for Python and C++ development"""
 
     name = "palanteer"
-    depends_on_extension = ("curl", "git_clone", "x11")
+    depends_on_extension = ("apt_update", "curl", "git_clone", "x11")
     apt_packages = [
         "build-essential",
         "cmake",

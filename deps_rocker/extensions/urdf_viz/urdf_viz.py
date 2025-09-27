@@ -5,6 +5,7 @@ class UrdfViz(SimpleRockerExtension):
     """Add the urdf-viz to your docker image"""
 
     name = "urdf_viz"
+    depends_on_extension = ("apt_update",)
     apt_packages = ["libxi6", "libxcursor-dev", "libxrandr-dev", "jq", "ros-humble-xacro"]
 
     def required(self, cliargs):

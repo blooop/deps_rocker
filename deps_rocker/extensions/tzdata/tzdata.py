@@ -5,3 +5,4 @@ class TzData(SimpleRockerExtension):
     """Sets up tzdata without requiring user input, defaults to UTC"""
 
     name = "tzdata"
+    depends_on_extension = ("apt_update",)

@@ -7,6 +7,7 @@ class RosHumble(SimpleRockerExtension):
     """Adds ros-humble to your docker container"""
 
     name = "ros_humble"
+    depends_on_extension = ("apt_update",)
 
     def invoke_after(self, cliargs):
         return {"vcstool"}

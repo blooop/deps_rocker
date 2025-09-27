@@ -7,6 +7,7 @@ class SshClient(SimpleRockerExtension):
     """Install openssh-client and mount the user's ~/.ssh directory into the container."""
 
     name = "ssh_client"
+    depends_on_extension = ("apt_update",)
     depends = ["ssh", "user"]
     apt_packages = ["openssh-client"]
 

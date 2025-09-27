@@ -1,4 +1,4 @@
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates git \
+RUN apt-get install -y --no-install-recommends curl ca-certificates git \
 && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*') \

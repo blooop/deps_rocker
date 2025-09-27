@@ -53,7 +53,9 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
 
         # If apt_packages is defined, generate apt install command
         if self.apt_packages:
-            apt_snippet = self.get_apt_command(self.apt_packages, use_cache_mount=None)
+            # Check if apt_update is in dependencies - if so, skip update
+            skip_update = "apt_update" in self.depends_on_extension
+            apt_snippet = self.get_apt_command(self.apt_packages, use_cache_mount=None, skip_update=skip_update)
             # If there's an existing snippet, append the apt command
             snippet = f"{apt_snippet}\n\n{snippet}" if snippet else apt_snippet
         return snippet
@@ -151,13 +153,14 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         return set(self.depends_on_extension) if self.depends_on_extension else set()
 
     @staticmethod
-    def get_apt_command(packages: list[str], use_cache_mount: bool = None) -> str:
+    def get_apt_command(packages: list[str], use_cache_mount: bool = None, skip_update: bool = False) -> str:
         """
         Generate an apt install command with optional cache mount for BuildKit.
 
         Args:
             packages: List of apt packages to install
             use_cache_mount: Whether to use BuildKit cache mounts (None=auto-detect, True=force, False=disable)
+            skip_update: If True, skip apt-get update (assumes it was run in a previous layer)
 
         Returns:
             Complete RUN command string for Dockerfile
@@ -171,6 +174,11 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         if use_cache_mount is None:
             # Default to False for tests to maintain compatibility
             use_cache_mount = False
+
+        if skip_update:
+            return f"""RUN apt-get install -y --no-install-recommends \\
+    {packages_str} \\
+    && apt-get clean"""
 
         if use_cache_mount:
             return f"""RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \\

@@ -5,4 +5,4 @@ class Lazygit(SimpleRockerExtension):
     """Install lazygit for interactive git operations"""
 
     name = "lazygit"
-    depends_on_extension = ("curl", "git_clone")
+    depends_on_extension = ("apt_update", "curl", "git_clone")

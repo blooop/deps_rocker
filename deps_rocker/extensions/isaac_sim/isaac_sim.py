@@ -10,6 +10,7 @@ class IsaacSim(SimpleRockerExtension):
     """Add isaacsim to your docker container"""
 
     name = "isaacsim"
+    depends_on_extension = ("apt_update",)
     apt_packages = [
         "python3-pip",
         "cmake",

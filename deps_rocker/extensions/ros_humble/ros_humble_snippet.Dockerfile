@@ -2,7 +2,7 @@
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install language
-RUN apt-get update && apt-get install -y \
+RUN apt-get install -y \
   locales \
   && locale-gen en_US.UTF-8 \
   && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 \
@@ -12,16 +12,15 @@ ENV LANG=en_US.UTF-8
 # Install timezone
 RUN ln -fs /usr/share/zoneinfo/UTC /etc/localtime \
   && export DEBIAN_FRONTEND=noninteractive \
-  && apt-get update \
   && apt-get install -y tzdata \
   && dpkg-reconfigure --frontend noninteractive tzdata \
   && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get -y upgrade \
+RUN apt-get -y upgrade \
   && rm -rf /var/lib/apt/lists/*
 
 # Install common programs
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get install -y --no-install-recommends \
   curl \
   gnupg2 \
   lsb-release \
