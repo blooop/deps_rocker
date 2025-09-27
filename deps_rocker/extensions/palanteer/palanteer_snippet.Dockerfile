@@ -12,5 +12,8 @@ RUN cd /tmp && \
 # Install palanteer Python package
 RUN pip3 install palanteer==0.8.0
 
-# Ensure palanteer binary is in PATH
-ENV PATH="/usr/local/bin:$PATH"
+# Create symlink to ensure palanteer is accessible
+RUN ln -sf /usr/local/bin/palanteer /usr/bin/palanteer || true
+
+# Update PATH to include /usr/local/bin
+ENV PATH="/usr/local/bin:${PATH}"
