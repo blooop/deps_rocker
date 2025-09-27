@@ -3,10 +3,14 @@ RUN cd /tmp && \
     git clone --depth 1 https://github.com/dfeneyrou/palanteer.git && \
     cd palanteer && \
     mkdir build && cd build && \
-    cmake .. -DCMAKE_BUILD_TYPE=Release && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local && \
     make -j$(nproc) && \
     make install && \
+    ldconfig && \
     cd / && rm -rf /tmp/palanteer
 
 # Install palanteer Python package
 RUN pip3 install palanteer==0.8.0
+
+# Ensure palanteer binary is in PATH
+ENV PATH="/usr/local/bin:$PATH"
