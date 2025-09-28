@@ -1,20 +1,25 @@
 # Docker-in-Docker Extension
 #
-# IMPORTANT: This extension requires the container to run with specific privileges and mounts:
+# 🚨 CRITICAL REQUIREMENT: This extension REQUIRES --privileged mode to function!
 #
-# Required rocker arguments:
-#   --privileged          (required for Docker daemon to start)
-#   --volume /var/lib/docker  (optional: persist Docker data)
+# Docker-in-Docker needs kernel access and system capabilities that are only
+# available with privileged containers. Without --privileged, the Docker daemon
+# cannot start and this extension will not work.
 #
-# Alternative minimal privileges (instead of --privileged):
-#   --cap-add SYS_ADMIN
-#   --cap-add DAC_READ_SEARCH
-#   --security-opt apparmor:unconfined
-#   --cgroup-parent docker.slice
-#   --cgroupns private
+# MANDATORY rocker arguments:
+#   --privileged          (REQUIRED - Docker daemon cannot start without this)
 #
-# Example usage:
+# Optional arguments:
+#   --volume /var/lib/docker  (optional: persist Docker data between runs)
+#
+# CORRECT USAGE:
 #   rocker --docker-in-docker --privileged ubuntu:22.04
+#
+# Advanced users only (alternative to --privileged):
+#   --cap-add SYS_ADMIN --cap-add DAC_READ_SEARCH --security-opt apparmor:unconfined
+#   --cgroup-parent docker.slice --cgroupns private
+#
+# ⚠️  WARNING: Running without --privileged will result in test failures!
 
 # Install prerequisites
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -51,3 +56,6 @@ RUN chmod +x /usr/local/share/docker-init.sh
 # Create entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Set entrypoint to automatically start Docker daemon
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
