@@ -92,6 +92,7 @@ urdf_viz = "deps_rocker.extensions.urdf_viz.urdf_viz:UrdfViz"
 claude = "deps_rocker.extensions.claude.claude:Claude"
 codex = "deps_rocker.extensions.codex.codex:Codex"
 gemini = "deps_rocker.extensions.gemini.gemini:Gemini"
+spec_kit = "deps_rocker.extensions.spec_kit.spec_kit:SpecKit"
 conda = "deps_rocker.extensions.conda.conda:Conda"
 
 # Environments
