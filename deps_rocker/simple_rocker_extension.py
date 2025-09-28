@@ -85,16 +85,38 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         except FileNotFoundError as _:
             logging.info(f"no user snippet found {snippet_name}")
         except Exception as e:
-            error_msg = f"Error processing empy template '{snippet_name}' in extension '{self.name}': {e}"
+            error_msg = (
+                f"Error processing empy template '{snippet_name}' in extension '{self.name}': {e}"
+            )
 
             # Provide specific guidance for common empy template errors
             if "unterminated string literal" in str(e).lower():
-                error_msg += "\n" + " " * 4 + "HINT: This often occurs when using '@' or '$' characters in Dockerfile commands."
-                error_msg += "\n" + " " * 4 + "      In empy templates, escape '@' as '@@' and '$' as '$$' when they should be literal characters."
-                error_msg += "\n" + " " * 4 + "      Example: 'npm install -g package@version' should be 'npm install -g package@@version'"
+                error_msg += (
+                    "\n"
+                    + " " * 4
+                    + "HINT: This often occurs when using '@' or '$' characters in Dockerfile commands."
+                )
+                error_msg += (
+                    "\n"
+                    + " " * 4
+                    + "      In empy templates, escape '@' as '@@' and '$' as '$$' when they should be literal characters."
+                )
+                error_msg += (
+                    "\n"
+                    + " " * 4
+                    + "      Example: 'npm install -g package@version' should be 'npm install -g package@@version'"
+                )
             elif "syntax error" in str(e).lower():
-                error_msg += "\n" + " " * 4 + "HINT: Check for unescaped special characters in your Dockerfile snippet."
-                error_msg += "\n" + " " * 4 + "      Common issues: unescaped '@' or '$' characters, missing quotes, or malformed template syntax."
+                error_msg += (
+                    "\n"
+                    + " " * 4
+                    + "HINT: Check for unescaped special characters in your Dockerfile snippet."
+                )
+                error_msg += (
+                    "\n"
+                    + " " * 4
+                    + "      Common issues: unescaped '@' or '$' characters, missing quotes, or malformed template syntax."
+                )
 
             logging.error(error_msg)
         return ""
