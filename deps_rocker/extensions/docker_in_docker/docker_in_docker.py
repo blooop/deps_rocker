@@ -12,10 +12,10 @@ class DockerInDocker(SimpleRockerExtension):
         del cliargs  # Unused but required by interface
 
         # Essential arguments for Docker-in-Docker
-        args = ' --privileged'
+        args = " --privileged"
 
         # Add volume mount for Docker data persistence (but NOT socket - that would be docker-out-of-docker)
-        args += ' --volume /var/lib/docker'
+        args += " --volume /var/lib/docker"
 
         return args
 
