@@ -6,14 +6,13 @@
 # available with privileged containers. Without --privileged, the Docker daemon
 # cannot start and this extension will not work.
 #
-# MANDATORY rocker arguments:
-#   --privileged          (REQUIRED - Docker daemon cannot start without this)
+# AUTOMATIC rocker arguments (provided by extension):
+#   --privileged                              (REQUIRED - Docker daemon cannot start without this)
+#   --volume /var/lib/docker                  (Docker data persistence)
+#   --volume /var/run/docker.sock             (Docker socket access)
 #
-# Optional arguments:
-#   --volume /var/lib/docker  (optional: persist Docker data between runs)
-#
-# CORRECT USAGE:
-#   rocker --docker-in-docker --privileged ubuntu:22.04
+# SIMPLE USAGE (extension automatically provides all required arguments):
+#   rocker --docker-in-docker ubuntu:22.04
 #
 # Advanced users only (alternative to --privileged):
 #   --cap-add SYS_ADMIN --cap-add DAC_READ_SEARCH --security-opt apparmor:unconfined
