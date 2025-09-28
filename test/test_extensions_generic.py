@@ -30,6 +30,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         "spec_kit",
         # "palanteer",
         "conda",
+        "docker_in_docker",
         # "isaac_sim",
     ]
 
@@ -176,6 +177,9 @@ CMD [\"echo\", \"Extension test complete\"]
 
     def test_conda_extension(self):
         self.run_extension_build_and_test("conda")
+
+    def test_docker_in_docker_extension(self):
+        self.run_extension_build_and_test("docker_in_docker")
 
     # def test_isaac_sim_extension(self):
     #     self.run_extension_build_and_test("isaac_sim")
