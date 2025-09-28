@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     gnupg \
     lsb-release \
+    sudo \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Add Docker's official GPG key
@@ -46,9 +47,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     docker-buildx-plugin \
     docker-compose-plugin \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Create docker group and add current user
-RUN groupadd -f docker
 
 # Install Docker-in-Docker initialization script
 COPY docker-init.sh /usr/local/share/docker-init.sh

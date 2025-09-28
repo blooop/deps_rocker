@@ -15,7 +15,7 @@ class DockerInDocker(SimpleRockerExtension):
         args = " --privileged"
 
         # Add volume mount for Docker data persistence (but NOT socket - that would be docker-out-of-docker)
-        args += " --volume /var/lib/docker"
+        args += " --volume /var/lib/docker "
 
         return args
 
