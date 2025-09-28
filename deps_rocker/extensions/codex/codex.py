@@ -32,4 +32,4 @@ class Codex(SimpleRockerExtension):
         args = [
             f'-v "{host_codex}:{container_codex}"',
         ]
-        return " ".join(args)
+        return " " + " ".join(args)
