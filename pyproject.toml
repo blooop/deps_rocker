@@ -14,6 +14,10 @@ dependencies = [
   "toml>=0.10",
 ]
 
+[tool.pixi.dependencies]
+shellcheck = ">=0.10.0,<0.11"
+pre-commit = ">=4,<4.4"
+
 [project.urls]
 Source = "https://github.com/blooop/deps_rocker"
 Home = "https://github.com/blooop/deps_rocker"
