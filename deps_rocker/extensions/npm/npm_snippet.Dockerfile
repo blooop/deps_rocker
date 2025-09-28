@@ -1,7 +1,7 @@
 # Install nvm, node and npm
 ENV NVM_DIR=/usr/local/nvm
 ENV NODE_VERSION=24.9.0
-ENV NPM_VERSION=11.6.1
+ENV NPM_VERSION=11.6.0
 
 # Create nvm directory
 RUN mkdir -p $NVM_DIR
