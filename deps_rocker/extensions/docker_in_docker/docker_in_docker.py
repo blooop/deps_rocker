@@ -14,14 +14,14 @@ class DockerInDocker(SimpleRockerExtension):
         # Essential arguments for Docker-in-Docker
         args = ' --privileged'
 
-        # Add volume mounts for Docker data persistence and socket access
+        # Add volume mount for Docker data persistence (but NOT socket - that would be docker-out-of-docker)
         args += ' --volume /var/lib/docker'
-        args += ' --volume /var/run/docker.sock:/var/run/docker.sock'
 
         return args
 
     def get_files(self, cliargs):
         """Copy the docker-init.sh and docker-entrypoint.sh scripts into the container"""
+        del cliargs  # Unused but required by interface
         files = {}
 
         docker_init_content = self.get_config_file("docker-init.sh")

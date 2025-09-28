@@ -8,11 +8,13 @@
 #
 # AUTOMATIC rocker arguments (provided by extension):
 #   --privileged                              (REQUIRED - Docker daemon cannot start without this)
-#   --volume /var/lib/docker                  (Docker data persistence)
-#   --volume /var/run/docker.sock             (Docker socket access)
+#   --volume /var/lib/docker                  (Docker data persistence within container)
 #
 # SIMPLE USAGE (extension automatically provides all required arguments):
 #   rocker --docker-in-docker ubuntu:22.04
+#
+# NOTE: This is true Docker-in-Docker - runs a separate Docker daemon inside the container.
+# This is different from "docker-out-of-docker" which would mount the host's socket.
 #
 # Advanced users only (alternative to --privileged):
 #   --cap-add SYS_ADMIN --cap-add DAC_READ_SEARCH --security-opt apparmor:unconfined
