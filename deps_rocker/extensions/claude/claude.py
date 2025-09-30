@@ -5,11 +5,11 @@ from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
 class Claude(SimpleRockerExtension):
-    """Install Claude Code via install script and mount host ~/.claude into the container"""
+    """Install Claude Code via npm and mount host ~/.claude into the container"""
 
     name = "claude"
-    # Ensure curl is available for the install script, and user exists for mounting into home
-    depends_on_extension: tuple[str, ...] = ("curl", "user", "uv")
+    # Ensure npm is available for installation, and user exists for mounting into home
+    depends_on_extension: tuple[str, ...] = ("npm", "user", "uv")
 
     def get_docker_args(self, cliargs) -> str:
         """
