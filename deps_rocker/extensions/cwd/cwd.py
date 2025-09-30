@@ -9,7 +9,7 @@ class CWD(SimpleRockerExtension):
     name = "cwd"
 
     def get_docker_args(self, cliargs) -> str:
-        return f" -v {Path.cwd()}:/{Path.cwd().name} -w /{Path.cwd().name}"
+        return f" -v {Path.cwd()}:/{Path.cwd().name} -w /{Path.cwd().stem}"
 
     def invoke_after(self, cliargs) -> set:
         return {"user"}
