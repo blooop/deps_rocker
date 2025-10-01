@@ -6,13 +6,20 @@ UV_ENV="$HOME/.venvs/dev-tools-uv"
 PROJ_A="$HOME/projects/rockerc"
 PROJ_B="$HOME/projects/deps_rocker"
 
-# Create venv if missing
-if [ ! -d "$UV_ENV" ]; then
-    echo "Creating uv venv at $UV_ENV"
-    uv venv "$UV_ENV"
-else
-    echo "Using existing uv venv at $UV_ENV"
+# Always wipe existing environment
+if [ -d "$UV_ENV" ]; then
+    echo "🗑️  Removing existing environment at $UV_ENV"
+    rm -rf "$UV_ENV"
 fi
+# Remove from bashrc if present
+if grep -Fq "$UV_ENV/bin" "$HOME/.bashrc" 2>/dev/null; then
+    echo "🧹 Removing venv PATH from ~/.bashrc"
+    grep -v "$UV_ENV/bin" "$HOME/.bashrc" > "$HOME/.bashrc.tmp" && mv "$HOME/.bashrc.tmp" "$HOME/.bashrc"
+fi
+
+# Create fresh venv
+echo "Creating uv venv at $UV_ENV"
+uv venv "$UV_ENV"
 
 # Add to ~/.bashrc if not already present
 if ! grep -Fq "$UV_ENV/bin" "$HOME/.bashrc"; then
