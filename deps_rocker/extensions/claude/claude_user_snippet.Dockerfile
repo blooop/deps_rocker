@@ -3,7 +3,3 @@
 
 # Add ~/.local/bin to PATH for the user
 RUN echo 'export PATH="$HOME/.local/bin:$PATH"' >> $HOME/.bashrc
-
-# Install claude-monitor for the user
-RUN uv tool install claude-monitor \
-    && echo 'Claude monitor installed.'
