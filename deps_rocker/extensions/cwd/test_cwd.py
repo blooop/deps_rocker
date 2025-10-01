@@ -9,7 +9,7 @@ class TestCWD(unittest.TestCase):
         cwd_ext = CWD()
         cliargs = {}
         docker_args = cwd_ext.get_docker_args(cliargs)
-        expected = f" -v {Path.cwd()}:/workspaces "
+        expected = f" -v {Path.cwd()}:/{Path.cwd().stem} -w /{Path.cwd().stem}"
         self.assertEqual(docker_args, expected)
 
     def test_invoke_after(self):
