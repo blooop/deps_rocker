@@ -24,13 +24,23 @@ class Claude(SimpleRockerExtension):
           - Export CLAUDE_CONFIG_DIR pointing at the mounted path
           - Also mount cache/share dirs if present (best effort)
         """
-        # Determine container home directory (provided by user extension) or fallback
-        container_home = cliargs.get("user_home_dir") or pwd.getpwuid(os.getuid()).pw_dir
-        if not container_home:
-            logging.warning(
-                "Could not determine container home directory. Skipping Claude config mounts."
+        # Determine container home directory
+        # When user extension is active, it will override the username/home directory
+        # For container home, we use the current user's home path structure
+        host_userinfo = pwd.getpwuid(os.getuid())
+        container_username = (cliargs or {}).get("user_override_name") or host_userinfo.pw_name
+        container_home = f"/home/{container_username}"
+
+        # Use host home for determining config paths
+        # Always use the actual host user's home for finding config files
+        host_home = host_userinfo.pw_dir
+
+        # Log the mounting strategy for debugging
+        if container_username != host_userinfo.pw_name:
+            logging.debug(
+                f"Claude extension: mounting host user '{host_userinfo.pw_name}' config "
+                f"to container user '{container_username}'"
             )
-            return ""
 
         mounts: list[str] = []
         envs: list[str] = []
@@ -42,9 +52,9 @@ class Claude(SimpleRockerExtension):
             candidates.append(
                 (os.path.join(host_xdg, "claude"), f"{container_home}/.config/claude")
             )
-        candidates.append((os.path.expanduser("~/.claude"), f"{container_home}/.claude"))
+        candidates.append((os.path.join(host_home, ".claude"), f"{container_home}/.claude"))
         candidates.append(
-            (os.path.expanduser("~/.config/claude"), f"{container_home}/.config/claude")
+            (os.path.join(host_home, ".config/claude"), f"{container_home}/.config/claude")
         )
 
         host_config = None
@@ -60,8 +70,42 @@ class Claude(SimpleRockerExtension):
                 "No Claude config directory found on host (XDG + ~/.claude). The CLI may run first-time setup in the container."
             )
         else:
+            # Mount the entire config directory with proper options
             mounts.append(f' -v "{host_config}:{container_config}"')
             envs.append(f' -e "CLAUDE_CONFIG_DIR={container_config}"')
+
+            # Validate critical config files exist and log their status
+            critical_files = [".credentials.json", ".claude.json", "settings.json"]
+            accessible_files = []
+
+            for filename in critical_files:
+                host_file = os.path.join(host_config, filename)
+                if os.path.exists(host_file):
+                    # Check if file is readable
+                    try:
+                        with open(host_file, "r", encoding="utf-8") as f:
+                            # Just check readability, don't read content
+                            f.read(1)
+                        accessible_files.append(filename)
+                        logging.debug(f"Claude config file accessible: {filename}")
+                    except (IOError, PermissionError) as e:
+                        logging.warning(
+                            f"Claude config file {filename} exists but not readable: {e}"
+                        )
+
+            if accessible_files:
+                logging.info(f"Mounting Claude config with accessible files: {accessible_files}")
+            else:
+                logging.warning(
+                    "No accessible Claude config files found - authentication may be required in container"
+                )
+
+            # Ensure container config directory exists and has proper permissions
+            # This is handled by Docker volume mounting, but we set proper ownership
+            container_config_parent = os.path.dirname(container_config)
+            if container_config_parent != container_home:
+                # Create parent directory structure if using XDG config
+                envs.append(f' -e "CLAUDE_ENSURE_CONFIG_DIR={container_config_parent}"')
 
         # Encourage consistent XDG resolution paths inside the container
         envs.append(f' -e "XDG_CONFIG_HOME={container_home}/.config"')
@@ -71,8 +115,11 @@ class Claude(SimpleRockerExtension):
 
         # Supplemental mounts
         extra_paths = [
-            (os.path.expanduser("~/.cache/claude"), f"{container_home}/.cache/claude"),
-            (os.path.expanduser("~/.local/share/claude"), f"{container_home}/.local/share/claude"),
+            (os.path.join(host_home, ".cache/claude"), f"{container_home}/.cache/claude"),
+            (
+                os.path.join(host_home, ".local/share/claude"),
+                f"{container_home}/.local/share/claude",
+            ),
         ]
         for host_extra, container_extra in extra_paths:
             if os.path.exists(host_extra):
@@ -82,3 +129,10 @@ class Claude(SimpleRockerExtension):
             return ""
 
         return "".join(mounts + envs)
+
+    def get_environment_subs(self, cliargs):
+        """
+        Get environment setup commands for Claude config.
+        """
+        # No special setup needed - Docker volume mounting handles permissions
+        return {}

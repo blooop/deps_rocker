@@ -609,18 +609,18 @@ packages:
 - pypi: ./
   name: deps-rocker
   version: 0.16.0
-  sha256: 8b1720d7fd2c629a53ecad1d7c79be2e10d6afc3982f4aba4e2753e6e14fb24b
+  sha256: dd695a7299e5d32b03f232924e947ad72bbbe26fabc5b52a8a26f6417afedc5c
   requires_dist:
   - rocker>=0.2.19
   - off-your-rocker>=0.1.0
   - pyyaml>=5.0
   - toml>=0.10
   - pylint>=3.2.5,<=3.3.8 ; extra == 'test'
-  - pytest-cov>=4.1,<=6.2.1 ; extra == 'test'
-  - pytest>=7.4,<=8.4.1 ; extra == 'test'
-  - hypothesis>=6.104.2,<=6.138.11 ; extra == 'test'
-  - ruff>=0.5.0,<=0.12.11 ; extra == 'test'
-  - coverage>=7.5.4,<=7.10.6 ; extra == 'test'
+  - pytest-cov>=4.1,<=7.0.0 ; extra == 'test'
+  - pytest>=7.4,<=8.4.2 ; extra == 'test'
+  - hypothesis>=6.104.2,<=6.140.2 ; extra == 'test'
+  - ruff>=0.5.0,<=0.13.2 ; extra == 'test'
+  - coverage>=7.5.4,<=7.10.7 ; extra == 'test'
   - pre-commit<=4.3.0 ; extra == 'test'
   requires_python: '>=3.9'
   editable: true
