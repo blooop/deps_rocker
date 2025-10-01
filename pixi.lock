@@ -608,8 +608,8 @@ packages:
   requires_python: '>=3.9'
 - pypi: ./
   name: deps-rocker
-  version: 0.15.0
-  sha256: 3348deac8a47d8d2b8a2a73bf81197dc087d55b3d324bc04c49f3121c60303fa
+  version: 0.16.0
+  sha256: 8b1720d7fd2c629a53ecad1d7c79be2e10d6afc3982f4aba4e2753e6e14fb24b
   requires_dist:
   - rocker>=0.2.19
   - off-your-rocker>=0.1.0
@@ -1257,7 +1257,7 @@ packages:
   license: MIT
   license_family: MIT
   purls:
-  - pkg:pypi/pyyaml?source=compressed-mapping
+  - pkg:pypi/pyyaml?source=hash-mapping
   size: 180966
   timestamp: 1758892005321
 - conda: https://conda.anaconda.org/conda-forge/linux-64/pyyaml-6.0.3-py311h3778330_0.conda
