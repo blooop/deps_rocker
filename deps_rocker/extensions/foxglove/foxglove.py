@@ -7,6 +7,17 @@ class Foxglove(SimpleRockerExtension):
 
     name = "foxglove"
     depends_on_extension = ("curl",)
+    apt_packages = [
+        "libgtk-3-0",
+        "libnotify4",
+        "libnss3",
+        "libxtst6",
+        "xdg-utils",
+        "libatspi2.0-0",
+        "libdrm2",
+        "libgbm1",
+        "libxcb-dri3-0",
+    ]
 
     def get_docker_args(self, cliargs) -> str:
         """

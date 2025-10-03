@@ -1,16 +1,3 @@
-# Install Foxglove Studio dependencies
-RUN apt-get update && apt-get install --no-install-recommends -y \
-    libgtk-3-0 \
-    libnotify4 \
-    libnss3 \
-    libxtst6 \
-    xdg-utils \
-    libatspi2.0-0 \
-    libdrm2 \
-    libgbm1 \
-    libxcb-dri3-0 \
-    && rm -rf /var/lib/apt/lists/*
-
 # Install Foxglove Studio via direct download
 RUN FOXGLOVE_VERSION="2.34.0" && \
     FOXGLOVE_DEB="foxglove-studio-${FOXGLOVE_VERSION}-linux-amd64.deb" && \
