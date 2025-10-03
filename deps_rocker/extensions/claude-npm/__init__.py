@@ -1,0 +1,1 @@
+"""Claude npm extension package"""
