@@ -23,6 +23,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         "lazygit",
         "cwd",
         "claude",
+        "claude-npm",
         "codex",
         "npm",
         "cargo",
@@ -155,6 +156,9 @@ CMD [\"echo\", \"Extension test complete\"]
 
     def test_claude_extension(self):
         self.run_extension_build_and_test("claude")
+
+    def test_claude_npm_extension(self):
+        self.run_extension_build_and_test("claude-npm")
 
     def test_codex_extension(self):
         self.run_extension_build_and_test("codex")

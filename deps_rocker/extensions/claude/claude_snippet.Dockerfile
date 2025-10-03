@@ -1,5 +1,5 @@
-# Install Claude Code CLI via npm and claude-monitor via uv
-RUN npm install -g @@anthropic-ai/claude-code \
+# Install Claude Code CLI via official installer and claude-monitor via uv
+RUN curl -fsSL https://claude.ai/install.sh | bash \
     && uv tool install claude-monitor \
     && echo 'Claude Code and monitor installed.'
 
