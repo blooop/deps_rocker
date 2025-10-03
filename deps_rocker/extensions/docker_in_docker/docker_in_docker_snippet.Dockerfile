@@ -48,6 +48,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     docker-compose-plugin \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Create docker group and add current user to docker group for non-root access
+RUN groupadd -f docker \
+    && if [ -n "${USER}" ] && id -u "${USER}" >/dev/null 2>&1; then usermod -aG docker "${USER}"; fi
+
 # Install Docker-in-Docker initialization script
 COPY docker-init.sh /usr/local/share/docker-init.sh
 RUN chmod +x /usr/local/share/docker-init.sh

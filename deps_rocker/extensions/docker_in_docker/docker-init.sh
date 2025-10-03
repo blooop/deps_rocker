@@ -14,7 +14,10 @@ set -e
 dockerd_start="$(cat << 'EOF'
     # explicitly remove dockerd pid file to ensure a clean start
     if [ -f "/var/run/docker.pid" ]; then
-        rm -f /var/run/docker.pid
+        # Check if dockerd is actually running before removing pid file
+        if ! pgrep -x dockerd > /dev/null; then
+            rm -f /var/run/docker.pid
+        fi
     fi
 
     # -- Start: dind wrapper script --

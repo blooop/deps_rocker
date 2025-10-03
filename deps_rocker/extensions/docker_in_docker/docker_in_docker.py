@@ -12,24 +12,19 @@ class DockerInDocker(SimpleRockerExtension):
         del cliargs  # Unused but required by interface
 
         # Essential arguments for Docker-in-Docker
-        args = " --privileged"
-
-        # Add volume mount for Docker data persistence (but NOT socket - that would be docker-out-of-docker)
-        args += " --volume /var/lib/docker "
-
-        return args
+        return " --privileged --volume /var/lib/docker"
 
     def get_files(self, cliargs):
         """Copy the docker-init.sh and docker-entrypoint.sh scripts into the container"""
         del cliargs  # Unused but required by interface
         files = {}
 
-        docker_init_content = self.get_config_file("docker-init.sh")
-        if docker_init_content:
-            files["docker-init.sh"] = docker_init_content.decode("utf-8")
+        if not (docker_init_content := self.get_config_file("docker-init.sh")):
+            raise FileNotFoundError("Required config file 'docker-init.sh' is missing")
+        files["docker-init.sh"] = docker_init_content.decode("utf-8")
 
-        docker_entrypoint_content = self.get_config_file("docker-entrypoint.sh")
-        if docker_entrypoint_content:
-            files["docker-entrypoint.sh"] = docker_entrypoint_content.decode("utf-8")
+        if not (docker_entrypoint_content := self.get_config_file("docker-entrypoint.sh")):
+            raise FileNotFoundError("Required config file 'docker-entrypoint.sh' is missing")
+        files["docker-entrypoint.sh"] = docker_entrypoint_content.decode("utf-8")
 
         return files
