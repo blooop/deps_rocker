@@ -19,8 +19,29 @@
 pip install deps-rocker
 ```
 
-development
+## Development
+
+### Quick Development Setup
+
+Use the provided development script to set up a development environment with both rockerc and deps_rocker:
+
+```bash
+./scripts/develop.sh
 ```
+
+This script will:
+- Create a fresh UV virtual environment at `~/.venvs/dev-tools-uv`
+- Install both rockerc and deps_rocker projects in editable mode
+- Add the virtual environment to your PATH in `~/.bashrc`
+- Make console scripts from both projects available system-wide
+
+After running the script, restart your shell or run `source ~/.bashrc` to activate the environment.
+
+### Manual Development Setup
+
+Alternatively, you can manually inject deps_rocker into an existing rockerc installation:
+
+```bash
 pipx inject rockerc -e .
 ```
 
