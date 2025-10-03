@@ -4,7 +4,7 @@
 Add a Foxglove Studio extension to deps_rocker that installs Foxglove Studio for robotics data visualization and analysis.
 
 ## Requirements
-- Install Foxglove Studio v2.34.0 (latest) on Linux amd64
+- Install Foxglove Studio v2.15.0 (latest) on Linux amd64
 - Handle required system dependencies (libnotify4, xdg-utils, libappindicator3-1)
 - Use .deb package installation method
 - Mount persistent storage for Foxglove Agent

@@ -6,6 +6,7 @@ class Foxglove(SimpleRockerExtension):
     """Install Foxglove Studio for robotics data visualization"""
 
     name = "foxglove"
+    depends_on_extension = ("curl",)
 
     def get_docker_args(self, cliargs) -> str:
         """
