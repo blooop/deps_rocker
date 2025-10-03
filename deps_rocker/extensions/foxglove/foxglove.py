@@ -18,6 +18,8 @@ class Foxglove(SimpleRockerExtension):
         "libgbm1",
         "libxcb-dri3-0",
         "libasound2",
+        "desktop-file-utils",
+        "gnupg",
     ]
 
     def get_docker_args(self, cliargs) -> str:

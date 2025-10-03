@@ -7,4 +7,5 @@ RUN FOXGLOVE_VERSION="2.34.0" && \
     echo "Verifying package integrity..." && \
     dpkg-deb --info "${FOXGLOVE_DEB}" > /dev/null 2>&1 && \
     dpkg -i "${FOXGLOVE_DEB}" && \
-    rm "${FOXGLOVE_DEB}"
+    rm "${FOXGLOVE_DEB}" && \
+    rm -f /etc/apt/sources.list.d/foxglove-studio.list
