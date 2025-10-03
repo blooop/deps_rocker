@@ -31,6 +31,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         # "palanteer",
         "conda",
         # "isaac_sim",
+        "snap",
         "foxglove",
     ]
 
@@ -180,6 +181,9 @@ CMD [\"echo\", \"Extension test complete\"]
 
     # def test_isaac_sim_extension(self):
     #     self.run_extension_build_and_test("isaac_sim")
+
+    def test_snap_extension(self):
+        self.run_extension_build_and_test("snap")
 
     def test_foxglove_extension(self):
         self.run_extension_build_and_test("foxglove")
