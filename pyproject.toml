@@ -92,6 +92,7 @@ palanteer = "deps_rocker.extensions.palanteer.palanteer:Palanteer"
 ros_humble = "deps_rocker.extensions.ros_humble.ros_humble:RosHumble"
 isaac_sim = "deps_rocker.extensions.isaac_sim.isaac_sim:IsaacSim"
 urdf_viz = "deps_rocker.extensions.urdf_viz.urdf_viz:UrdfViz"
+foxglove = "deps_rocker.extensions.foxglove.foxglove:Foxglove"
 
 #AI tools
 claude = "deps_rocker.extensions.claude.claude:Claude"
