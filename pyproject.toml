@@ -95,7 +95,7 @@ urdf_viz = "deps_rocker.extensions.urdf_viz.urdf_viz:UrdfViz"
 
 #AI tools
 claude = "deps_rocker.extensions.claude.claude:Claude"
-claude-npm = "deps_rocker.extensions.claude-npm.claude_npm:ClaudeNpm"
+claude-npm = "deps_rocker.extensions.claude_npm.claude_npm:ClaudeNpm"
 codex = "deps_rocker.extensions.codex.codex:Codex"
 gemini = "deps_rocker.extensions.gemini.gemini:Gemini"
 spec_kit = "deps_rocker.extensions.spec_kit.spec_kit:SpecKit"
