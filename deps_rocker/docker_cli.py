@@ -76,26 +76,18 @@ def run_docker_cli(
         iid_path = Path(tmp_dir) / "iid"
         full_command = list(command) + [f"--iidfile={iid_path}"]
 
-        try:
-            # Passing a list keeps the call shell-free, preventing shell injection.
-            process = subprocess.Popen(
-                full_command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
-                bufsize=1,
-                env=dict(env),
-            )
-        except FileNotFoundError:
-            raise
-
-        try:
+        # Passing a list keeps the call shell-free, preventing shell injection.
+        with subprocess.Popen(
+            full_command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+            env=dict(env),
+        ) as process:
             _stream_process_output(process, output_callback)
-        finally:
-            if process.stdout is not None:
-                process.stdout.close()
+            returncode = process.wait()
 
-        returncode = process.wait()
         if returncode != 0:
             return None
 

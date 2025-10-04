@@ -40,7 +40,7 @@ def _normalise_buildargs(
 def patch_rocker_docker_build() -> None:
     # Defer import so rocker remains optional at installation time
     try:
-        import rocker.core as core
+        from rocker import core
     except Exception:
         return
 
@@ -90,7 +90,7 @@ def patch_rocker_docker_build() -> None:
         )
 
     core.docker_build = patched_docker_build
-    core._deps_rocker_buildkit_patch = True
+    core._deps_rocker_buildkit_patch = True  # pylint: disable=protected-access
 
 
 __all__ = ["patch_rocker_docker_build"]
