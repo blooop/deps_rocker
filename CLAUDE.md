@@ -113,3 +113,10 @@ Common dependencies that extensions might need:
 - `tzdata` - For timezone data
 
 Always check if the tool being installed has specific requirements and add appropriate dependencies.
+
+### BuildKit Cache Mounts
+- Use `RUN --mount=type=cache,target=/path/to/cache` for any download or clone that should be reused between builds.
+- Inside the `RUN` block, create the cache directory and skip network downloads when the expected file already exists (`if [ ! -f "${cache_file}" ]; then curl ...; fi`).
+- Prefer versioned filenames (e.g. include release tag or tool version) so new releases trigger a fresh download while older layers stay cached.
+- Keep artifacts (installers, archives, repos) in the cache; do not delete them at the end of the step so future builds can reuse them.
+- When cloning repositories, reuse the cached checkout and update it in-place with `git fetch`/`git reset` before copying into the container filesystem.

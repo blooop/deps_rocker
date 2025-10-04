@@ -6,8 +6,14 @@ ENV NPM_VERSION=11.6.1
 # Create nvm directory
 RUN mkdir -p $NVM_DIR
 
-# Download and install nvm
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
+
+# Download and install nvm using BuildKit cache mount for the install script
+RUN --mount=type=cache,target=/tmp/nvm-install-cache \
+	mkdir -p /tmp/nvm-install-cache && \
+	if [ ! -f /tmp/nvm-install-cache/install.sh ]; then \
+		curl -sS -o /tmp/nvm-install-cache/install.sh https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh; \
+	fi && \
+	bash /tmp/nvm-install-cache/install.sh
 
 # Install node and npm using nvm, then upgrade npm to specific version
 RUN bash -c "source $NVM_DIR/nvm.sh && nvm install $NODE_VERSION && nvm use $NODE_VERSION && nvm alias default $NODE_VERSION && npm install -g npm@@$NPM_VERSION"
