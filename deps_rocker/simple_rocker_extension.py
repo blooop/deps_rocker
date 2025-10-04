@@ -1,18 +1,11 @@
 import pkgutil
 import logging
 import em
-import os
 from rocker.extensions import RockerExtension
 from typing import Type
 from argparse import ArgumentParser
 from typing import Dict, Optional
-
-
-def _is_buildkit_enabled() -> bool:
-    """Detect whether Docker BuildKit is enabled via DOCKER_BUILDKIT env var."""
-
-    value = os.environ.get("DOCKER_BUILDKIT", "")
-    return value.strip().lower() in {"1", "true", "yes"}
+from deps_rocker.buildkit import is_buildkit_enabled
 
 
 class SimpleRockerExtensionMeta(type):
@@ -63,7 +56,7 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         if self.apt_packages:
             # Enable cache mounts when BuildKit is active
             apt_snippet = self.get_apt_command(
-                self.apt_packages, use_cache_mount=_is_buildkit_enabled()
+                self.apt_packages, use_cache_mount=is_buildkit_enabled()
             )
             # If there's an existing snippet, append the apt command
             snippet = f"{apt_snippet}\n\n{snippet}" if snippet else apt_snippet
@@ -213,7 +206,7 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
 
         # Default to automatic detection when not explicitly provided
         if use_cache_mount is None:
-            use_cache_mount = _is_buildkit_enabled()
+            use_cache_mount = is_buildkit_enabled()
 
         if use_cache_mount:
             return f"""RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \\
