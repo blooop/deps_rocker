@@ -11,10 +11,10 @@ if [ -d "$UV_ENV" ]; then
     echo "🗑️  Removing existing environment at $UV_ENV"
     rm -rf "$UV_ENV"
 fi
-# Remove from bashrc if present
-if grep -Fq "$UV_ENV/bin" "$HOME/.bashrc" 2>/dev/null; then
-    echo "🧹 Removing venv PATH from ~/.bashrc"
-    grep -v "$UV_ENV/bin" "$HOME/.bashrc" > "$HOME/.bashrc.tmp" && mv "$HOME/.bashrc.tmp" "$HOME/.bashrc"
+# Remove specific export line from bashrc if present
+if grep -Fq "export PATH=\"$UV_ENV/bin:\$PATH\"" "$HOME/.bashrc" 2>/dev/null; then
+    echo "🧹 Removing venv PATH export from ~/.bashrc"
+    awk '!/^export PATH="'"$UV_ENV"'\/bin:\$PATH"$/' "$HOME/.bashrc" > "$HOME/.bashrc.tmp" && mv "$HOME/.bashrc.tmp" "$HOME/.bashrc"
 fi
 
 # Create fresh venv

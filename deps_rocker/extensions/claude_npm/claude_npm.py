@@ -3,11 +3,11 @@ import pwd
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
-class Claude(SimpleRockerExtension):
-    """Install Claude Code via official installer and mount host ~/.claude into the container"""
+class ClaudeNpm(SimpleRockerExtension):
+    """Install Claude Code via npm and mount host ~/.claude into the container"""
 
-    name = "claude"
-    depends_on_extension: tuple[str, ...] = ("curl", "user", "uv")
+    name = "claude-npm"
+    depends_on_extension: tuple[str, ...] = ("npm", "user", "uv")
 
     def get_docker_args(self, cliargs) -> str:
         """Mount host ~/.claude directory into container with environment setup"""

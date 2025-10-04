@@ -95,7 +95,7 @@ urdf_viz = "deps_rocker.extensions.urdf_viz.urdf_viz:UrdfViz"
 
 #AI tools
 claude = "deps_rocker.extensions.claude.claude:Claude"
-claude-npm = "deps_rocker.extensions.claude-npm.claude_npm:ClaudeNpm"
+claude_npm = "deps_rocker.extensions.claude_npm.claude_npm:ClaudeNpm"
 codex = "deps_rocker.extensions.codex.codex:Codex"
 gemini = "deps_rocker.extensions.gemini.gemini:Gemini"
 spec_kit = "deps_rocker.extensions.spec_kit.spec_kit:SpecKit"
@@ -170,4 +170,5 @@ exclude_also = [
 markers = [
     "docker: marks tests as requiring docker (deselect with '-m \"not docker\"')",
     "claude: claude-specific tests (run with '-m claude')",
+    "integration: marks tests as slow integration tests (deselect with '-m \"not integration\"')",
 ]
