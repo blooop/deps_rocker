@@ -9,7 +9,10 @@ RUN mkdir -p $NVM_DIR
 
 # Download and install nvm using BuildKit cache mount for the install script
 RUN --mount=type=cache,target=/tmp/nvm-install-cache \
-	curl -o /tmp/nvm-install-cache/install.sh https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh && \
+	mkdir -p /tmp/nvm-install-cache && \
+	if [ ! -f /tmp/nvm-install-cache/install.sh ]; then \
+		curl -sS -o /tmp/nvm-install-cache/install.sh https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh; \
+	fi && \
 	bash /tmp/nvm-install-cache/install.sh
 
 # Install node and npm using nvm, then upgrade npm to specific version

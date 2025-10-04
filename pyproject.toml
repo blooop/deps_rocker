@@ -122,7 +122,7 @@ style = { depends-on = ["format", "lint"] }
 commit-format = "git commit -a -m'autoformat code' || true"
 test = "pytest -v -s"
 test-claude = "pytest -v -s -m claude"
-coverage = "coverage run -m pytest -v -s && coverage xml -o coverage.xml"
+coverage = "coverage run -m pytest -v -s --durations=10 && coverage xml -o coverage.xml"
 coverage-report = "coverage report -m"
 update-lock = "pixi update && git commit -a -m'update pixi.lock' || true"
 push = "git push"
