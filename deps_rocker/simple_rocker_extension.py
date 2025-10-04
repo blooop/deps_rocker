@@ -90,7 +90,11 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
                 logging.warning(self.name)
                 logging.info(f"empy_{snippet_prefix}snippet: {snippet}")
                 logging.info(f"empy_{snippet_prefix}args: {empy_args}")
-                expanded = em.expand(snippet, empy_args)
+                merged_args: Dict = {}
+                if empy_args:
+                    merged_args.update(empy_args)
+                merged_args.setdefault("buildkit_enabled", _is_buildkit_enabled())
+                expanded = em.expand(snippet, merged_args)
                 logging.info(f"expanded\n{expanded}")
                 return expanded
         except FileNotFoundError as _:

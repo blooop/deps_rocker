@@ -1,4 +1,5 @@
 import em
+import os
 import pkgutil
 from dataclasses import dataclass, field
 from typing import List
@@ -31,10 +32,17 @@ class CommandLayer:
             "deps_rocker", f"templates/{self.command}_snippet.Dockerfile"
         ).decode("utf-8")
 
+        buildkit_enabled = os.environ.get("DOCKER_BUILDKIT", "").strip().lower() in {
+            "1",
+            "true",
+            "yes",
+        }
+
         empy_data = dict(
             data_list=list(sorted(self.data)),
             filename=self.get_filename(),
             layer_name=self.layer,
+            buildkit_enabled=buildkit_enabled,
         )
         print("empy_snippet", snippet)
         print("empy_data", empy_data)
