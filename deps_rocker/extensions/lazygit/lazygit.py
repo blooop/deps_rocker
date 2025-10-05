@@ -7,7 +7,11 @@ class Lazygit(SimpleRockerExtension):
     name = "lazygit"
     depends_on_extension = ("curl", "git", "git_clone")
 
-    def get_template_args(self, cliargs=None):
-        return {
-            "lazygit_version": cliargs.get("lazygit_version", "0.41.0") if cliargs else "0.41.0",
-        }
+    # Template arguments for both snippets
+    empy_args = {
+        "lazygit_version": "0.41.0",
+    }
+
+    empy_builder_args = {
+        "lazygit_version": "0.41.0",
+    }

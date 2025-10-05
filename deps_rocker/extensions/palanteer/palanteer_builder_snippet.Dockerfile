@@ -19,9 +19,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
 
 ADD https://github.com/dfeneyrou/palanteer.git#main /tmp/palanteer
 
-RUN set -euxo pipefail; \
-    cmake -S /tmp/palanteer -B /tmp/palanteer/build -DCMAKE_BUILD_TYPE=Release; \
-    cmake --build /tmp/palanteer/build --parallel; \
-    mkdir -p @builder_output_dir@/bin; \
-    cp /tmp/palanteer/build/bin/* @builder_output_dir@/bin/; \
+RUN set -euxo pipefail && \
+    cmake -S /tmp/palanteer -B /tmp/palanteer/build -DCMAKE_BUILD_TYPE=Release && \
+    cmake --build /tmp/palanteer/build --parallel && \
+    mkdir -p @builder_output_dir@/bin && \
+    cp /tmp/palanteer/build/bin/* @builder_output_dir@/bin/ && \
     rm -rf /tmp/palanteer

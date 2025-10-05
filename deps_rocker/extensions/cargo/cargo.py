@@ -7,7 +7,11 @@ class Cargo(SimpleRockerExtension):
     name = "cargo"
     depends_on_extension = ("curl",)
 
-    def get_template_args(self, cliargs=None):
-        return {
-            "cargo_version": cliargs.get("cargo_version", "1.77.2") if cliargs else "1.77.2",
-        }
+    # Template arguments for both snippets
+    empy_args = {
+        "cargo_version": "1.77.2",
+    }
+
+    empy_builder_args = {
+        "cargo_version": "1.77.2",
+    }

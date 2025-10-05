@@ -7,16 +7,16 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
     rm -rf /var/lib/apt/lists/*
 
 RUN --mount=type=cache,target=/tmp/urdf-viz-cache,id=urdf-viz-cache \
-    set -euxo pipefail; \
-    mkdir -p /tmp/urdf-viz-cache @builder_output_dir@; \
-    release_json=$(curl -sL https://api.github.com/repos/openrr/urdf-viz/releases/latest); \
-    download_url=$(echo "$release_json" | jq -r '.assets[] | select(.name == "urdf-viz-x86_64-unknown-linux-gnu.tar.gz") | .browser_download_url'); \
-    release_tag=$(echo "$release_json" | jq -r '.tag_name'); \
-    asset_name=$(basename "$download_url"); \
-    tarball="/tmp/urdf-viz-cache/${release_tag}-${asset_name}"; \
+    set -euxo pipefail && \
+    mkdir -p /tmp/urdf-viz-cache @builder_output_dir@ && \
+    release_json=$(curl -sL https://api.github.com/repos/openrr/urdf-viz/releases/latest) && \
+    download_url=$(echo "$release_json" | jq -r '.assets[] | select(.name == "urdf-viz-x86_64-unknown-linux-gnu.tar.gz") | .browser_download_url') && \
+    release_tag=$(echo "$release_json" | jq -r '.tag_name') && \
+    asset_name=$(basename "$download_url") && \
+    tarball="/tmp/urdf-viz-cache/${release_tag}-${asset_name}" && \
     if [ ! -f "$tarball" ]; then \
         curl -sSL "$download_url" -o "$tarball"; \
-    fi; \
-    tar -xzf "$tarball" -C /tmp; \
-    find /tmp -name urdf-viz -type f -exec install -Dm755 {} @builder_output_dir@/urdf-viz \; ; \
+    fi && \
+    tar -xzf "$tarball" -C /tmp && \
+    find /tmp -name urdf-viz -type f -exec install -Dm755 {} @builder_output_dir@/urdf-viz \; && \
     rm -rf /tmp/urdf-viz*

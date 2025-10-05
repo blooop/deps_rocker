@@ -29,7 +29,7 @@ RUN --mount=type=cache,target=/tmp/nvm-install-cache,id=npm-nvm-cache \
         nvm install $NODE_VERSION; \
         nvm use $NODE_VERSION; \
         nvm alias default $NODE_VERSION; \
-        npm install -g npm@$NPM_VERSION; \
+        npm install -g npm@@$NPM_VERSION; \
         cp -a "$NVM_DIR" @builder_output_dir@/nvm; \
         printf "export NVM_DIR=%s\\n" "$NVM_DIR" > @builder_output_dir@/nvm-env.sh; \
         printf "[ -s \"\\$NVM_DIR/nvm.sh\\" ] && . \"\\$NVM_DIR/nvm.sh\\"\\n" >> @builder_output_dir@/nvm-env.sh; \
