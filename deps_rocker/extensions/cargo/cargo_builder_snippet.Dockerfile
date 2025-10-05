@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-ARG CARGO_VERSION=@cargo_version@
+ARG CARGO_VERSION=@CARGO_VERSION@
 
 @(f"FROM {base_image} AS {builder_stage}")
 
