@@ -285,6 +285,7 @@ def has_ros_packages(
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
+        check=False,
     )
     if result.returncode != 0:
         verbose_log(
