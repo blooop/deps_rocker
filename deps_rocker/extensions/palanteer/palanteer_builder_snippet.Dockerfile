@@ -19,10 +19,19 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
 
 ADD https://github.com/dfeneyrou/palanteer.git#main /tmp/palanteer
 
-RUN set -euxo pipefail && \
-    OUTPUT_DIR="@builder_output_dir@" && \
-    cmake -S /tmp/palanteer -B /tmp/palanteer/build -DCMAKE_BUILD_TYPE=Release && \
-    cmake --build /tmp/palanteer/build --parallel && \
-    mkdir -p "$OUTPUT_DIR/bin" && \
-    cp /tmp/palanteer/build/bin/* "$OUTPUT_DIR/bin/" && \
-    rm -rf /tmp/palanteer
+RUN bash -c "set -euxo pipefail && \
+        echo 'DEBUG: OUTPUT_DIR=@(f"{builder_output_dir}")' && \
+        cmake -S /tmp/palanteer -B /tmp/palanteer/build -DCMAKE_BUILD_TYPE=Release && \
+        cmake --build /tmp/palanteer/build --parallel && \
+        mkdir -p '@(f"{builder_output_dir}/bin")' && \
+        echo 'DEBUG: Copying to @(f"{builder_output_dir}/bin")' && \
+        cp /tmp/palanteer/build/bin/* '@(f"{builder_output_dir}/bin")/' && \
+        # Build Python wheel if setup.py exists
+        if [ -f /tmp/palanteer/python/setup.py ]; then \
+            cd /tmp/palanteer/python && python3 setup.py bdist_wheel; \
+        fi && \
+        mkdir -p '@(f"{builder_output_dir}/dist")' && \
+        if compgen -G "/tmp/palanteer/python/dist/*.whl" > /dev/null; then cp /tmp/palanteer/python/dist/*.whl '@(f"{builder_output_dir}/dist")/'; fi && \
+        echo 'DEBUG: Listing @(f"{builder_output_dir}")' && \
+        ls -lR '@(f"{builder_output_dir}")' && \
+        rm -rf /tmp/palanteer"
