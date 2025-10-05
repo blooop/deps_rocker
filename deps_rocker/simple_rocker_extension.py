@@ -30,10 +30,46 @@ class SimpleRockerExtensionMeta(type):
 class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta):
     """A class to take care of most of the boilerplace required for a rocker extension"""
 
+    @property
+    def builder_output_dir(self):
+        return f"/opt/deps_rocker/{self.name}"
+
+    @property
+    def builder_stage(self):
+        return f"{self.name}_builder"
+
+    @property
+    def empy_args_with_builder(self):
+        # Always include builder_output_dir and builder_stage
+        args = dict(self.empy_args)
+        args.setdefault("builder_output_dir", self.builder_output_dir)
+        args.setdefault("builder_stage", self.builder_stage)
+        return args
+
+    @property
+    def empy_builder_args_with_builder(self):
+        # Always include builder_output_dir and builder_stage
+        args = dict(self.empy_builder_args)
+        args.setdefault("builder_output_dir", self.builder_output_dir)
+        args.setdefault("builder_stage", self.builder_stage)
+        return args
+
     name = "simple_rocker_extension"
     empy_args = {}
     empy_user_args = {}
-    empy_builder_args = {}
+    _empy_builder_args = None  # Internal storage for explicit builder args
+
+    @property
+    def empy_builder_args(self):
+        # If explicitly set, use it; otherwise, default to empy_args
+        if self._empy_builder_args is not None:
+            return self._empy_builder_args
+        return self.empy_args
+
+    @empy_builder_args.setter
+    def empy_builder_args(self, value):
+        self._empy_builder_args = value
+
     depends_on_extension: tuple[str, ...] = ()  # Tuple of dependencies required by the extension
     apt_packages: list[str] = []  # List of apt packages required by the extension
     builder_output_root = "/opt/deps_rocker"

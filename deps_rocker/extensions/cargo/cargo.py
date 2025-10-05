@@ -11,7 +11,3 @@ class Cargo(SimpleRockerExtension):
     empy_args = {
         "cargo_version": "1.77.2",
     }
-
-    empy_builder_args = {
-        "cargo_version": "1.77.2",
-    }

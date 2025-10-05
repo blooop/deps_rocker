@@ -12,8 +12,3 @@ class Conda(SimpleRockerExtension):
         "miniforge_version": "latest",
         "conda_version": "24.3.0-0",
     }
-
-    empy_builder_args = {
-        "miniforge_version": "latest",
-        "conda_version": "24.3.0-0",
-    }

@@ -11,7 +11,3 @@ class Lazygit(SimpleRockerExtension):
     empy_args = {
         "lazygit_version": "0.41.0",
     }
-
-    empy_builder_args = {
-        "lazygit_version": "0.41.0",
-    }

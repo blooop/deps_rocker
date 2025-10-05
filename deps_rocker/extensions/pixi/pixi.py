@@ -11,7 +11,3 @@ class Pixi(SimpleRockerExtension):
     empy_args = {
         "pixi_version": "0.55.0",
     }
-
-    empy_builder_args = {
-        "pixi_version": "0.55.0",
-    }
