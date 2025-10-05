@@ -8,6 +8,6 @@ class Cargo(SimpleRockerExtension):
     depends_on_extension = ("curl",)
 
     # Template arguments for both snippets
-    empy_args = {
-        "cargo_version": "1.77.2",
+    empty_args = {
+        "CARGO_VERSION": "1.77.2",
     }
