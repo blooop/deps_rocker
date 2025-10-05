@@ -6,8 +6,3 @@ class Cargo(SimpleRockerExtension):
 
     name = "cargo"
     depends_on_extension = ("curl",)
-
-    # Template arguments for both snippets
-    empty_args = {
-        "CARGO_VERSION": "1.90.0",
-    }

@@ -1,5 +1,4 @@
 # syntax=docker/dockerfile:1.4
-ARG CARGO_VERSION=@CARGO_VERSION@
 
 # Install Rust toolchain from cached builder stage
 @(f"COPY --from={builder_stage} {builder_output_dir}/root/.cargo /root/.cargo")
