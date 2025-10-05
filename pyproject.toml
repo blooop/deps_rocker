@@ -116,7 +116,7 @@ pre-commit-update = "pre-commit autoupdate"
 format = "ruff format ."
 check-clean-workspace = "git diff --exit-code"
 ruff-lint = "ruff check . --fix"
-pylint = "pylint --version && echo 'running pylint...' && pylint $(git ls-files '*.py')"
+pylint = "pylint --version && echo 'running pylint...' && pylint -j 1 $(git ls-files '*.py')"
 lint = { depends-on = ["ruff-lint", "pylint"] }
 style = { depends-on = ["format", "lint"] }
 commit-format = "git commit -a -m'autoformat code' || true"

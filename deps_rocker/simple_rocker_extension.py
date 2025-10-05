@@ -33,8 +33,10 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
     name = "simple_rocker_extension"
     empy_args = {}
     empy_user_args = {}
+    empy_builder_args = {}
     depends_on_extension: tuple[str, ...] = ()  # Tuple of dependencies required by the extension
     apt_packages: list[str] = []  # List of apt packages required by the extension
+    builder_output_root = "/opt/deps_rocker"
 
     @classmethod
     def get_name(cls) -> str:
@@ -50,7 +52,7 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         return module
 
     def get_snippet(self, cliargs) -> str:
-        snippet = self.get_and_expand_empy_template(self.empy_args)
+        snippet = self.get_and_expand_empy_template(cliargs, self.empy_args)
 
         # If apt_packages is defined, generate apt install command
         if self.apt_packages:
@@ -63,9 +65,25 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         return snippet
 
     def get_user_snippet(self, cliargs) -> str:
-        return self.get_and_expand_empy_template(self.empy_user_args, snippet_prefix="user_")
+        return self.get_and_expand_empy_template(
+            cliargs, self.empy_user_args, snippet_prefix="user_"
+        )
 
-    def get_and_expand_empy_template(self, empy_args, snippet_prefix=""):
+    def get_preamble(self, cliargs):
+        fragments: list[str] = []
+
+        builder_snippet = self.get_builder_snippet(cliargs)
+        if builder_snippet:
+            fragments.append(builder_snippet)
+
+        return "\n\n".join(fragments)
+
+    def get_builder_snippet(self, cliargs) -> str:
+        return self.get_and_expand_empy_template(
+            cliargs, getattr(self, "empy_builder_args", None), snippet_prefix="builder_"
+        )
+
+    def get_and_expand_empy_template(self, cliargs, empy_args=None, snippet_prefix=""):
         """
         Loads and expands an empy template snippet for Dockerfile generation.
         Args:
@@ -82,8 +100,9 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
                 snippet = dat.decode("utf-8")
                 logging.warning(self.name)
                 logging.info(f"empy_{snippet_prefix}snippet: {snippet}")
-                logging.info(f"empy_{snippet_prefix}args: {empy_args}")
-                expanded = em.expand(snippet, empy_args)
+                template_args = self._build_template_args(cliargs, empy_args)
+                logging.info(f"empy_{snippet_prefix}args: {template_args}")
+                expanded = em.expand(snippet, template_args)
                 logging.info(f"expanded\n{expanded}")
                 return expanded
         except FileNotFoundError as _:
@@ -124,6 +143,28 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
 
             logging.error(error_msg)
         return ""
+
+    def _build_template_args(self, cliargs, empy_args=None) -> dict:
+        args: dict = {}
+        if empy_args:
+            args.update(empy_args)
+
+        if cliargs:
+            base_image = cliargs.get("base_image", "")
+        else:
+            base_image = ""
+
+        args.setdefault("base_image", base_image)
+        args.setdefault("builder_stage", self.get_builder_stage_name())
+        args.setdefault("builder_output_dir", self.get_builder_output_dir())
+        args.setdefault("extension_name", self.name)
+        return args
+
+    def get_builder_stage_name(self) -> str:
+        return f"{self.name}_builder"
+
+    def get_builder_output_dir(self) -> str:
+        return f"{self.builder_output_root}/{self.name}"
 
     @staticmethod
     def register_arguments(parser: ArgumentParser, defaults: dict = None):
@@ -209,8 +250,8 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
             use_cache_mount = is_buildkit_enabled()
 
         if use_cache_mount:
-            return f"""RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \\
-    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \\
+            return f"""RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \\
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \\
     apt-get update && apt-get install -y --no-install-recommends \\
     {packages_str}"""
         return f"""RUN apt-get update && apt-get install -y --no-install-recommends \\
