@@ -46,8 +46,8 @@ else
     echo "WARNING: rosdep not found"
 fi
 
-# Test that we can list ROS 2 packages
-ros2 pkg list | head -5
+# Test that we can list ROS 2 packages (limit output and handle broken pipe)
+ros2 pkg list 2>/dev/null | head -5 || true
 
 # Test colcon build functionality in a temporary workspace
 echo "Testing colcon build functionality..."
@@ -98,7 +98,7 @@ if command -v cr &> /dev/null; then
     
     # Test basic cr functionality
     echo "Testing cr basic usage..."
-    cr ba --help | head -5 || echo "cr ba command working"
+    cr ba --help 2>/dev/null | head -5 2>/dev/null || echo "cr ba command working"
 else
     echo "WARNING: cr command not found (colcon-runner may not be installed)"
 fi
