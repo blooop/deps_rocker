@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-ARG FZF_VERSION=@fzf_version@
+ARG FZF_VERSION=@FZF_VERSION@
 
 @(f"FROM {base_image} AS {builder_stage}")
 
