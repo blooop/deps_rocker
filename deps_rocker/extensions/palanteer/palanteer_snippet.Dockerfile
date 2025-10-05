@@ -1,16 +1,17 @@
 
-
-# Copy Palanteer binaries from builder stage
-COPY --from=@(f"{builder_stage}") @(f"{builder_output_dir}/bin/") /usr/local/bin/
-
-# Copy Palanteer Python wheels from builder stage
-COPY --from=@(f"{builder_stage}") @(f"{builder_output_dir}/dist/") /tmp/palanteer_wheels/
-
-# Install Palanteer Python wheel if present (POSIX-compliant)
-RUN set -eux; \
-	if ls /tmp/palanteer_wheels/*.whl 1> /dev/null 2>&1; then \
-		pip3 install /tmp/palanteer_wheels/*.whl; \
-	fi
+# Clone and build palanteer using BuildKit cache for the git repo (use root-owned cache dir)
+RUN --mount=type=cache,target=/root/.cache/palanteer-git-cache \
+    cd /tmp && \
+    if [ ! -d /root/.cache/palanteer-git-cache/palanteer ]; then \
+        git clone --depth 1 https://github.com/dfeneyrou/palanteer.git /root/.cache/palanteer-git-cache/palanteer; \
+    fi && \
+    cp -r /root/.cache/palanteer-git-cache/palanteer /tmp/palanteer && \
+    cd /tmp/palanteer && \
+    mkdir build && cd build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release && \
+    make -j$(nproc) && \
+    cp bin/* /usr/local/bin/ && \
+    cd /tmp && rm -rf palanteer
 
 # Update PATH to include /usr/local/bin
 ENV PATH="/usr/local/bin:${PATH}"
