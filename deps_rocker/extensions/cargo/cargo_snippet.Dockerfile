@@ -1,10 +1,11 @@
-# Install Rust and Cargo via rustup, caching the installer download with BuildKit
-RUN --mount=type=cache,target=/root/.cache/rustup \
-    if [ ! -f /root/.cache/rustup/rustup-init.sh ]; then \
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o /root/.cache/rustup/rustup-init.sh; \
-    fi && \
-    sh /root/.cache/rustup/rustup-init.sh -y --default-toolchain stable && \
-    . ~/.cargo/env && \
-    echo 'source ~/.cargo/env' >> ~/.bashrc
+# syntax=docker/dockerfile:1.4
+ARG CARGO_VERSION=@cargo_version@
 
+# Install Rust toolchain from cached builder stage
+@(f"COPY --from={builder_stage} {builder_output_dir}/root/.cargo /root/.cargo")
+@(f"COPY --from={builder_stage} {builder_output_dir}/root/.rustup /root/.rustup")
+@(f"COPY --from={builder_stage} {builder_output_dir}/cargo-env.sh /etc/profile.d/cargo-env.sh")
+RUN chmod 644 /etc/profile.d/cargo-env.sh && \
+    echo 'source /etc/profile.d/cargo-env.sh' >> /etc/bash.bashrc && \
+    echo 'source /etc/profile.d/cargo-env.sh' >> /root/.bashrc
 ENV PATH="/root/.cargo/bin:${PATH}"

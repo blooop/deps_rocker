@@ -33,8 +33,10 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
     name = "simple_rocker_extension"
     empy_args = {}
     empy_user_args = {}
+    empy_builder_args = {}
     depends_on_extension: tuple[str, ...] = ()  # Tuple of dependencies required by the extension
     apt_packages: list[str] = []  # List of apt packages required by the extension
+    builder_output_root = "/opt/deps_rocker"
 
     @classmethod
     def get_name(cls) -> str:
@@ -50,7 +52,7 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         return module
 
     def get_snippet(self, cliargs) -> str:
-        snippet = self.get_and_expand_empy_template(self.empy_args)
+        snippet = self.get_and_expand_empy_template(cliargs, self.empy_args)
 
         # If apt_packages is defined, generate apt install command
         if self.apt_packages:
@@ -63,9 +65,24 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         return snippet
 
     def get_user_snippet(self, cliargs) -> str:
-        return self.get_and_expand_empy_template(self.empy_user_args, snippet_prefix="user_")
+        return self.get_and_expand_empy_template(
+            cliargs, self.empy_user_args, snippet_prefix="user_"
+        )
 
-    def get_and_expand_empy_template(self, empy_args, snippet_prefix=""):
+    def get_preamble(self, cliargs):
+        fragments: list[str] = []
+
+        if builder_snippet := self.get_builder_snippet(cliargs):
+            fragments.append(builder_snippet)
+
+        return "\n\n".join(fragments)
+
+    def get_builder_snippet(self, cliargs) -> str:
+        return self.get_and_expand_empy_template(
+            cliargs, getattr(self, "empy_builder_args", None), snippet_prefix="builder_"
+        )
+
+    def get_and_expand_empy_template(self, cliargs, empy_args=None, snippet_prefix=""):
         """
         Loads and expands an empy template snippet for Dockerfile generation.
         Args:
@@ -82,48 +99,70 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
                 snippet = dat.decode("utf-8")
                 logging.warning(self.name)
                 logging.info(f"empy_{snippet_prefix}snippet: {snippet}")
-                logging.info(f"empy_{snippet_prefix}args: {empy_args}")
-                expanded = em.expand(snippet, empy_args)
+                template_args = self._build_template_args(cliargs, empy_args)
+                logging.info(f"empy_{snippet_prefix}args: {template_args}")
+                expanded = em.expand(snippet, template_args)
                 logging.info(f"expanded\n{expanded}")
                 return expanded
         except FileNotFoundError as _:
             logging.info(f"no user snippet found {snippet_name}")
         except Exception as e:
-            error_msg = (
-                f"Error processing empy template '{snippet_name}' in extension '{self.name}': {e}"
+            self._log_empy_template_error(snippet_name, e)
+        return ""
+
+    def _log_empy_template_error(self, snippet_name, e):
+        error_msg = (
+            f"Error processing empy template '{snippet_name}' in extension '{self.name}': {e}"
+        )
+
+        # Provide specific guidance for common empy template errors
+        if "unterminated string literal" in str(e).lower():
+            error_msg += (
+                "\n"
+                + " " * 4
+                + "HINT: This often occurs when using '@' or '$' characters in Dockerfile commands."
+            )
+            error_msg += (
+                "\n"
+                + " " * 4
+                + "      In empy templates, escape '@' as '@@' and '$' as '$$' when they should be literal characters."
+            )
+            error_msg += (
+                "\n"
+                + " " * 4
+                + "      Example: 'npm install -g package@version' should be 'npm install -g package@@version'"
+            )
+        elif "syntax error" in str(e).lower():
+            error_msg += (
+                "\n"
+                + " " * 4
+                + "HINT: Check for unescaped special characters in your Dockerfile snippet."
+            )
+            error_msg += (
+                "\n"
+                + " " * 4
+                + "      Common issues: unescaped '@' or '$' characters, missing quotes, or malformed template syntax."
             )
 
-            # Provide specific guidance for common empy template errors
-            if "unterminated string literal" in str(e).lower():
-                error_msg += (
-                    "\n"
-                    + " " * 4
-                    + "HINT: This often occurs when using '@' or '$' characters in Dockerfile commands."
-                )
-                error_msg += (
-                    "\n"
-                    + " " * 4
-                    + "      In empy templates, escape '@' as '@@' and '$' as '$$' when they should be literal characters."
-                )
-                error_msg += (
-                    "\n"
-                    + " " * 4
-                    + "      Example: 'npm install -g package@version' should be 'npm install -g package@@version'"
-                )
-            elif "syntax error" in str(e).lower():
-                error_msg += (
-                    "\n"
-                    + " " * 4
-                    + "HINT: Check for unescaped special characters in your Dockerfile snippet."
-                )
-                error_msg += (
-                    "\n"
-                    + " " * 4
-                    + "      Common issues: unescaped '@' or '$' characters, missing quotes, or malformed template syntax."
-                )
+        logging.error(error_msg)
 
-            logging.error(error_msg)
-        return ""
+    def _build_template_args(self, cliargs, empy_args=None) -> dict:
+        args = empy_args.copy() if empy_args else {}
+        base_image = cliargs.get("base_image", "") if cliargs else ""
+        args |= {
+            "base_image": base_image,
+            "builder_stage": self.get_builder_stage_name(),
+            "builder_output_dir": self.get_builder_output_dir(),
+            "builder_output_path": f"{self.get_builder_output_dir()}/",
+            "extension_name": self.name,
+        }
+        return args
+
+    def get_builder_stage_name(self) -> str:
+        return f"{self.name}_builder"
+
+    def get_builder_output_dir(self) -> str:
+        return f"{self.builder_output_root}/{self.name}"
 
     @staticmethod
     def register_arguments(parser: ArgumentParser, defaults: dict = None):
@@ -209,8 +248,8 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
             use_cache_mount = is_buildkit_enabled()
 
         if use_cache_mount:
-            return f"""RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \\
-    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \\
+            return f"""RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \\
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \\
     apt-get update && apt-get install -y --no-install-recommends \\
     {packages_str}"""
         return f"""RUN apt-get update && apt-get install -y --no-install-recommends \\
