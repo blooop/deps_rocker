@@ -1,21 +1,25 @@
-# syntax=docker/dockerfile:1.4
-ARG NODE_VERSION=@node_version@
-ARG NPM_VERSION=@npm_version@
-ARG NVM_VERSION=@nvm_version@
-
-# Install nvm, node, and npm from builder stage artifacts
+# Install nvm, node and npm
 ENV NVM_DIR=/usr/local/nvm
 ENV NODE_VERSION=24.9.0
 ENV NPM_VERSION=11.6.1
 
-@(f"COPY --from={builder_stage} {builder_output_path}node /usr/local/bin/")
-@(f"COPY --from={builder_stage} {builder_output_path}npm /usr/local/bin/")
-@(f"COPY --from={builder_stage} {builder_output_path}npx /usr/local/bin/")
-@(f"COPY --from={builder_stage} {builder_output_path}node-env.sh /etc/profile.d/node-env.sh")
+# Create nvm directory
+RUN mkdir -p $NVM_DIR
 
-RUN chmod +x /usr/local/bin/node /usr/local/bin/npm /usr/local/bin/npx && \
-    chmod 644 /etc/profile.d/node-env.sh && \
-    echo '. /etc/profile.d/node-env.sh' >> /etc/bash.bashrc && \
-    echo '. /etc/profile.d/node-env.sh' >> /root/.bashrc
 
-RUN node --version && npm --version
+# Download and install nvm using BuildKit cache mount for the install script
+RUN --mount=type=cache,target=/tmp/nvm-install-cache \
+	mkdir -p /tmp/nvm-install-cache && \
+	if [ ! -f /tmp/nvm-install-cache/install.sh ]; then \
+		curl -sS -o /tmp/nvm-install-cache/install.sh https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh; \
+	fi && \
+	bash /tmp/nvm-install-cache/install.sh
+
+# Install node and npm using nvm, then upgrade npm to specific version
+RUN bash -c "source $NVM_DIR/nvm.sh && nvm install $NODE_VERSION && nvm use $NODE_VERSION && nvm alias default $NODE_VERSION && npm install -g npm@@$NPM_VERSION"
+
+# Verify installed npm version
+RUN bash -c "source $NVM_DIR/nvm.sh && echo 'Installed npm version:' && npm --version"
+
+# Add node and npm to path
+ENV PATH="$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH"
