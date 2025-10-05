@@ -9,9 +9,9 @@ class Pixi(SimpleRockerExtension):
 
     # Template arguments for both snippets
     empy_args = {
-        "pixi_version": "0.21.0",
+        "pixi_version": "0.55.0",
     }
 
     empy_builder_args = {
-        "pixi_version": "0.21.0",
+        "pixi_version": "0.55.0",
     }
