@@ -1,8 +1,7 @@
 # syntax=docker/dockerfile:1.4
-ARG ROS_DISTRO=@ros_distro@
 
 # Use rwthika/ros2 image as builder stage to get ROS 2 installation
-@(f"FROM rwthika/ros2:${{ROS_DISTRO}}-ros-core AS {builder_stage}")
+@(f"FROM rwthika/ros2:{ros_distro}-ros-core AS {builder_stage}")
 
 # Copy the entire ROS installation to a known location for later copying
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \

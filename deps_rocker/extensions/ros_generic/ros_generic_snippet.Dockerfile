@@ -19,6 +19,11 @@ ENV PYTHONPATH=/opt/ros/${ROS_DISTRO}/lib/python3.10/site-packages:/opt/ros/${RO
 ENV ROS_PYTHON_VERSION=3
 ENV ROS_VERSION=2
 
+# Underlay management tooling and bootstrap
+COPY ros_underlays.py /usr/local/bin/ros-underlays
+COPY ros_underlays_manifest.json /opt/ros/underlays/ros_underlays_manifest.json
+RUN chmod +x /usr/local/bin/ros-underlays
+
 # Install additional development tools
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
     --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
@@ -58,3 +63,10 @@ RUN pip install colcon-common-extensions colcon-defaults colcon-spawn-shell colc
 
 # Initialize rosdep
 RUN rosdep init || true
+
+RUN ros-underlays sync --verbose && \
+    chmod -R a+rwX /opt/ros/underlays || true
+RUN echo "if [ -f /opt/ros/underlays/setup.bash ]; then source /opt/ros/underlays/setup.bash; fi" >> /etc/bash.bashrc
+RUN printf '#!/usr/bin/env bash\nset -euo pipefail\nexec ros-underlays rebuild "$@@"\n' > /usr/local/bin/ros-underlays-rebuild && \
+    chmod +x /usr/local/bin/ros-underlays-rebuild
+RUN echo "alias ros-underlays-rebuild='ros-underlays rebuild'" >> /etc/bash.bashrc

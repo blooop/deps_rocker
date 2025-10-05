@@ -49,6 +49,31 @@ fi
 # Test that we can list ROS 2 packages (limit output and handle broken pipe)
 ros2 pkg list 2>/dev/null | head -5 || true
 
+# Ensure ros-underlays helper is available and functional
+if ! command -v ros-underlays &> /dev/null; then
+    echo "ERROR: ros-underlays helper not found"
+    exit 1
+fi
+
+echo "Listing configured underlays..."
+ros-underlays list
+
+if [ ! -x /opt/ros/underlays/setup.bash ]; then
+    echo "ERROR: expected underlay aggregator at /opt/ros/underlays/setup.bash"
+    exit 1
+fi
+
+echo "Dry-run sync of underlays..."
+ros-underlays sync --dry-run --verbose
+
+echo "Dry-run rebuild of underlays..."
+ros-underlays rebuild --dry-run --verbose
+
+if command -v ros-underlays-rebuild &> /dev/null; then
+    echo "Testing ros-underlays-rebuild helper..."
+    ros-underlays-rebuild --dry-run --verbose
+fi
+
 # Test colcon build functionality in a temporary workspace
 echo "Testing colcon build functionality..."
 mkdir -p /tmp/test_ws/src
