@@ -116,6 +116,8 @@ pre-commit-update = "pre-commit autoupdate"
 format = "ruff format ."
 check-clean-workspace = "git diff --exit-code"
 ruff-lint = "ruff check . --fix"
+# NOTE: Pylint is forced to run single-threaded (-j 1) due to concurrency issues observed with parallel execution.
+# This may impact performance for large codebases. See PR discussion for details.
 pylint = "pylint --version && echo 'running pylint...' && pylint -j 1 $(git ls-files '*.py')"
 lint = { depends-on = ["ruff-lint", "pylint"] }
 style = { depends-on = ["format", "lint"] }

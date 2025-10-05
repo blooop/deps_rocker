@@ -27,7 +27,6 @@ class Gemini(SimpleRockerExtension):
             return ""
 
         mounts: list[str] = []
-        envs: list[str] = []
 
         # Mount user-wide gemini config directory
         host_gemini_config = os.path.expanduser("~/.gemini")
@@ -49,9 +48,11 @@ class Gemini(SimpleRockerExtension):
             "GOOGLE_APPLICATION_CREDENTIALS",
         ]
 
-        for env_var in env_vars:
-            if env_var in os.environ:
-                envs.append(f' -e "{env_var}={os.environ[env_var]}"')
+        envs = [
+            f' -e "{env_var}={os.environ[env_var]}"'
+            for env_var in env_vars
+            if env_var in os.environ
+        ]
 
         # Mount Google Application Credentials file if specified and exists
         if "GOOGLE_APPLICATION_CREDENTIALS" in os.environ:

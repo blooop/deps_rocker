@@ -72,8 +72,7 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
     def get_preamble(self, cliargs):
         fragments: list[str] = []
 
-        builder_snippet = self.get_builder_snippet(cliargs)
-        if builder_snippet:
+        if builder_snippet := self.get_builder_snippet(cliargs):
             fragments.append(builder_snippet)
 
         return "\n\n".join(fragments)
@@ -108,57 +107,55 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         except FileNotFoundError as _:
             logging.info(f"no user snippet found {snippet_name}")
         except Exception as e:
-            error_msg = (
-                f"Error processing empy template '{snippet_name}' in extension '{self.name}': {e}"
-            )
-
-            # Provide specific guidance for common empy template errors
-            if "unterminated string literal" in str(e).lower():
-                error_msg += (
-                    "\n"
-                    + " " * 4
-                    + "HINT: This often occurs when using '@' or '$' characters in Dockerfile commands."
-                )
-                error_msg += (
-                    "\n"
-                    + " " * 4
-                    + "      In empy templates, escape '@' as '@@' and '$' as '$$' when they should be literal characters."
-                )
-                error_msg += (
-                    "\n"
-                    + " " * 4
-                    + "      Example: 'npm install -g package@version' should be 'npm install -g package@@version'"
-                )
-            elif "syntax error" in str(e).lower():
-                error_msg += (
-                    "\n"
-                    + " " * 4
-                    + "HINT: Check for unescaped special characters in your Dockerfile snippet."
-                )
-                error_msg += (
-                    "\n"
-                    + " " * 4
-                    + "      Common issues: unescaped '@' or '$' characters, missing quotes, or malformed template syntax."
-                )
-
-            logging.error(error_msg)
+            self._log_empy_template_error(snippet_name, e)
         return ""
 
+    def _log_empy_template_error(self, snippet_name, e):
+        error_msg = (
+            f"Error processing empy template '{snippet_name}' in extension '{self.name}': {e}"
+        )
+
+        # Provide specific guidance for common empy template errors
+        if "unterminated string literal" in str(e).lower():
+            error_msg += (
+                "\n"
+                + " " * 4
+                + "HINT: This often occurs when using '@' or '$' characters in Dockerfile commands."
+            )
+            error_msg += (
+                "\n"
+                + " " * 4
+                + "      In empy templates, escape '@' as '@@' and '$' as '$$' when they should be literal characters."
+            )
+            error_msg += (
+                "\n"
+                + " " * 4
+                + "      Example: 'npm install -g package@version' should be 'npm install -g package@@version'"
+            )
+        elif "syntax error" in str(e).lower():
+            error_msg += (
+                "\n"
+                + " " * 4
+                + "HINT: Check for unescaped special characters in your Dockerfile snippet."
+            )
+            error_msg += (
+                "\n"
+                + " " * 4
+                + "      Common issues: unescaped '@' or '$' characters, missing quotes, or malformed template syntax."
+            )
+
+        logging.error(error_msg)
+
     def _build_template_args(self, cliargs, empy_args=None) -> dict:
-        args: dict = {}
-        if empy_args:
-            args.update(empy_args)
-
-        if cliargs:
-            base_image = cliargs.get("base_image", "")
-        else:
-            base_image = ""
-
-        args.setdefault("base_image", base_image)
-        args.setdefault("builder_stage", self.get_builder_stage_name())
-        args.setdefault("builder_output_dir", self.get_builder_output_dir())
-        args.setdefault("builder_output_path", f"{self.get_builder_output_dir()}/")
-        args.setdefault("extension_name", self.name)
+        args = empy_args.copy() if empy_args else {}
+        base_image = cliargs.get("base_image", "") if cliargs else ""
+        args |= {
+            "base_image": base_image,
+            "builder_stage": self.get_builder_stage_name(),
+            "builder_output_dir": self.get_builder_output_dir(),
+            "builder_output_path": f"{self.get_builder_output_dir()}/",
+            "extension_name": self.name,
+        }
         return args
 
     def get_builder_stage_name(self) -> str:
