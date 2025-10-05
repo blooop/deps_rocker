@@ -1,9 +1,6 @@
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
-
-
-
 class Npm(SimpleRockerExtension):
     """Install npm using nvm (Node Version Manager)"""
 
