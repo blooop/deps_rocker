@@ -20,3 +20,5 @@ RUN --mount=type=cache,target=/tmp/miniforge-cache,id=conda-installer-cache \
     $CONDA_DIR/bin/conda clean -afy; \
     cp -a $CONDA_DIR @builder_output_dir@/miniconda3; \
     cp $CONDA_DIR/etc/profile.d/conda.sh @builder_output_dir@/conda.sh
+ARG MINIFORGE_VERSION=@miniforge_version@
+ARG CONDA_VERSION=@conda_version@

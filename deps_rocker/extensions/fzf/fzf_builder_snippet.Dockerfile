@@ -1,3 +1,6 @@
+# syntax=docker/dockerfile:1.4
+ARG FZF_VERSION=@fzf_version@
+
 FROM @base_image@ AS @builder_stage@
 
 ADD https://github.com/junegunn/fzf.git#master /tmp/fzf

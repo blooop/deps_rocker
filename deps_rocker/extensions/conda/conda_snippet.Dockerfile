@@ -1,3 +1,7 @@
+# syntax=docker/dockerfile:1.4
+ARG MINIFORGE_VERSION=@miniforge_version@
+ARG CONDA_VERSION=@conda_version@
+
 ENV CONDA_DIR=/opt/miniconda3
 
 # Copy Miniforge installation prepared in builder stage

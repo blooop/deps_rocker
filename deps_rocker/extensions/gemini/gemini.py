@@ -10,18 +10,16 @@ class Gemini(SimpleRockerExtension):
     name = "gemini"
     depends_on_extension = ("npm", "user")
 
-    def get_docker_args(self, cliargs) -> str:
-        """
-        Mount host Gemini configuration into the container so the CLI
-        can reuse existing authentication and configuration.
+    def get_template_args(self, _cliargs=None):
+        return {}
 
-        Strategy:
-          - Mount ~/.gemini directory if it exists on host
-          - Mount current directory .gemini if it exists
-          - Preserve environment variables for authentication
-        """
+    def get_docker_args(self, cliargs) -> str:
         # Determine container home directory (provided by user extension) or fallback
-        container_home = cliargs.get("user_home_dir") or pwd.getpwuid(os.getuid()).pw_dir
+        container_home = (
+            cliargs.get("user_home_dir")
+            if cliargs and "user_home_dir" in cliargs
+            else pwd.getpwuid(os.getuid()).pw_dir
+        )
         if not container_home:
             logging.warning(
                 "Could not determine container home directory. Skipping Gemini config mounts."

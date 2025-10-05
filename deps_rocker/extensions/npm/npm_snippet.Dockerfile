@@ -1,3 +1,8 @@
+# syntax=docker/dockerfile:1.4
+ARG NODE_VERSION=@node_version@
+ARG NPM_VERSION=@npm_version@
+ARG NVM_VERSION=@nvm_version@
+
 # Install nvm, node, and npm from builder stage artifacts
 ENV NVM_DIR=/usr/local/nvm
 ENV NODE_VERSION=24.9.0

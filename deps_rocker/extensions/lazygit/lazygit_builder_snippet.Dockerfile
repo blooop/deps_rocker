@@ -1,3 +1,6 @@
+# syntax=docker/dockerfile:1.4
+ARG LAZYGIT_VERSION=@lazygit_version@
+
 FROM @base_image@ AS @builder_stage@
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
