@@ -19,3 +19,13 @@ class Palanteer(SimpleRockerExtension):
         "libxcursor-dev",
         "libxi-dev",
     ]
+
+    # For builder and snippet templates
+    builder_output_dir = "/opt/deps_rocker/palanteer"
+    builder_stage = "palanteer_builder"
+
+    empy_args = {
+        "builder_stage": builder_stage,
+        "builder_output_dir": builder_output_dir,
+    }
+    empy_builder_args = empy_args
