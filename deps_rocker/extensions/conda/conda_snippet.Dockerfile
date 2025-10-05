@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
-ARG MINIFORGE_VERSION=@miniforge_version@
-ARG CONDA_VERSION=@conda_version@
+ARG MINIFORGE_VERSION=@MINIFORGE_VERSION@
+ARG CONDA_VERSION=@CONDA_VERSION@
 
 ENV CONDA_DIR=/opt/miniconda3
 

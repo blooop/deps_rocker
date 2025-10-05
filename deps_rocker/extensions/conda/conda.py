@@ -9,6 +9,6 @@ class Conda(SimpleRockerExtension):
 
     # Template arguments for both snippets
     empy_args = {
-        "miniforge_version": "latest",
-        "conda_version": "24.3.0-0",
+        "MINIFORGE_VERSION": "latest",
+        "CONDA_VERSION": "24.3.0-0",
     }
