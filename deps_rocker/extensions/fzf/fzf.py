@@ -11,3 +11,5 @@ class Fzf(SimpleRockerExtension):
     empy_args = {
         "FZF_VERSION": "0.53.0",
     }
+
+    apt_packages = ["ripgrep", " fd-find"]
