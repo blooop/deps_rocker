@@ -8,12 +8,14 @@ ENV NVM_DIR=/usr/local/nvm
 ENV NODE_VERSION=24.9.0
 ENV NPM_VERSION=11.6.1
 
-COPY --from=@builder_stage@ @builder_output_dir@/nvm $NVM_DIR
-COPY --from=@builder_stage@ @builder_output_dir@/nvm-env.sh /etc/profile.d/nvm-env.sh
-RUN chmod 644 /etc/profile.d/nvm-env.sh && \
-    echo '. /etc/profile.d/nvm-env.sh' >> /etc/bash.bashrc && \
-    echo '. /etc/profile.d/nvm-env.sh' >> /root/.bashrc
+@(f"COPY --from={builder_stage} {builder_output_path}node /usr/local/bin/")
+@(f"COPY --from={builder_stage} {builder_output_path}npm /usr/local/bin/")
+@(f"COPY --from={builder_stage} {builder_output_path}npx /usr/local/bin/")
+@(f"COPY --from={builder_stage} {builder_output_path}node-env.sh /etc/profile.d/node-env.sh")
 
-RUN bash -lc '. /etc/profile.d/nvm-env.sh && echo "Installed npm version:" && npm --version'
+RUN chmod +x /usr/local/bin/node /usr/local/bin/npm /usr/local/bin/npx && \
+    chmod 644 /etc/profile.d/node-env.sh && \
+    echo '. /etc/profile.d/node-env.sh' >> /etc/bash.bashrc && \
+    echo '. /etc/profile.d/node-env.sh' >> /root/.bashrc
 
-ENV PATH="$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH"
+RUN node --version && npm --version

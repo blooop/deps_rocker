@@ -1,4 +1,4 @@
-FROM @base_image@ AS @builder_stage@
+@(f"FROM {base_image} AS {builder_stage}")
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
     --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
@@ -20,8 +20,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
 ADD https://github.com/dfeneyrou/palanteer.git#main /tmp/palanteer
 
 RUN set -euxo pipefail && \
+    OUTPUT_DIR="@builder_output_dir@" && \
     cmake -S /tmp/palanteer -B /tmp/palanteer/build -DCMAKE_BUILD_TYPE=Release && \
     cmake --build /tmp/palanteer/build --parallel && \
-    mkdir -p @builder_output_dir@/bin && \
-    cp /tmp/palanteer/build/bin/* @builder_output_dir@/bin/ && \
+    mkdir -p "$OUTPUT_DIR/bin" && \
+    cp /tmp/palanteer/build/bin/* "$OUTPUT_DIR/bin/" && \
     rm -rf /tmp/palanteer

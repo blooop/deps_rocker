@@ -157,6 +157,7 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         args.setdefault("base_image", base_image)
         args.setdefault("builder_stage", self.get_builder_stage_name())
         args.setdefault("builder_output_dir", self.get_builder_output_dir())
+        args.setdefault("builder_output_path", f"{self.get_builder_output_dir()}/")
         args.setdefault("extension_name", self.name)
         return args
 
