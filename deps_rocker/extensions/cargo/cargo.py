@@ -9,5 +9,5 @@ class Cargo(SimpleRockerExtension):
 
     # Template arguments for both snippets
     empty_args = {
-        "CARGO_VERSION": "1.77.2",
+        "CARGO_VERSION": "1.90.0",
     }
