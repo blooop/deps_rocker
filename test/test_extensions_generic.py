@@ -8,10 +8,10 @@ from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 @pytest.mark.docker
 class TestExtensionsGeneric(unittest.TestCase):
+    """Simplified tests for deps_rocker extensions"""
+
     def test_ros_generic_extension(self):
         self.run_extension_build_and_test("ros_generic")
-
-    """Simplified tests for deps_rocker extensions"""
 
     EXTENSIONS_TO_TEST = [
         "ros_generic",

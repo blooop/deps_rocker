@@ -7,7 +7,7 @@ class RosGeneric(SimpleRockerExtension):
     """Adds a configurable ROS 2 distribution (default: humble) to your docker container"""
 
     name = "ros_generic"
-    depends_on_extension = ("vcstool", "locales", "tzdata", "curl")
+    depends_on_extension = ("locales", "tzdata", "curl")
 
     def get_files(self, cliargs) -> dict[str, str]:
         dat = self.get_config_file("configs/defaults.yaml")
@@ -16,6 +16,18 @@ class RosGeneric(SimpleRockerExtension):
     def get_ros_distro(self, cliargs):
         # Allow override via cliargs, else default to humble
         return cliargs.get("ros_distro", "humble")
+
+    @property
+    def empy_args(self):
+        return {
+            "ros_distro": "humble"  # default value
+        }
+
+    @property
+    def empy_builder_args(self):
+        return {
+            "ros_distro": "humble"  # default value
+        }
 
     def get_docker_args(self, cliargs) -> str:
         """Return a string of --env args for Docker run, space-separated."""
