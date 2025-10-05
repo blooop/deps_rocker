@@ -9,5 +9,5 @@ class Lazygit(SimpleRockerExtension):
 
     # Template arguments for both snippets
     empy_args = {
-        "lazygit_version": "0.41.0",
+        "LAZYGIT_VERSION": "0.41.0",
     }

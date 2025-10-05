@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-ARG LAZYGIT_VERSION=@lazygit_version@
+ARG LAZYGIT_VERSION=@LAZYGIT_VERSION@
 
 @(f"FROM {base_image} AS {builder_stage}")
 
