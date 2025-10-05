@@ -24,6 +24,7 @@ jobs:
         uses: devcontainers/ci@v0.3
         with:
           runCmd: |
+            export DOCKER_BUILDKIT=1
             pixi run -e ${{ matrix.environment }} ci
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
