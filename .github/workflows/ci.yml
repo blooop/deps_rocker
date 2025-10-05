@@ -12,9 +12,11 @@ permissions:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 1
     strategy:
       matrix:
-        environment: [py310, py311, py312, py313]
+        environment: [py310, py313]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -22,6 +24,7 @@ jobs:
         uses: devcontainers/ci@v0.3
         with:
           runCmd: |
+            export DOCKER_BUILDKIT=1
             pixi run -e ${{ matrix.environment }} ci
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
