@@ -1,6 +1,6 @@
 # Plan for ROS Jazzy Extension
 
-1. Copy ros_humble extension directory to ros_jazzy
+1. Copy ros_generic extension directory to ros_jazzy
 2. Update __init__.py to import ros_jazzy
 3. Create ros_jazzy.py:
    - Inherit from SimpleRockerExtension

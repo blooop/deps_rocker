@@ -8,7 +8,7 @@ class UrdfViz(SimpleRockerExtension):
     apt_packages = ["libxi6", "libxcursor-dev", "libxrandr-dev", "jq", "ros-humble-xacro"]
 
     def required(self, cliargs):
-        return {"curl", "ros_humble"}
+        return {"curl", "ros_generic"}
 
     def invoke_after(self, cliargs):
-        return {"curl", "ros_humble"}
+        return {"curl", "ros_generic"}
