@@ -9,9 +9,5 @@ class Fzf(SimpleRockerExtension):
 
     # Template arguments for both snippets
     empy_args = {
-        "fzf_version": "0.53.0",
-    }
-
-    empy_builder_args = {
-        "fzf_version": "0.53.0",
+        "FZF_VERSION": "0.53.0",
     }

@@ -8,14 +8,6 @@ class Npm(SimpleRockerExtension):
     depends_on_extension = ("curl",)
 
     empy_args = {
-        "node_version": "24.9.0",
-        "npm_version": "11.6.1",
-        "builder_output_dir": "/opt/deps_rocker/npm",
-        "builder_stage": "npm_builder",
-    }
-
-    empy_builder_args = {
-        "node_version": "24.9.0",
-        "builder_output_dir": "/opt/deps_rocker/npm",
-        "builder_stage": "npm_builder",
+        "NODE_VERSION": "24.9.0",
+        "NPM_VERSION": "11.6.1",
     }

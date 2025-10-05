@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-ARG NODE_VERSION=@node_version@
+ARG NODE_VERSION=@NODE_VERSION@
 
 @(f"FROM {base_image} AS {builder_stage}")
 

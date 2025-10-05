@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-ARG CONDA_VERSION=@conda_version@
+ARG CONDA_VERSION=@CONDA_VERSION@
 
 @(f"FROM {base_image} AS {builder_stage}")
 

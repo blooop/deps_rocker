@@ -6,12 +6,3 @@ class Cargo(SimpleRockerExtension):
 
     name = "cargo"
     depends_on_extension = ("curl",)
-
-    # Template arguments for both snippets
-    empy_args = {
-        "cargo_version": "1.77.2",
-    }
-
-    empy_builder_args = {
-        "cargo_version": "1.77.2",
-    }
