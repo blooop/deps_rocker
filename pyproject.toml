@@ -142,6 +142,11 @@ clear-pixi = "rm -rf .pixi pixi.lock"
 setup-git-merge-driver = "git config merge.ourslock.driver true"
 update-from-template-repo = "./scripts/update_from_template.sh"
 
+# Run tests for a specific extension: pixi run test-extension <extension_name>
+[tool.pixi.tasks.test-extension]
+cmd = ["pytest", "-v", "-s", "test/test_extensions_generic.py", "-k", "test_{{extension_name}}_extension"]
+args = ["extension_name"]
+
 [tool.pylint]
 extension-pkg-whitelist = ["numpy"]
 jobs = 16                           #detect number of cores
