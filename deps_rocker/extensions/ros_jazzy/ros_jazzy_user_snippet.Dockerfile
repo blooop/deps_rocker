@@ -1,10 +1,11 @@
 
 #ROS user snippet
 
-RUN if [ -d "/dependencies" ]; then \
-    rosdep update && \
-    rosdep install --from-paths /dependencies --ignore-src -r -y; \
-fi
+RUN DEPS_ROOT="${ROS_DEPENDENCIES_ROOT:-/workspaces/ros_ws/src}" && \
+    if [ -d "$DEPS_ROOT" ]; then \
+        rosdep update && \
+        rosdep install --from-paths "$DEPS_ROOT" --ignore-src -r -y; \
+    fi
 
 # colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF &&
 # source install/setup.bash
@@ -15,5 +16,5 @@ RUN mkdir -p $HOME/.colcon
 COPY defaults.yaml /defaults.yaml
 RUN cp /defaults.yaml $HOME/.colcon/defaults.yaml
 
-RUN echo "source /opt/ros/jazzy/setup.bash" >> $HOME/.bashrc;
-RUN echo "[ -f /workspaces/ros_ws/install/setup.bash ] && source /workspaces/ros_ws/install/setup.bash" >> $HOME/.bashrc
+RUN echo "source /opt/ros/jazzy/setup.bash" >> $HOME/.bashrc
+RUN printf '%s\n' '[ -n "${ROS_UNDERLAY_PATH:-}" ] && [ -f "${ROS_UNDERLAY_PATH}/setup.bash" ] && source "${ROS_UNDERLAY_PATH}/setup.bash"' >> $HOME/.bashrc

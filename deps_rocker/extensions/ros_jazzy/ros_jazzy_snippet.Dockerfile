@@ -55,4 +55,11 @@ ENV ROS_VERSION=2
 
 RUN rosdep init
 
-RUN mkdir -p /workspaces/ros_ws && chmod 777 /workspaces/ros_ws 
+RUN mkdir -p /workspaces/ros_ws/{repos,src,underlay,build,log} && chmod -R 777 /workspaces/ros_ws
+
+ENV ROS_WORKSPACE_ROOT=/workspaces/ros_ws
+ENV ROS_REPOS_ROOT=/workspaces/ros_ws/repos
+ENV ROS_DEPENDENCIES_ROOT=/workspaces/ros_ws/src
+ENV ROS_UNDERLAY_PATH=/workspaces/ros_ws/underlay
+ENV ROS_BUILD_BASE=/workspaces/ros_ws/build
+ENV ROS_LOG_BASE=/workspaces/ros_ws/log

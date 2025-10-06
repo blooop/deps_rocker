@@ -1,7 +1,12 @@
 """Mixin class for repository discovery functionality"""
 
+from __future__ import annotations
+
 from pathlib import Path
 import itertools
+
+
+DEFAULT_WORKSPACE_ROOT = Path("/workspaces/ros_ws")
 
 
 class RepositoryDiscoveryMixin:
@@ -11,17 +16,43 @@ class RepositoryDiscoveryMixin:
     and is intended to be used by extensions that need to work with vcstool repositories.
     """
 
+    workspace_root: Path = DEFAULT_WORKSPACE_ROOT
+
+    def _ensure_empy_args(self) -> None:
+        """Ensure empy_args exists and contains the workspace layout defaults."""
+
+        if not hasattr(self, "empy_args"):
+            self.empy_args = {}
+
+        layout = self._get_workspace_layout()
+        self.workspace_layout = layout
+
+        for key, value in layout.items():
+            self.empy_args.setdefault(key, value)
+
+        self.empy_args.setdefault("depend_repos", [])
+
+    def _get_workspace_layout(self) -> dict[str, str]:
+        """Return the canonical workspace layout as POSIX strings."""
+
+        root = Path(getattr(self, "workspace_root", DEFAULT_WORKSPACE_ROOT))
+        root = root if root.is_absolute() else (DEFAULT_WORKSPACE_ROOT / root)
+
+        return {
+            "workspace_root": root.as_posix(),
+            "repos_root": (root / "repos").as_posix(),
+            "dependencies_root": (root / "src").as_posix(),
+            "underlay_path": (root / "underlay").as_posix(),
+        }
+
     def discover_repos(self):
         """Discover all *.repos and depends.repos.yaml files recursively
 
         Populates self.empy_args["depend_repos"] with discovered repository files.
         Each entry contains 'dep' (relative path) and 'path' (parent directory).
         """
-        if not hasattr(self, "empy_args"):
-            self.empy_args = {}
 
-        if "depend_repos" not in self.empy_args:
-            self.empy_args["depend_repos"] = []
+        self._ensure_empy_args()
 
         # Search for both *.repos and depends.repos.yaml files
         repos_patterns = [

@@ -7,6 +7,7 @@ Automatically build a shared ROS underlay layer from repositories cloned by vcst
 - Discover `*.repos` and `depends.repos.yaml` files recursively like vcstool extension
 - Build ROS underlay from all packages cloned by vcstool extension
 - Install underlay to `/ros_underlay`
+- Ensure `/ros_underlay` is writable by the build user before building (fixes colcon PermissionError)
 - Source underlay in container environment
 - Provide `build-underlay` command to rebuild underlay inside running container
 - Support ROS workspace dependencies resolution with rosdep

@@ -9,9 +9,10 @@ if ! command -v build-underlay &> /dev/null; then
     exit 1
 fi
 
-# Check if /ros_underlay directory was created
-if [ ! -d "/ros_underlay" ]; then
-    echo "ERROR: /ros_underlay directory not found"
+# Check if the underlay directory was created
+UNDERLAY_ROOT="${ROS_UNDERLAY_PATH:-/workspaces/ros_ws/underlay}"
+if [ ! -d "$UNDERLAY_ROOT" ]; then
+    echo "ERROR: $UNDERLAY_ROOT directory not found"
     exit 1
 fi
 
@@ -20,8 +21,8 @@ build-underlay
 
 # Check environment variables are set
 
-if [[ ":$AMENT_PREFIX_PATH:" != *":/ros_underlay:"* ]]; then
-    echo "ERROR: AMENT_PREFIX_PATH does not contain /ros_underlay"
+if [[ ":$AMENT_PREFIX_PATH:" != *":$UNDERLAY_ROOT:"* ]]; then
+    echo "ERROR: AMENT_PREFIX_PATH does not contain $UNDERLAY_ROOT"
     exit 1
 fi
 
