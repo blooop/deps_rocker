@@ -63,3 +63,4 @@ ENV ROS_DEPENDENCIES_ROOT=/workspaces/ros_ws/src
 ENV ROS_UNDERLAY_PATH=/workspaces/ros_ws/underlay
 ENV ROS_BUILD_BASE=/workspaces/ros_ws/build
 ENV ROS_LOG_BASE=/workspaces/ros_ws/log
+ENV COLCON_LOG_PATH=/workspaces/ros_ws/log

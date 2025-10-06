@@ -94,7 +94,7 @@ echo "Building packages with colcon..."
 for path in "${repos_paths[@]}"; do
     echo "  Building packages from: $path"
     cd "$path"
-    colcon build --install-base "$ROS_UNDERLAY_PATH" --merge-install --build-base "$ROS_BUILD_BASE" --log-base "$ROS_LOG_BASE"
+    colcon --log-base "$ROS_LOG_BASE" build --install-base "$ROS_UNDERLAY_PATH" --merge-install --build-base "$ROS_BUILD_BASE"
 done
 
 echo "ROS underlay build complete!"

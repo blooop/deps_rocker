@@ -6,6 +6,7 @@ ENV ROS_WORKSPACE_ROOT=@(workspace_root)
 ENV ROS_REPOS_ROOT=@(repos_root)
 ENV ROS_DEPENDENCIES_ROOT=@(dependencies_root)
 ENV ROS_UNDERLAY_PATH=@(underlay_path)
+ENV COLCON_LOG_PATH=@(workspace_root)/log
 
 RUN mkdir -p @(repos_root) @(dependencies_root) @(underlay_path) @(workspace_root)/build @(workspace_root)/log
 
@@ -51,10 +52,10 @@ RUN mkdir -p @(underlay_path) @(workspace_root)/build @(workspace_root)/log
 @[end if]@
 
 # Set environment variables to include underlay (even if empty)
-ENV AMENT_PREFIX_PATH=@(underlay_path):$AMENT_PREFIX_PATH
-ENV COLCON_PREFIX_PATH=@(underlay_path):$COLCON_PREFIX_PATH
-ENV LD_LIBRARY_PATH=@(underlay_path)/lib:$LD_LIBRARY_PATH
-ENV PATH=@(underlay_path)/bin:$PATH
-ENV PYTHONPATH=@(underlay_path)/lib/python3.12/site-packages:$PYTHONPATH
+ENV AMENT_PREFIX_PATH=@(underlay_path):${AMENT_PREFIX_PATH}
+ENV COLCON_PREFIX_PATH=@(underlay_path):${COLCON_PREFIX_PATH}
+ENV LD_LIBRARY_PATH=@(underlay_path)/lib:${LD_LIBRARY_PATH}
+ENV PATH=@(underlay_path)/bin:${PATH}
+ENV PYTHONPATH=@(underlay_path)/lib/python3.12/site-packages:${PYTHONPATH}
 
 RUN chmod -R a+rwX @(underlay_path) @(workspace_root)/build @(workspace_root)/log
