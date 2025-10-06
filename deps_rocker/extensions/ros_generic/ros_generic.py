@@ -11,6 +11,7 @@ class RosGeneric(SimpleRockerExtension):
 
     name = "ros_generic"
     depends_on_extension = ("locales", "tzdata", "curl", "vcstool")
+    default_ros_distro = "jazzy"
 
     def get_files(self, cliargs) -> dict[str, str]:
         files: Dict[str, str] = {
@@ -31,20 +32,16 @@ class RosGeneric(SimpleRockerExtension):
         return files
 
     def get_ros_distro(self, cliargs):
-        # Allow override via cliargs, else default to jazzy
-        return cliargs.get("ros_distro", "jazzy")
+        # Allow override via cliargs, else use class default
+        return cliargs.get("ros_distro", self.default_ros_distro)
 
     @property
     def empy_args(self):
-        return {
-            "ros_distro": "jazzy"  # default value
-        }
+        return {"ros_distro": self.default_ros_distro}
 
     @property
     def empy_builder_args(self):
-        return {
-            "ros_distro": "jazzy"  # default value
-        }
+        return {"ros_distro": self.default_ros_distro}
 
     def get_docker_args(self, cliargs) -> str:
         """Return a string of --env args for Docker run, space-separated."""
