@@ -7,7 +7,7 @@ from typing import Dict, List
 
 
 class RosGeneric(SimpleRockerExtension):
-    """Adds a configurable ROS 2 distribution (default: humble) to your docker container"""
+    """Adds a configurable ROS 2 distribution (default: jazzy) to your docker container"""
 
     name = "ros_generic"
     depends_on_extension = ("locales", "tzdata", "curl", "vcstool")
@@ -31,19 +31,19 @@ class RosGeneric(SimpleRockerExtension):
         return files
 
     def get_ros_distro(self, cliargs):
-        # Allow override via cliargs, else default to humble
-        return cliargs.get("ros_distro", "humble")
+        # Allow override via cliargs, else default to jazzy
+        return cliargs.get("ros_distro", "jazzy")
 
     @property
     def empy_args(self):
         return {
-            "ros_distro": "humble"  # default value
+            "ros_distro": "jazzy"  # default value
         }
 
     @property
     def empy_builder_args(self):
         return {
-            "ros_distro": "humble"  # default value
+            "ros_distro": "jazzy"  # default value
         }
 
     def get_docker_args(self, cliargs) -> str:
