@@ -1,3 +1,7 @@
+# Copy build-underlay script to /usr/local/bin (always install, regardless of repos)
+COPY @(extension_name)/build-underlay.sh /usr/local/bin/build-underlay
+RUN chmod +x /usr/local/bin/build-underlay
+
 @[if depend_repos]@
 # Build ROS underlay from vcstool repositories
 RUN --mount=type=cache,target=/root/.ros/rosdep,sharing=locked,id=rosdep-cache \
@@ -44,8 +48,11 @@ ENV PYTHONPATH=/opt/ros_underlay/lib/python3.12/site-packages:$PYTHONPATH
 @[else]@
 # No *.repos files found, create empty underlay directory
 RUN mkdir -p /opt/ros_underlay
-@[end if]@
 
-# Copy build-underlay script to /usr/local/bin
-COPY @(extension_name)/build-underlay.sh /usr/local/bin/build-underlay
-RUN chmod +x /usr/local/bin/build-underlay
+# Set environment variables to include underlay (even if empty)
+ENV AMENT_PREFIX_PATH=/opt/ros_underlay:$AMENT_PREFIX_PATH
+ENV COLCON_PREFIX_PATH=/opt/ros_underlay:$COLCON_PREFIX_PATH
+ENV LD_LIBRARY_PATH=/opt/ros_underlay/lib:$LD_LIBRARY_PATH
+ENV PATH=/opt/ros_underlay/bin:$PATH
+ENV PYTHONPATH=/opt/ros_underlay/lib/python3.12/site-packages:$PYTHONPATH
+@[end if]@
