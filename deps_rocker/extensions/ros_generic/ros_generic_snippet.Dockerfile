@@ -45,21 +45,23 @@ RUN ccache --set-config=max_size=20G && \
     ccache --set-config=compression=true && \
     ccache --set-config=compression_level=6
 
-# Install colcon and other Python tools
-RUN pip install colcon-common-extensions colcon-defaults colcon-spawn-shell colcon-clean rosdep
 
-# Initialize rosdep
-RUN rosdep init || true
+# Install colcon, rosdep, and other Python tools using apt where possible
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
+    apt-get update && apt-get install -y --no-install-recommends \
+    python3-colcon-common-extensions \
+    python3-colcon-defaults \
+    python3-colcon-clean \
+    python3-colcon-runner \
+    python3-rosdep \
+    python3-lark \
+    python3-numpy \
+    python3-uv \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Configure ccache for standard usage
-ENV PATH="/usr/lib/ccache:$PATH"
-ENV CCACHE_DIR=/root/.ccache
-RUN ccache --set-config=max_size=20G && \
-    ccache --set-config=compression=true && \
-    ccache --set-config=compression_level=6
-
-# Install colcon and rosdep Python tools
-RUN pip install colcon-common-extensions colcon-defaults colcon-spawn-shell colcon-clean colcon-runner uv rosdep lark numpy
+# Install colcon-spawn-shell via pip (not available in apt)
+RUN pip install --break-system-packages colcon-spawn-shell
 
 # Initialize rosdep
 RUN rosdep init || true
@@ -67,6 +69,6 @@ RUN rosdep init || true
 RUN ros-underlays sync --verbose && \
     chmod -R a+rwX /opt/ros/underlays || true
 RUN echo "if [ -f /opt/ros/underlays/setup.bash ]; then source /opt/ros/underlays/setup.bash; fi" >> /etc/bash.bashrc
-RUN printf '#!/usr/bin/env bash\nset -euo pipefail\nexec ros-underlays rebuild "$@@"\n' > /usr/local/bin/ros-underlays-rebuild && \
+RUN printf '#!/usr/bin/env bash\nset -euo pipefail\nexec ros-underlays rebuild "$@"\n' > /usr/local/bin/ros-underlays-rebuild && \
     chmod +x /usr/local/bin/ros-underlays-rebuild
 RUN echo "alias ros-underlays-rebuild='ros-underlays rebuild'" >> /etc/bash.bashrc
