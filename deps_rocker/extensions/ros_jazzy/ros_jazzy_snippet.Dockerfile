@@ -53,4 +53,6 @@ ENV PYTHONPATH=/opt/ros/jazzy/local/lib/python3.12/dist-packages:/opt/ros/jazzy/
 ENV ROS_PYTHON_VERSION=3
 ENV ROS_VERSION=2
 
-RUN rosdep init 
+RUN rosdep init
+
+RUN mkdir -p /workspaces/ros_ws && chmod 777 /workspaces/ros_ws 

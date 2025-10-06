@@ -9,11 +9,11 @@ fi
 # colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF &&
 # source install/setup.bash
 
-RUN mkdir $HOME/.colcon
+RUN mkdir -p $HOME/.colcon
 
 #need to work out why I can't just copy directly to the right location...
 COPY defaults.yaml /defaults.yaml
 RUN cp /defaults.yaml $HOME/.colcon/defaults.yaml
 
 RUN echo "source /opt/ros/jazzy/setup.bash" >> $HOME/.bashrc;
-RUN echo "source /workspaces/ros_ws/install/setup.bash" >> $HOME/.bashrc
+RUN echo "[ -f /workspaces/ros_ws/install/setup.bash ] && source /workspaces/ros_ws/install/setup.bash" >> $HOME/.bashrc
