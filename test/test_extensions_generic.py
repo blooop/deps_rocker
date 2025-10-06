@@ -32,6 +32,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         "conda",
         # "isaac_sim",
         "ros_jazzy",
+        "ros_underlay",
     ]
 
     @classmethod
@@ -183,6 +184,9 @@ CMD [\"echo\", \"Extension test complete\"]
 
     def test_ros_jazzy_extension(self):
         self.run_extension_build_and_test("ros_jazzy")
+
+    def test_ros_underlay_extension(self):
+        self.run_extension_build_and_test("ros_underlay")
 
     def test_z_all_extensions_together(self):
         if not self.working_extension_names:
