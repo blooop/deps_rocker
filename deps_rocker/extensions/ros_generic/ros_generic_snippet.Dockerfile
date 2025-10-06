@@ -6,7 +6,7 @@
 ARG ROS_DISTRO=@ros_distro@
 
 # Copy ROS 2 installation and libraries from the builder stage
-@(f"COPY --from={builder_stage} {builder_output_dir}/ros /opt/ros")
+@(f"COPY --from={builder_stage} {builder_output_dir}/ros /opt/ros/${{ROS_DISTRO}}")
 @(f"COPY --from={builder_stage} {builder_output_dir}/lib/* /usr/local/lib/")
 
 # Set up environment variables for ROS
