@@ -140,6 +140,7 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
             logging.info(f"no user snippet found {snippet_name}")
         except Exception as e:
             self._log_empy_template_error(snippet_name, e)
+            raise  # Raise the error so tests and builds fail on empy/template errors
         return ""
 
     def _log_empy_template_error(self, snippet_name, e):
