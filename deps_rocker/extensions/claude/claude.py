@@ -9,7 +9,15 @@ class Claude(SimpleRockerExtension):
 
     name = "claude"
     # Ensure curl is available for the install script, and user exists for mounting into home
-    depends_on_extension: tuple[str, ...] = ("curl", "user", "uv")
+    depends_on_extension: tuple[str, ...] = ("curl", "user")
+
+    def get_files(self, cliargs) -> dict[str, str]:
+        """Provide the claude wrapper script as part of the build context"""
+        wrapper_content = """#!/usr/bin/env sh
+export PATH="$HOME/.local/bin:$PATH"
+exec "$HOME/.local/bin/claude" "$@"
+"""
+        return {"claude-wrapper.sh": wrapper_content}
 
     def get_docker_args(self, cliargs) -> str:
         """
@@ -72,7 +80,7 @@ class Claude(SimpleRockerExtension):
         # Supplemental mounts
         extra_paths = [
             (os.path.expanduser("~/.cache/claude"), f"{container_home}/.cache/claude"),
-            (os.path.expanduser("~/.local/share/claude"), f"{container_home}/.local/share/claude"),
+            # Note: Do not mount ~/.local/share/claude as it would overwrite the installed binary
         ]
         for host_extra, container_extra in extra_paths:
             if os.path.exists(host_extra):
