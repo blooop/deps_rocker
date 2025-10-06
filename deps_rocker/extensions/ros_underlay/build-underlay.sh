@@ -6,7 +6,7 @@ echo "Building ROS underlay from vcstool repositories..."
 # Source ROS setup
 source /opt/ros/jazzy/setup.bash
 
-# Find all *.repos files and extract their parent directories
+# Find all *.repos and depends.repos.yaml files and extract their parent directories
 repos_paths=()
 if [ -d "/dependencies" ]; then
     while IFS= read -r -d '' repos_file; do
@@ -14,12 +14,12 @@ if [ -d "/dependencies" ]; then
         if [ -d "$repos_dir" ] && [ "$(find "$repos_dir" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)" -gt 0 ]; then
             repos_paths+=("$repos_dir")
         fi
-    done < <(find /dependencies -name "*.repos" -type f -print0)
+    done < <(find /dependencies \( -name "*.repos" -o -name "depends.repos.yaml" \) -type f -print0)
 fi
 
 # Check if we found any packages
 if [ ${#repos_paths[@]} -eq 0 ]; then
-    echo "No packages found from *.repos files, skipping underlay build"
+    echo "No packages found from *.repos or depends.repos.yaml files, skipping underlay build"
     mkdir -p /opt/ros_underlay
     exit 0
 fi

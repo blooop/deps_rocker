@@ -4,7 +4,7 @@
 Automatically build a shared ROS underlay layer from repositories cloned by vcstool, with support for rebuilding inside the container without Docker rebuild.
 
 ## Requirements
-- Discover `*.repos` files recursively like vcstool extension
+- Discover `*.repos` and `depends.repos.yaml` files recursively like vcstool extension
 - Build ROS underlay from all packages cloned by vcstool extension
 - Install underlay to `/opt/ros_underlay`
 - Source underlay in container environment
