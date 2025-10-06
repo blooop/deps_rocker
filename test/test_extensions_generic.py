@@ -31,6 +31,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         # "palanteer",
         "conda",
         # "isaac_sim",
+        "ros_humble",
     ]
 
     @classmethod
@@ -179,6 +180,9 @@ CMD [\"echo\", \"Extension test complete\"]
 
     # def test_isaac_sim_extension(self):
     #     self.run_extension_build_and_test("isaac_sim")
+
+    def test_ros_humble_extension(self):
+        self.run_extension_build_and_test("ros_humble")
 
     def test_z_all_extensions_together(self):
         if not self.working_extension_names:

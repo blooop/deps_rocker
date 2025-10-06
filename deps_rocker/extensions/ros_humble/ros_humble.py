@@ -31,4 +31,4 @@ class RosHumble(SimpleRockerExtension):
             else:
                 raise ValueError("Unable to determine username and no ROS_DOMAIN_ID provided.")
 
-        return f"--env ROS_DOMAIN_ID={ROS_DOMAIN_ID}"
+        return f" --env ROS_DOMAIN_ID={ROS_DOMAIN_ID}"
