@@ -90,6 +90,7 @@ palanteer = "deps_rocker.extensions.palanteer.palanteer:Palanteer"
 
 #robotics
 ros_humble = "deps_rocker.extensions.ros_humble.ros_humble:RosHumble"
+ros_jazzy = "deps_rocker.extensions.ros_jazzy.ros_jazzy:RosJazzy"
 isaac_sim = "deps_rocker.extensions.isaac_sim.isaac_sim:IsaacSim"
 urdf_viz = "deps_rocker.extensions.urdf_viz.urdf_viz:UrdfViz"
 

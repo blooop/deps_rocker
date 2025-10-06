@@ -1,4 +1,4 @@
-RUN pip install vcstool
+RUN pip install vcstool --break-system-packages
 
 #loops through all the *.repos files that were found and imports them with the same folder structure
 @[for dep in depend_repos]@

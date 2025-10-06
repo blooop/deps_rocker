@@ -31,7 +31,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         # "palanteer",
         "conda",
         # "isaac_sim",
-        "ros_humble",
+        "ros_jazzy",
     ]
 
     @classmethod
@@ -39,7 +39,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         """Build a simple base image for testing extensions"""
         cls.base_dockerfile_tag = "testfixture_extensions_base"
         cls.base_dockerfile = """
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 RUN apt-get update && apt-get install -y coreutils curl && apt-get clean
 CMD [\"echo\", \"Extension test complete\"]
 """
@@ -181,8 +181,8 @@ CMD [\"echo\", \"Extension test complete\"]
     # def test_isaac_sim_extension(self):
     #     self.run_extension_build_and_test("isaac_sim")
 
-    def test_ros_humble_extension(self):
-        self.run_extension_build_and_test("ros_humble")
+    def test_ros_jazzy_extension(self):
+        self.run_extension_build_and_test("ros_jazzy")
 
     def test_z_all_extensions_together(self):
         if not self.working_extension_names:
