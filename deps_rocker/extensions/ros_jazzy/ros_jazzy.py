@@ -6,3 +6,7 @@ class RosJazzy(RosGeneric):
 
     name = "ros_jazzy"
     default_ros_distro = "jazzy"
+
+    def _get_pkg(self):
+        # Use ros_generic package for config files
+        return "deps_rocker.extensions.ros_generic"

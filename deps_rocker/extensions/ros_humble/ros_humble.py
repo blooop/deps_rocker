@@ -6,3 +6,7 @@ class RosHumble(RosGeneric):
 
     name = "ros_humble"
     default_ros_distro = "humble"
+
+    def _get_pkg(self):
+        # Use ros_generic package for config files
+        return "deps_rocker.extensions.ros_generic"
