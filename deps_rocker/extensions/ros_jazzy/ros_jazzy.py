@@ -8,11 +8,7 @@ class RosJazzy(SimpleRockerExtension):
 
     name = "ros_jazzy"
 
-    def invoke_after(self, cliargs):
-        return {"vcstool"}
-
-    def required(self, cliargs):
-        return {"vcstool"}
+    depends_on_extensions = ["vsctool", "curl"]
 
     def get_files(self, cliargs) -> dict[str, str]:
         dat = self.get_config_file("configs/defaults.yaml")
