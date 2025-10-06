@@ -88,6 +88,9 @@ lazygit = "deps_rocker.extensions.lazygit.lazygit:Lazygit"
 neovim = "deps_rocker.extensions.neovim.neovim:NeoVim"
 palanteer = "deps_rocker.extensions.palanteer.palanteer:Palanteer"
 
+# developer search tools
+deps-devtools = "deps_rocker.extensions.deps_devtools.deps_devtools:DepsDevtools"
+
 #robotics
 ros_jazzy = "deps_rocker.extensions.ros_jazzy.ros_jazzy:RosJazzy"
 ros_underlay = "deps_rocker.extensions.ros_underlay.ros_underlay:RosUnderlay"
