@@ -241,7 +241,7 @@ class ScriptInjectionExtension(SimpleRockerExtension):
         # Use ubuntu:22.04 as the base image for this test
         # Only inject the test script and run it with bash, in the final extension-built image
         # Inject the test script and run it with bash, in the final extension-built image
-        return f"COPY {self.context_name} /tmp/test.sh\n" 'CMD ["bash", "/tmp/test.sh"]'
+        return f'COPY {self.context_name} /tmp/test.sh\nCMD ["bash", "/tmp/test.sh"]'
 
     def get_files(self, cliargs):
         with open(self.script_path, "r", encoding="utf-8") as f:

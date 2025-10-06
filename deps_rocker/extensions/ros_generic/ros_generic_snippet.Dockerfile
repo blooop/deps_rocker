@@ -29,5 +29,3 @@ ENV ROS_VERSION=2
 
 COPY --from=ros_generic_builder /opt/deps_rocker/ros_generic/ros_underlays.py /usr/local/bin/ros-underlays
 COPY --from=ros_generic_builder /opt/deps_rocker/ros_generic/ros_underlays_manifest.json /opt/ros/underlays/ros_underlays_manifest.json
-
-
