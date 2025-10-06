@@ -1,5 +1,5 @@
 # ROS Workspace Layout
 
-- Define a canonical, user-writable location for vcstool checkouts and ROS underlays to avoid permission errors.
-- Align ros_jazzy, vcstool, ros_underlay, and related helpers on that layout.
-- Keep ROS workspaces easy to discover and persistent through container lifecycle.
+- Adopt `/workspaces/ros_ws` as the canonical root with `repos/`, `src/`, and `underlay/` subdirectories and publish it via `ROS_WORKSPACE_ROOT` and friends.
+- Route vcstool imports into `src/` while preserving manifest copies in `repos/`, then build/install under `underlay/` so the user owns the artifacts.
+- Ensure ros_jazzy, ros_underlay, vcstool, and helper scripts share the layout defaults and remain easy to override when needed.
