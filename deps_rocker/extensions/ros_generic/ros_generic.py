@@ -13,6 +13,8 @@ class RosGeneric(SimpleRockerExtension):
     # depends_on_extension = ("locales", "tzdata", "curl", "vcstool")
     depends_on_extension = ("curl", "vcstool")
     default_ros_distro = "jazzy"
+    builder_output_dir = "/opt/deps_rocker/ros_generic"
+    builder_stage = "ros_generic_builder"
 
     def get_files(self, cliargs) -> dict[str, str]:
         files: Dict[str, str] = {
@@ -26,12 +28,13 @@ class RosGeneric(SimpleRockerExtension):
             "search_roots": ["/dependencies"],
             "manifests": manifests,
         }
+        # Write manifest to the build context root
         files["ros_underlays_manifest.json"] = json.dumps(manifest_payload, indent=2) + "\n"
 
         # Store dynamic args for template processing
         self._dynamic_empy_args = {
             "has_underlay_manifests": bool(manifests),
-            "ros_underlay_manifest_file": "ros_underlays_manifest.json"
+            "ros_underlay_manifest_file": "ros_underlays_manifest.json",
         }
         return files
 
@@ -43,7 +46,7 @@ class RosGeneric(SimpleRockerExtension):
     def empy_args(self):
         args = {"ros_distro": self.default_ros_distro}
         # Include dynamic args set by get_files
-        if hasattr(self, '_dynamic_empy_args'):
+        if hasattr(self, "_dynamic_empy_args"):
             args.update(self._dynamic_empy_args)
         return args
 
@@ -51,7 +54,7 @@ class RosGeneric(SimpleRockerExtension):
     def empy_builder_args(self):
         args = {"ros_distro": self.default_ros_distro}
         # Include dynamic args set by get_files
-        if hasattr(self, '_dynamic_empy_args'):
+        if hasattr(self, "_dynamic_empy_args"):
             args.update(self._dynamic_empy_args)
         return args
 
