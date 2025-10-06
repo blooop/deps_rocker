@@ -11,6 +11,7 @@ class Claude(SimpleRockerExtension):
     # Ensure curl is available for the install script, and user exists for mounting into home
     depends_on_extension: tuple[str, ...] = ("curl", "user")
 
+
     def get_files(self, cliargs) -> dict[str, str]:
         """Provide the claude wrapper script as part of the build context"""
         wrapper_content = """#!/usr/bin/env sh
