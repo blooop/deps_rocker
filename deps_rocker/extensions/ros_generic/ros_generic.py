@@ -10,7 +10,8 @@ class RosGeneric(SimpleRockerExtension):
     """Adds a configurable ROS 2 distribution (default: jazzy) to your docker container"""
 
     name = "ros_generic"
-    depends_on_extension = ("locales", "tzdata", "curl", "vcstool")
+    # depends_on_extension = ("locales", "tzdata", "curl", "vcstool")
+    depends_on_extension = ("curl", "vcstool")
     default_ros_distro = "jazzy"
 
     def get_files(self, cliargs) -> dict[str, str]:
@@ -27,8 +28,11 @@ class RosGeneric(SimpleRockerExtension):
         }
         files["ros_underlays_manifest.json"] = json.dumps(manifest_payload, indent=2) + "\n"
 
-        self.empy_args["has_underlay_manifests"] = bool(manifests)
-        self.empy_args["ros_underlay_manifest_file"] = "ros_underlays_manifest.json"
+        # Store dynamic args for template processing
+        self._dynamic_empy_args = {
+            "has_underlay_manifests": bool(manifests),
+            "ros_underlay_manifest_file": "ros_underlays_manifest.json"
+        }
         return files
 
     def get_ros_distro(self, cliargs):
@@ -37,11 +41,19 @@ class RosGeneric(SimpleRockerExtension):
 
     @property
     def empy_args(self):
-        return {"ros_distro": self.default_ros_distro}
+        args = {"ros_distro": self.default_ros_distro}
+        # Include dynamic args set by get_files
+        if hasattr(self, '_dynamic_empy_args'):
+            args.update(self._dynamic_empy_args)
+        return args
 
     @property
     def empy_builder_args(self):
-        return {"ros_distro": self.default_ros_distro}
+        args = {"ros_distro": self.default_ros_distro}
+        # Include dynamic args set by get_files
+        if hasattr(self, '_dynamic_empy_args'):
+            args.update(self._dynamic_empy_args)
+        return args
 
     def get_docker_args(self, cliargs) -> str:
         """Return a string of --env args for Docker run, space-separated."""
