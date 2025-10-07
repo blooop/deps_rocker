@@ -27,11 +27,14 @@ class TestExtensionsGeneric(unittest.TestCase):
         "npm",
         "cargo",
         "gemini",
-        "spec_kit",
-        # "palanteer",
+        # "spec_kit",
+        # "palanteer", #very slow
         "conda",
         "docker_in_docker",
         # "isaac_sim",
+        # "ros_jazzy", #tested via ros_underlay
+        # "vcstool", #tested via ros_underlay
+        "ros_underlay",
     ]
 
     @classmethod
@@ -39,7 +42,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         """Build a simple base image for testing extensions"""
         cls.base_dockerfile_tag = "testfixture_extensions_base"
         cls.base_dockerfile = """
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 RUN apt-get update && apt-get install -y coreutils curl && apt-get clean
 CMD [\"echo\", \"Extension test complete\"]
 """
@@ -308,6 +311,15 @@ echo "Docker-in-Docker privileged test completed"
 
     # def test_isaac_sim_extension(self):
     #     self.run_extension_build_and_test("isaac_sim")
+
+    def test_ros_jazzy_extension(self):
+        self.run_extension_build_and_test("ros_jazzy")
+
+    def test_ros_underlay_extension(self):
+        self.run_extension_build_and_test("ros_underlay")
+
+    def test_vcstool_extension(self):
+        self.run_extension_build_and_test("vcstool")
 
     def test_z_all_extensions_together(self):
         if not self.working_extension_names:

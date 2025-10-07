@@ -3,16 +3,12 @@ import hashlib
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
-class RosHumble(SimpleRockerExtension):
-    """Adds ros-humble to your docker container"""
+class RosJazzy(SimpleRockerExtension):
+    """Adds ros-jazzy to your docker container"""
 
-    name = "ros_humble"
+    name = "ros_jazzy"
 
-    def invoke_after(self, cliargs):
-        return {"vcstool"}
-
-    def required(self, cliargs):
-        return {"vcstool"}
+    depends_on_extension = ("vcstool", "curl")
 
     def get_files(self, cliargs) -> dict[str, str]:
         dat = self.get_config_file("configs/defaults.yaml")
@@ -31,4 +27,4 @@ class RosHumble(SimpleRockerExtension):
             else:
                 raise ValueError("Unable to determine username and no ROS_DOMAIN_ID provided.")
 
-        return f"--env ROS_DOMAIN_ID={ROS_DOMAIN_ID}"
+        return f" --env ROS_DOMAIN_ID={ROS_DOMAIN_ID}"

@@ -1,37 +1,19 @@
-from pathlib import Path
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
+from deps_rocker.extensions.repository_discovery_mixin import RepositoryDiscoveryMixin
 
 
-class VcsTool(SimpleRockerExtension):
+class VcsTool(RepositoryDiscoveryMixin, SimpleRockerExtension):
     """Add vcstool to the container and clones any repos found in *.repos files"""
 
     name = "vcstool"
     apt_packages = ["python3-pip", "git", "git-lfs"]
 
     def __init__(self) -> None:
-        self.empy_args["depend_repos"] = []
-        self.output_files = self.generate_files()
-
-    def generate_files(self):
-        """Generates depend.repos files and collects their paths
-
-        Returns:
-            dict[str]: _description_
-        """
-        repos = Path.cwd().rglob("*.repos")
-        output_files = {}
-        for r in repos:
-            if r.is_file():
-                with r.open(encoding="utf-8") as f:
-                    rel_path = r.relative_to(Path.cwd()).as_posix()
-                    output_files[rel_path] = f.read()
-                    self.empy_args["depend_repos"].append(
-                        dict(dep=rel_path, path=Path(rel_path).parent.as_posix())
-                    )
-        return output_files
+        super().__init__()
+        self.discover_repos()
 
     def get_files(self, cliargs) -> dict:
-        return self.output_files
+        return self.get_repo_files_content()
 
     # def invoke_after(self, cliargs):
     #     return set(["cwd", "user"])

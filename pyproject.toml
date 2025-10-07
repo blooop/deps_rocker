@@ -89,8 +89,12 @@ lazygit = "deps_rocker.extensions.lazygit.lazygit:Lazygit"
 neovim = "deps_rocker.extensions.neovim.neovim:NeoVim"
 palanteer = "deps_rocker.extensions.palanteer.palanteer:Palanteer"
 
+# developer search tools
+deps-devtools = "deps_rocker.extensions.deps_devtools.deps_devtools:DepsDevtools"
+
 #robotics
-ros_humble = "deps_rocker.extensions.ros_humble.ros_humble:RosHumble"
+ros_jazzy = "deps_rocker.extensions.ros_jazzy.ros_jazzy:RosJazzy"
+ros_underlay = "deps_rocker.extensions.ros_underlay.ros_underlay:RosUnderlay"
 isaac_sim = "deps_rocker.extensions.isaac_sim.isaac_sim:IsaacSim"
 urdf_viz = "deps_rocker.extensions.urdf_viz.urdf_viz:UrdfViz"
 
@@ -142,6 +146,11 @@ ci-push = { depends-on = ["format", "ruff-lint", "update-lock", "ci", "push"] }
 clear-pixi = "rm -rf .pixi pixi.lock"
 setup-git-merge-driver = "git config merge.ourslock.driver true"
 update-from-template-repo = "./scripts/update_from_template.sh"
+
+# Run tests for a specific extension: pixi run test-extension <extension_name>
+[tool.pixi.tasks.test-extension]
+args = ["extension_name"]
+cmd = ["pytest", "-v", "-s", "test/test_extensions_generic.py", "-k", "test_{{extension_name}}_extension"]
 
 [tool.pylint]
 extension-pkg-whitelist = ["numpy"]

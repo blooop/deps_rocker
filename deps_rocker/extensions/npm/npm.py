@@ -6,3 +6,8 @@ class Npm(SimpleRockerExtension):
 
     name = "npm"
     depends_on_extension = ("curl",)
+
+    empy_args = {
+        "NODE_VERSION": "24.9.0",
+        "NPM_VERSION": "11.6.1",
+    }
