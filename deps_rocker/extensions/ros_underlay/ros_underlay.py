@@ -7,7 +7,7 @@ class RosUnderlay(RepositoryDiscoveryMixin, SimpleRockerExtension):
     """Build ROS underlay from vcstool repositories"""
 
     name = "ros_underlay"
-    depends_on_extension = ("vcstool",)
+    depends_on_extension = ("vcstool", "ros_jazzy")
 
     def __init__(self) -> None:
         super().__init__()
