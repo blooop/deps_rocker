@@ -131,7 +131,7 @@ RUN --mount=type=cache,target=/root/.cache/vcs-repos,id=vcs-repos-cache \
     mkdir -p /root/.cache/vcs-repos/@(dep["path"]) && \
     vcs import --recursive /root/.cache/vcs-repos/@(dep["path"]) < @(repos_root)/@(dep["dep"]) && \
     mkdir -p @(dependencies_root)/@(dep["path"]) && \
-    cp -r /root/.cache/vcs-repos/@(dep["path"])/* @(dependencies_root)/@(dep["path"])/ || true
+    cp -r /root/.cache/vcs-repos/@(dep["path"])/. @(dependencies_root)/@(dep["path"])/
 ```
 
 **Benefits:**
@@ -141,6 +141,6 @@ RUN --mount=type=cache,target=/root/.cache/vcs-repos,id=vcs-repos-cache \
 - Safer than git reference repositories (no corruption risk)
 
 **Notes:**
-- Use `|| true` at the end to handle empty directories gracefully
+- Use `/.` instead of `/*` to handle empty directories while still catching real copy errors
 - Cache is per-path to avoid conflicts between different manifests
 - All repos share the same cache ID to maximize reuse

@@ -13,7 +13,7 @@ RUN --mount=type=cache,target=/root/.cache/vcs-repos,id=vcs-repos-cache \
     mkdir -p /root/.cache/vcs-repos/@(dep["path"]) && \
     vcs import --recursive /root/.cache/vcs-repos/@(dep["path"]) < @(repos_root)/@(dep["dep"]) && \
     mkdir -p @(dependencies_root)/@(dep["path"]) && \
-    cp -r /root/.cache/vcs-repos/@(dep["path"])/* @(dependencies_root)/@(dep["path"])/ || true
+    cp -r /root/.cache/vcs-repos/@(dep["path"])/. @(dependencies_root)/@(dep["path"])/
 @[end for]@
 
 RUN chmod -R a+rwX @(dependencies_root)
