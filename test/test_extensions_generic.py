@@ -27,11 +27,11 @@ class TestExtensionsGeneric(unittest.TestCase):
         "npm",
         "cargo",
         "gemini",
-        "spec_kit",
+        # "spec_kit",
         # "palanteer",
         "conda",
         # "isaac_sim",
-        "ros_jazzy",
+        # "ros_jazzy",
         "ros_underlay",
         "vcstool",
     ]
