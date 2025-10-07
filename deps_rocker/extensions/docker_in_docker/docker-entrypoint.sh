@@ -82,11 +82,21 @@ if ! pgrep dockerd > /dev/null 2>&1; then
     echo "Waiting for Docker daemon to start..."
     timeout=90  # Increased timeout for complex environments
     counter=0
+    DOCKER_NEEDS_ELEVATED=0
     while [ $timeout -gt 0 ]; do
         # Check if docker socket is available and responding
-        if [ -S /var/run/docker.sock ] && docker version > /dev/null 2>&1; then
-            echo "✅ Docker daemon is ready!"
-            break
+        if [ -S /var/run/docker.sock ]; then
+            if docker version > /dev/null 2>&1; then
+                echo "✅ Docker daemon is ready!"
+                break
+            fi
+
+            # Fall back to sudo when the current user lacks socket permissions
+            if command -v sudo >/dev/null 2>&1 && sudo -n docker version > /dev/null 2>&1; then
+                echo "✅ Docker daemon is ready (requires sudo for docker CLI access)"
+                DOCKER_NEEDS_ELEVATED=1
+                break
+            fi
         fi
 
         # Show progress every 5 seconds
@@ -119,6 +129,13 @@ if ! pgrep dockerd > /dev/null 2>&1; then
         echo "Last 50 lines of dockerd.log:"
         tail -50 /tmp/dockerd.log 2>/dev/null || echo "No log available"
         exit 1
+    fi
+
+    # Warn when docker CLI access still requires elevated permissions
+    if [ "$DOCKER_NEEDS_ELEVATED" -eq 1 ]; then
+        echo "⚠️ Current user cannot access the Docker socket directly. Use 'sudo docker ...' or add the user to the docker group."
+    elif [ "$(id -u)" -ne 0 ] && ! id -nG | grep -q '\bdocker\b'; then
+        echo "ℹ️ Current user is not in the docker group; docker commands may require sudo."
     fi
 else
     echo "Docker daemon is already running"
