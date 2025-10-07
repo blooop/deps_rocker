@@ -148,8 +148,8 @@ update-from-template-repo = "./scripts/update_from_template.sh"
 
 # Run tests for a specific extension: pixi run test-extension <extension_name>
 [tool.pixi.tasks.test-extension]
-cmd = ["pytest", "-v", "-s", "test/test_extensions_generic.py", "-k", "test_{{extension_name}}_extension"]
 args = ["extension_name"]
+cmd = ["pytest", "-v", "-s", "test/test_extensions_generic.py", "-k", "test_{{extension_name}}_extension"]
 
 [tool.pylint]
 extension-pkg-whitelist = ["numpy"]
