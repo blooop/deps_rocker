@@ -53,7 +53,11 @@ ENV PYTHONPATH=/opt/ros/jazzy/local/lib/python3.12/dist-packages:/opt/ros/jazzy/
 ENV ROS_PYTHON_VERSION=3
 ENV ROS_VERSION=2
 
-RUN rosdep init
+RUN if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then \
+    rosdep init; \
+  else \
+    echo "rosdep already initialized, skipping init"; \
+  fi
 
 RUN mkdir -p /workspaces/ros_ws/{repos,src,underlay,build,log} && chmod -R 777 /workspaces/ros_ws
 
