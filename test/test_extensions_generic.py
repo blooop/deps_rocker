@@ -28,12 +28,12 @@ class TestExtensionsGeneric(unittest.TestCase):
         "cargo",
         "gemini",
         # "spec_kit",
-        # "palanteer",
+        # "palanteer", #very slow
         "conda",
         # "isaac_sim",
-        # "ros_jazzy",
+        # "ros_jazzy", #tested via ros_underlay
+        # "vcstool", #tested via ros_underlay
         "ros_underlay",
-        "vcstool",
     ]
 
     @classmethod
