@@ -9,8 +9,11 @@ RUN mkdir -p @(repos_root) @(dependencies_root)
 # Import each discovered manifest into the canonical ROS workspace layout
 @[for dep in depend_repos]@
 COPY @(dep["dep"]) @(repos_root)/@(dep["dep"])
-RUN mkdir -p @(dependencies_root)/@(dep["path"]) && \
-    vcs import --recursive @(dependencies_root)/@(dep["path"]) < @(repos_root)/@(dep["dep"])
+RUN --mount=type=cache,target=/root/.cache/vcs-repos,id=vcs-repos-cache \
+    mkdir -p /root/.cache/vcs-repos/@(dep["path"]) && \
+    vcs import --recursive /root/.cache/vcs-repos/@(dep["path"]) < @(repos_root)/@(dep["dep"]) && \
+    mkdir -p @(dependencies_root)/@(dep["path"]) && \
+    cp -r /root/.cache/vcs-repos/@(dep["path"])/* @(dependencies_root)/@(dep["path"])/ || true
 @[end for]@
 
 RUN chmod -R a+rwX @(dependencies_root)
