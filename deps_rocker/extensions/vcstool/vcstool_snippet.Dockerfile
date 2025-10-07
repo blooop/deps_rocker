@@ -1,4 +1,4 @@
-RUN pip install vcstool --break-system-packages
+RUN --mount=type=cache,target=/root/.cache/pip,id=pip-cache pip install vcstool --break-system-packages
 
 ENV ROS_WORKSPACE_ROOT=@(workspace_root)
 ENV ROS_REPOS_ROOT=@(repos_root)
