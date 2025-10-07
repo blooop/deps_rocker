@@ -3,4 +3,5 @@
 
 # Provide Pixi installation bundle for user stage
 @(f"COPY --from={builder_stage} {builder_output_dir}/.pixi /opt/deps_rocker/pixi")
-RUN chmod -R a+rX /opt/deps_rocker/pixi
+RUN --mount=type=cache,target=/root/.cache/pixi \
+	chmod -R a+rX /opt/deps_rocker/pixi
