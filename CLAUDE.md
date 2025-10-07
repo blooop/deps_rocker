@@ -120,3 +120,27 @@ Always check if the tool being installed has specific requirements and add appro
 - Prefer versioned filenames (e.g. include release tag or tool version) so new releases trigger a fresh download while older layers stay cached.
 - Keep artifacts (installers, archives, repos) in the cache; do not delete them at the end of the step so future builds can reuse them.
 - When cloning repositories, reuse the cached checkout and update it in-place with `git fetch`/`git reset` before copying into the container filesystem.
+
+#### Caching Multi-Repository Imports (vcstool pattern)
+When importing multiple repositories (e.g., with vcstool), use a two-step approach:
+1. Import to a cache directory first
+2. Copy from cache to final destination
+
+```dockerfile
+RUN --mount=type=cache,target=/root/.cache/vcs-repos,id=vcs-repos-cache \
+    mkdir -p /root/.cache/vcs-repos/@(dep["path"]) && \
+    vcs import --recursive /root/.cache/vcs-repos/@(dep["path"]) < @(repos_root)/@(dep["dep"]) && \
+    mkdir -p @(dependencies_root)/@(dep["path"]) && \
+    cp -r /root/.cache/vcs-repos/@(dep["path"])/. @(dependencies_root)/@(dep["path"])/
+```
+
+**Benefits:**
+- Repository clones are cached and reused across builds
+- Avoids repeated network downloads for the same repos
+- Much faster than re-cloning on every build
+- Safer than git reference repositories (no corruption risk)
+
+**Notes:**
+- Use `/.` instead of `/*` to handle empty directories while still catching real copy errors
+- Cache is per-path to avoid conflicts between different manifests
+- All repos share the same cache ID to maximize reuse
