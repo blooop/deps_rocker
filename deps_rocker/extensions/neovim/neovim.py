@@ -2,15 +2,10 @@ from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
 class NeoVim(SimpleRockerExtension):
-    """Install the latest stable Neovim and mount host configs (~/.config/nvim, ~/.vim)"""
+    """Install Neovim v0.11.4 and mount host configs (~/.config/nvim, ~/.vim)"""
 
     name = "neovim"
     depends_on_extension = ("curl",)
-
-    # Template arguments for both snippets
-    empy_args = {
-        "NEOVIM_VERSION": "v0.11.4",
-    }
 
     def get_docker_args(self, cliargs):
         from pathlib import Path

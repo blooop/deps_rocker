@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-@(f"ARG NEOVIM_VERSION={NEOVIM_VERSION}")
+ARG NEOVIM_VERSION=v0.11.4
 
 @(f"FROM {base_image} AS {builder_stage}")
 ARG NEOVIM_VERSION
