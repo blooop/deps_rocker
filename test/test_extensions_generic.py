@@ -1,3 +1,9 @@
+# Test for neovim extension
+def test_neovim_extension():
+    import subprocess
+    result = subprocess.run(["nvim", "--version"], capture_output=True, text=True)
+    assert result.returncode == 0
+    assert "NVIM" in result.stdout
 import unittest
 import pytest
 import io
@@ -11,6 +17,7 @@ class TestExtensionsGeneric(unittest.TestCase):
     """Simplified tests for deps_rocker extensions"""
 
     EXTENSIONS_TO_TEST = [
+        "neovim",
         "uv",
         "tzdata",
         "curl",
