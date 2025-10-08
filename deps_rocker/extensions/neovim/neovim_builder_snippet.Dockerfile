@@ -1,8 +1,6 @@
 # syntax=docker/dockerfile:1.4
-ARG NEOVIM_VERSION=v0.11.4
-
 @(f"FROM {base_image} AS {builder_stage}")
-ARG NEOVIM_VERSION
+ARG NEOVIM_VERSION=v0.11.4
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
     --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
