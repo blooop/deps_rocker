@@ -7,9 +7,9 @@ class NeoVim(SimpleRockerExtension):
     name = "neovim"
     depends_on_extension = ("curl",)
 
-
     def get_docker_args(self, cliargs):
         from pathlib import Path
+
         home = str(Path.home())
         nvim_config = f"{home}/.config/nvim"
         vim_config = f"{home}/.vim"
