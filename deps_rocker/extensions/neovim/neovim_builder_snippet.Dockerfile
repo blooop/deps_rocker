@@ -2,6 +2,7 @@
 @(f"ARG NEOVIM_VERSION={NEOVIM_VERSION}")
 
 @(f"FROM {base_image} AS {builder_stage}")
+ARG NEOVIM_VERSION
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
     --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
@@ -10,13 +11,14 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
     rm -rf /var/lib/apt/lists/*
 
 RUN --mount=type=cache,target=/root/.cache/neovim-downloads,id=nvim-downloads \
-    bash -c "set -euxo pipefail && \
-    OUTPUT_DIR='@(f"{builder_output_dir}")' && \
-    mkdir -p /root/.cache/neovim-downloads \"\$OUTPUT_DIR\" && \
-    NVIM_ARCHIVE=\"/root/.cache/neovim-downloads/nvim-\${NEOVIM_VERSION}-linux-x86_64.tar.gz\" && \
-    if [ ! -f \"\$NVIM_ARCHIVE\" ]; then \
-        curl -fsSL \"https://github.com/neovim/neovim/releases/download/\${NEOVIM_VERSION}/nvim-linux-x86_64.tar.gz\" \
-             -o \"\$NVIM_ARCHIVE\"; \
+    export NVIM_VERSION=${NEOVIM_VERSION} && \
+    bash -c 'set -euxo pipefail && \
+    OUTPUT_DIR="@(f"{builder_output_dir}")" && \
+    mkdir -p /root/.cache/neovim-downloads "$OUTPUT_DIR" && \
+    NVIM_ARCHIVE="/root/.cache/neovim-downloads/nvim-${NVIM_VERSION}-linux-x86_64.tar.gz" && \
+    if [ ! -f "$NVIM_ARCHIVE" ]; then \
+        curl -fsSL "https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/nvim-linux-x86_64.tar.gz" \
+             -o "$NVIM_ARCHIVE"; \
     fi && \
-    tar -xzf \"\$NVIM_ARCHIVE\" -C /tmp && \
-    cp -a /tmp/nvim-linux-x86_64 \"\$OUTPUT_DIR/nvim\""
+    tar -xzf "$NVIM_ARCHIVE" -C /tmp && \
+    cp -a /tmp/nvim-linux-x86_64 "$OUTPUT_DIR/nvim"'
