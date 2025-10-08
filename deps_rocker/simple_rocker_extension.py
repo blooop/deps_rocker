@@ -30,13 +30,28 @@ class SimpleRockerExtensionMeta(type):
 class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta):
     """A class to take care of most of the boilerplace required for a rocker extension"""
 
+    _instance_counts: dict[str, int] = {}
+
+    def __init__(self):
+        super().__init__()
+        self._ensure_builder_stage_name()
+
+    def _ensure_builder_stage_name(self):
+        if hasattr(self, "_builder_stage_name"):
+            return
+        count = self._instance_counts.get(self.name, 0)
+        suffix = "" if count == 0 else f"_{count}"
+        self._builder_stage_name = f"{self.name}_builder{suffix}"
+        self._instance_counts[self.name] = count + 1
+
     @property
     def builder_output_dir(self):
         return f"/opt/deps_rocker/{self.name}"
 
     @property
     def builder_stage(self):
-        return f"{self.name}_builder"
+        self._ensure_builder_stage_name()
+        return self._builder_stage_name
 
     def _with_builder_defaults(self, raw: dict) -> dict:
         out = dict(raw)
@@ -191,7 +206,7 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         return args
 
     def get_builder_stage_name(self) -> str:
-        return f"{self.name}_builder"
+        return self.builder_stage
 
     def get_builder_output_dir(self) -> str:
         return f"{self.builder_output_root}/{self.name}"

@@ -243,6 +243,7 @@ class ScriptInjectionExtension(SimpleRockerExtension):
     name = "test_script"
 
     def __init__(self, script_path):
+        super().__init__()
         self.script_path = script_path
         self.context_name = "test.sh"
 

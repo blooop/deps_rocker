@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.4
-ARG NODE_VERSION=@NODE_VERSION@
 
 @(f"FROM {base_image} AS {builder_stage}")
+ARG NODE_VERSION=@NODE_VERSION@
 
 ENV NVM_DIR=/usr/local/nvm
 ENV NODE_VERSION=${NODE_VERSION}
