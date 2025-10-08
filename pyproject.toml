@@ -60,7 +60,6 @@ include = ["deps_rocker"]
 deps-rocker = "deps_rocker.dep_rocker_cli:gen_dockerfile"
 
 [project.entry-points."rocker.extensions"]
-# Add neovim extension entry point
 #dependency managers
 odeps_dependencies = "deps_rocker.dependencies:Dependencies"
 vcstool = "deps_rocker.extensions.vcstool.vcstool:VcsTool"
