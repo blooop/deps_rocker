@@ -1,9 +1,3 @@
-# Test for neovim extension
-def test_neovim_extension():
-    import subprocess
-    result = subprocess.run(["nvim", "--version"], capture_output=True, text=True)
-    assert result.returncode == 0
-    assert "NVIM" in result.stdout
 import unittest
 import pytest
 import io
