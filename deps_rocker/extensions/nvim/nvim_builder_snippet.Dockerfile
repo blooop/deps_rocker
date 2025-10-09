@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 @(f"FROM {base_image} AS {builder_stage}")
-ARG nvim_VERSION=v0.11.4
+ARG NVIM_VERSION=v0.11.4
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
     --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
@@ -9,7 +9,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
     rm -rf /var/lib/apt/lists/*
 
 RUN --mount=type=cache,target=/root/.cache/nvim-downloads,id=nvim-downloads \
-    export NVIM_VERSION=${nvim_VERSION} && \
+    export NVIM_VERSION=${NVIM_VERSION} && \
     bash -c 'set -euxo pipefail && \
     OUTPUT_DIR="@(f"{builder_output_dir}")" && \
     mkdir -p /root/.cache/nvim-downloads "$OUTPUT_DIR" && \
