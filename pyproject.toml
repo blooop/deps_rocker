@@ -85,7 +85,7 @@ detach = "deps_rocker.extensions.detach.detach:Detach"
 #dev tools
 fzf = "deps_rocker.extensions.fzf.fzf:Fzf"
 lazygit = "deps_rocker.extensions.lazygit.lazygit:Lazygit"
-neovim = "deps_rocker.extensions.neovim.neovim:NeoVim"
+nvim = "deps_rocker.extensions.nvim.nvim:Nvim"
 palanteer = "deps_rocker.extensions.palanteer.palanteer:Palanteer"
 
 # developer search tools

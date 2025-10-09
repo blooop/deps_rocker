@@ -11,13 +11,13 @@ class TestExtensionsGeneric(unittest.TestCase):
     """Simplified tests for deps_rocker extensions"""
 
     EXTENSIONS_TO_TEST = [
-        "neovim",
+        "nvim",
         "uv",
         "tzdata",
         "curl",
         "git_clone",
         "locales",
-        "neovim",
+        "nvim",
         "pixi",
         # "urdf_viz",
         "fzf",
@@ -139,8 +139,8 @@ CMD [\"echo\", \"Extension test complete\"]
     def test_locales_extension(self):
         self.run_extension_build_and_test("locales")
 
-    def test_neovim_extension(self):
-        self.run_extension_build_and_test("neovim")
+    def test_nvim_extension(self):
+        self.run_extension_build_and_test("nvim")
 
     def test_pixi_extension(self):
         self.run_extension_build_and_test("pixi")
