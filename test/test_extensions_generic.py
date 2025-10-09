@@ -28,6 +28,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         "npm",
         "cargo",
         "gemini",
+        "jquery",
         # "spec_kit",
         # "palanteer", #very slow
         "conda",
@@ -174,6 +175,9 @@ CMD [\"echo\", \"Extension test complete\"]
 
     def test_spec_kit_extension(self):
         self.run_extension_build_and_test("spec_kit")
+
+    def test_jquery_extension(self):
+        self.run_extension_build_and_test("jquery")
 
     # def test_palanteer_extension(self):
     #     self.run_extension_build_and_test("palanteer")
