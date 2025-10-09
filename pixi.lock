@@ -597,19 +597,12 @@ packages:
 - pypi: ./
   name: deps-rocker
   version: 0.18.0
-  sha256: d3196917baab5dc27366159722479b4c27231e6ace3f20401358c47434a47eeb
+  sha256: 63974d15fb844758f261760a18b43cdd22eaac95ecb2844c09800399084f84e8
   requires_dist:
   - rocker>=0.2.19
   - off-your-rocker>=0.1.0
   - pyyaml>=5.0
   - toml>=0.10
-  - pylint>=3.2.5,<=3.3.8 ; extra == 'test'
-  - pytest-cov>=4.1,<=7.0.0 ; extra == 'test'
-  - pytest>=7.4,<=8.4.2 ; extra == 'test'
-  - hypothesis>=6.104.2,<=6.140.2 ; extra == 'test'
-  - ruff>=0.5.0,<=0.13.2 ; extra == 'test'
-  - coverage>=7.5.4,<=7.10.7 ; extra == 'test'
-  - pre-commit<=4.3.0 ; extra == 'test'
   requires_python: '>=3.9'
   editable: true
 - pypi: https://files.pythonhosted.org/packages/50/3d/9373ad9c56321fdab5b41197068e1d8c25883b3fea29dd361f9b55116869/dill-0.4.0-py3-none-any.whl
