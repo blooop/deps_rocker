@@ -1,5 +1,3 @@
-import os
-from pathlib import Path
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
@@ -8,20 +6,20 @@ class Auto(SimpleRockerExtension):
 
     name = "auto"
 
-    def _detect_files_in_workspace(self, cliargs: dict) -> set[str]:
+    def _detect_files_in_workspace(self, _cliargs: dict) -> set[str]:
         """
         Detect files in the workspace and return a set of extension names to enable.
 
         Args:
-            cliargs: CLI arguments dict (may contain workspace path)
+            _cliargs: CLI arguments dict (not used, kept for compatibility)
 
         Returns:
             Set of extension names to enable
         """
         extensions = set()
 
-        # Get workspace directory from cliargs or use current directory
-        workspace = Path(cliargs.get("dir", os.getcwd()))
+        # Use centralized workspace path getter
+        workspace = self.get_workspace_path()
 
         # Exact file matches
         file_patterns = {
