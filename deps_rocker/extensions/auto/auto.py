@@ -1,3 +1,4 @@
+import logging
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
@@ -21,6 +22,10 @@ class Auto(SimpleRockerExtension):
         # Use centralized workspace path getter
         workspace = self.get_workspace_path()
 
+        logging.warning(f"[AUTO] Scanning workspace: {workspace}")
+        logging.warning(f"[AUTO] Workspace exists: {workspace.exists()}")
+        logging.warning(f"[AUTO] Workspace is_dir: {workspace.is_dir()}")
+
         # Exact file matches
         file_patterns = {
             "pixi.toml": "pixi",
@@ -33,24 +38,38 @@ class Auto(SimpleRockerExtension):
         }
 
         for filename, extension in file_patterns.items():
-            if (workspace / filename).exists():
+            file_path = workspace / filename
+            exists = file_path.exists()
+            logging.warning(f"[AUTO] Checking {filename}: {file_path} -> exists={exists}")
+            if exists:
+                logging.warning(f"[AUTO] ✓ Detected {filename} -> enabling {extension}")
                 extensions.add(extension)
 
         # Pattern-based matches (requirements*.txt)
-        if list(workspace.glob("requirements*.txt")):
+        req_files = list(workspace.glob("requirements*.txt"))
+        logging.warning(f"[AUTO] Checking requirements*.txt: found {len(req_files)} files")
+        if req_files:
+            logging.warning(f"[AUTO] ✓ Detected requirements files -> enabling uv")
             extensions.add("uv")
 
         # Check for conda environment files
-        if (workspace / "environment.yml").exists() or (workspace / "environment.yaml").exists():
+        env_yml = (workspace / "environment.yml").exists()
+        env_yaml = (workspace / "environment.yaml").exists()
+        logging.warning(f"[AUTO] Checking conda: environment.yml={env_yml}, environment.yaml={env_yaml}")
+        if env_yml or env_yaml:
+            logging.warning(f"[AUTO] ✓ Detected conda environment file -> enabling conda")
             extensions.add("conda")
 
         # Check for C/C++ files (for ccache)
         cpp_patterns = ["*.cpp", "*.hpp", "*.cc", "*.cxx", "*.h", "*.c", "*.hxx"]
         for pattern in cpp_patterns:
-            if list(workspace.rglob(pattern)):
+            cpp_files = list(workspace.rglob(pattern))
+            if cpp_files:
+                logging.warning(f"[AUTO] ✓ Detected {len(cpp_files)} {pattern} files -> enabling ccache")
                 extensions.add("ccache")
                 break  # Found at least one C++ file, no need to continue
 
+        logging.warning(f"[AUTO] Final detected extensions: {extensions}")
         return extensions
 
     def required(self, cliargs: dict) -> set[str]:
