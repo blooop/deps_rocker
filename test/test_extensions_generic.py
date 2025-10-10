@@ -37,6 +37,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         # "ros_jazzy", #tested via ros_underlay
         # "vcstool", #tested via ros_underlay
         "ros_underlay",
+        "auto",
     ]
 
     @classmethod
@@ -200,6 +201,9 @@ CMD [\"echo\", \"Extension test complete\"]
 
     def test_vcstool_extension(self):
         self.run_extension_build_and_test("vcstool")
+
+    def test_auto_extension(self):
+        self.run_extension_build_and_test("auto")
 
     def test_z_all_extensions_together(self):
         if not self.working_extension_names:
