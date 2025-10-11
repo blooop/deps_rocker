@@ -5,14 +5,14 @@ from pathlib import Path
 
 
 class Auto(RockerExtension):
+    """
+    Detect project files and enable relevant extensions based on workspace contents.
+    Use --auto=~/renv to specify the root directory for recursive search.
+    """
+
     @classmethod
     def get_name(cls):
         return cls.name
-
-    """
-    Detect project files and enable relevant extensions based on workspace contents.
-    Use --auto-search-root to specify the root directory for recursive search.
-    """
 
     @staticmethod
     def register_arguments(parser, defaults=None):
