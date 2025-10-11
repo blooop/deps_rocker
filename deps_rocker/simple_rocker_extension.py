@@ -1,11 +1,25 @@
 import pkgutil
 import logging
 import em
+from pathlib import Path
 from rocker.extensions import RockerExtension
 from typing import Type
 from argparse import ArgumentParser
 from typing import Dict, Optional
 from deps_rocker.buildkit import is_buildkit_enabled
+
+
+def get_workspace_path() -> Path:
+    """
+    Get the workspace directory path.
+
+    Returns the current working directory where rocker is invoked.
+    This is typically where the user's project files are located.
+
+    Returns:
+        Path: The workspace directory path
+    """
+    return Path.cwd()
 
 
 class SimpleRockerExtensionMeta(type):
@@ -68,6 +82,7 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
 
     depends_on_extension: tuple[str, ...] = ()  # Tuple of dependencies required by the extension
     apt_packages: list[str] = []  # List of apt packages required by the extension
+    builder_apt_packages: list[str] = []  # List of apt packages required in the builder stage
     builder_output_root = "/opt/deps_rocker"
 
     @classmethod
@@ -110,9 +125,42 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         return "\n\n".join(fragments)
 
     def get_builder_snippet(self, cliargs) -> str:
-        return self.get_and_expand_empy_template(
+        snippet = self.get_and_expand_empy_template(
             cliargs, getattr(self, "empy_builder_args", None), snippet_prefix="builder_"
         )
+
+        # If builder_apt_packages is defined, generate apt install command and insert after FROM
+        if self.builder_apt_packages and snippet:
+            # Enable cache mounts when BuildKit is active
+            apt_snippet = self.get_apt_command(
+                self.builder_apt_packages, use_cache_mount=is_buildkit_enabled()
+            )
+
+            # Insert apt command after the FROM line
+            lines = snippet.split("\n")
+            insert_index = 0
+
+            # Find the last line that starts with FROM, ARG, or is empty/comment after FROM
+            for i, line in enumerate(lines):
+                stripped = line.strip()
+                if stripped.startswith("FROM ") or stripped.startswith('@(f"FROM'):
+                    insert_index = i + 1
+                elif insert_index > 0 and (
+                    stripped.startswith("ARG ")
+                    or stripped.startswith("ENV ")
+                    or stripped.startswith("#")
+                    or not stripped
+                ):
+                    insert_index = i + 1
+                elif insert_index > 0:
+                    # Found first non-FROM/ARG/ENV/comment/empty line, stop here
+                    break
+
+            # Insert the apt snippet at the determined position
+            lines.insert(insert_index, "\n" + apt_snippet)
+            snippet = "\n".join(lines)
+
+        return snippet
 
     def get_and_expand_empy_template(self, cliargs, empy_args=None, snippet_prefix=""):
         """
@@ -257,6 +305,9 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         If deps is defined, returns it as a set.
         """
         return set(self.depends_on_extension) if self.depends_on_extension else set()
+
+    # alias the module-level function to avoid duplication
+    get_workspace_path = staticmethod(get_workspace_path)
 
     @staticmethod
     def get_apt_command(packages: list[str], use_cache_mount: bool = None) -> str:

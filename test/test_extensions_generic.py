@@ -11,22 +11,25 @@ class TestExtensionsGeneric(unittest.TestCase):
     """Simplified tests for deps_rocker extensions"""
 
     EXTENSIONS_TO_TEST = [
+        "nvim",
         "uv",
         "tzdata",
         "curl",
         "git_clone",
         "locales",
-        "neovim",
+        "nvim",
         "pixi",
         # "urdf_viz",
         "fzf",
         "lazygit",
         "cwd",
+        "ccache",
         "claude",
         "codex",
         "npm",
         "cargo",
         "gemini",
+        "jquery",
         # "spec_kit",
         # "palanteer", #very slow
         "conda",
@@ -34,7 +37,8 @@ class TestExtensionsGeneric(unittest.TestCase):
         # "isaac_sim",
         # "ros_jazzy", #tested via ros_underlay
         # "vcstool", #tested via ros_underlay
-        "ros_underlay",
+        # "ros_underlay", #too slow
+        "auto",
     ]
 
     @classmethod
@@ -152,8 +156,8 @@ CMD [\"echo\", \"Extension test complete\"]
     def test_locales_extension(self):
         self.run_extension_build_and_test("locales")
 
-    def test_neovim_extension(self):
-        self.run_extension_build_and_test("neovim")
+    def test_nvim_extension(self):
+        self.run_extension_build_and_test("nvim")
 
     def test_pixi_extension(self):
         self.run_extension_build_and_test("pixi")
@@ -169,6 +173,9 @@ CMD [\"echo\", \"Extension test complete\"]
 
     def test_cwd_extension(self):
         self.run_extension_build_and_test("cwd")
+
+    def test_ccache_extension(self):
+        self.run_extension_build_and_test("ccache")
 
     def test_claude_extension(self):
         self.run_extension_build_and_test("claude")
@@ -187,6 +194,9 @@ CMD [\"echo\", \"Extension test complete\"]
 
     def test_spec_kit_extension(self):
         self.run_extension_build_and_test("spec_kit")
+
+    def test_jquery_extension(self):
+        self.run_extension_build_and_test("jquery")
 
     # def test_palanteer_extension(self):
     #     self.run_extension_build_and_test("palanteer")
@@ -320,6 +330,9 @@ echo "Docker-in-Docker privileged test completed"
 
     def test_vcstool_extension(self):
         self.run_extension_build_and_test("vcstool")
+
+    def test_auto_extension(self):
+        self.run_extension_build_and_test("auto")
 
     def test_z_all_extensions_together(self):
         if not self.working_extension_names:

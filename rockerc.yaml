@@ -8,10 +8,10 @@
 image: ubuntu:22.04
 args:
   # - nvidia
+  - jquery
   - x11 
   - user 
   - pull 
-  - deps
   - git 
   - cwd
   - pixi

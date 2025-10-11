@@ -10,6 +10,7 @@ class Claude(SimpleRockerExtension):
     name = "claude"
     # Ensure curl is available for the install script, and user exists for mounting into home
     depends_on_extension: tuple[str, ...] = ("curl", "user")
+    builder_apt_packages = ["curl", "ca-certificates"]
 
     def get_files(self, cliargs) -> dict[str, str]:
         """Provide the claude wrapper script as part of the build context"""

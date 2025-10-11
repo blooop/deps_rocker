@@ -1,6 +1,6 @@
 [project]
 name = "deps_rocker"
-version = "0.17.0"
+version = "0.19.0"
 authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
 description = "A rocker plugin to help installing apt and pip dependencies"
 readme = "README.md"
@@ -37,17 +37,15 @@ python = "3.13.*"
 
 [tool.pixi.pypi-dependencies]
 deps_rocker = { path = ".", editable = true }
+# Test & lint tooling so pixi tasks succeed (mirrors project.optional-dependencies[test])
+[tool.pixi.feature.test.pypi-dependencies]
+ruff = ">=0.5.0,<0.14"
+pylint = ">=3.2.5,<3.4.0"
+pytest = ">=7.4,<8.5"
+pytest-cov = ">=4.1,<7.1"
+hypothesis = ">=6.104.2,<6.141"
+coverage = ">=7.5.4,<7.11"
 
-[project.optional-dependencies]
-test = [
-  "pylint>=3.2.5,<=3.3.8",
-  "pytest-cov>=4.1,<=7.0.0",
-  "pytest>=7.4,<=8.4.2",
-  "hypothesis>=6.104.2,<=6.140.2",
-  "ruff>=0.5.0,<=0.13.2",
-  "coverage>=7.5.4,<=7.10.7",
-  "pre-commit<=4.3.0",
-]
 
 [build-system]
 requires = ["hatchling"]
@@ -75,6 +73,7 @@ cwd = "deps_rocker.extensions.cwd.cwd:CWD"
 cwd_name = "deps_rocker.extensions.cwd.cwd:CWDName"
 
 #utils
+auto = "deps_rocker.extensions.auto.auto:Auto"
 curl = "deps_rocker.extensions.curl.curl:Curl"
 locales = "deps_rocker.extensions.locales.locales:Locales"
 tzdata = "deps_rocker.extensions.tzdata.tzdata:TzData"
@@ -84,9 +83,10 @@ docker_in_docker = "deps_rocker.extensions.docker_in_docker.docker_in_docker:Doc
 detach = "deps_rocker.extensions.detach.detach:Detach"
 
 #dev tools
+ccache = "deps_rocker.extensions.ccache.ccache:Ccache"
 fzf = "deps_rocker.extensions.fzf.fzf:Fzf"
 lazygit = "deps_rocker.extensions.lazygit.lazygit:Lazygit"
-neovim = "deps_rocker.extensions.neovim.neovim:NeoVim"
+nvim = "deps_rocker.extensions.nvim.nvim:Nvim"
 palanteer = "deps_rocker.extensions.palanteer.palanteer:Palanteer"
 
 # developer search tools
@@ -104,6 +104,7 @@ codex = "deps_rocker.extensions.codex.codex:Codex"
 gemini = "deps_rocker.extensions.gemini.gemini:Gemini"
 spec_kit = "deps_rocker.extensions.spec_kit.spec_kit:SpecKit"
 conda = "deps_rocker.extensions.conda.conda:Conda"
+jquery = "deps_rocker.extensions.jquery.jquery:Jquery"
 
 # Environments
 [tool.pixi.environments]
@@ -121,13 +122,13 @@ pre-commit-update = "pre-commit autoupdate"
 format = "ruff format ."
 check-clean-workspace = "git diff --exit-code"
 ruff-lint = "ruff check . --fix"
-pylint = "pylint --version && echo 'running pylint...' && pylint $(git ls-files '*.py')"
+pylint = "python -m pylint --version && echo 'running pylint...' && python -m pylint $(git ls-files '*.py')"
 lint = { depends-on = ["ruff-lint", "pylint"] }
 style = { depends-on = ["format", "lint"] }
 commit-format = "git commit -a -m'autoformat code' || true"
-test = "pytest -v -s"
-test-claude = "pytest -v -s -m claude"
-coverage = "coverage run -m pytest -v -s && coverage xml -o coverage.xml"
+test = "python -m pytest -v -s"
+test-claude = "python -m pytest -v -s -m claude"
+coverage = "coverage run -m pytest --durations=0 -v -s && coverage xml -o coverage.xml"
 coverage-report = "coverage report -m"
 update-lock = "pixi update && git commit -a -m'update pixi.lock' || true"
 push = "git push"

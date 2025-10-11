@@ -5,6 +5,7 @@ import yaml
 import toml
 from rocker.extensions import RockerExtension
 from .command_layer import CommandLayer
+from .simple_rocker_extension import get_workspace_path
 import typing
 
 
@@ -43,7 +44,7 @@ class Dependencies(RockerExtension):
                 # file_filter += ".deps.yaml"
             else:
                 file_filter = "*.deps.yaml"
-            self.read_dependencies(Path.cwd(), file_filter)
+            self.read_dependencies(get_workspace_path(), file_filter)
             self.parsed = True
 
     def read_dependencies(self, path: Path, pattern: str):
@@ -159,7 +160,7 @@ class Dependencies(RockerExtension):
         Returns:
             str: Space delimited string of dependencies
         """
-        pp_toml = Path.cwd().rglob("pyproject.toml")
+        pp_toml = get_workspace_path().rglob("pyproject.toml")
         pyproj_deps = []
         for p in pp_toml:
             with open(p, "r", encoding="utf-8") as f:
