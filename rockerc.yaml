@@ -8,6 +8,7 @@
 image: ubuntu:22.04
 args:
   # - nvidia
+  - jq
   - x11 
   - user 
   - pull 
