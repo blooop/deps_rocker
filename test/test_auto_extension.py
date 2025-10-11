@@ -148,7 +148,7 @@ class TestAutoExtension(unittest.TestCase):
 
         self._test_in_dir(setup, assertion)
 
-    """Tests for the auto extension file detection logic"""
+    # Tests for the auto extension file detection logic
 
     def setUp(self):
         """Create a temporary directory for testing"""
