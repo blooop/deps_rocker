@@ -6,6 +6,148 @@ from deps_rocker.extensions.auto.auto import Auto
 
 
 class TestAutoExtension(unittest.TestCase):
+    def test_detect_pixi_with_auto_search_root(self):
+        """Test detection of pixi.toml with --auto-search-root argument"""
+
+        def setup():
+            subdir = Path("subdir")
+            subdir.mkdir(exist_ok=True)
+            (subdir / "pixi.toml").touch()
+
+        def assertion(deps):
+            self.assertIn("pixi", deps)
+
+        original_dir = os.getcwd()
+        try:
+            os.chdir(self.test_dir)
+            setup()
+            deps = self.auto.required({"auto_search_root": "subdir"})
+            assertion(deps)
+        finally:
+            os.chdir(original_dir)
+
+    def test_detect_uv_pyproject_with_auto_search_root(self):
+        """Test detection of pyproject.toml for uv with --auto-search-root argument"""
+
+        def setup():
+            subdir = Path("subdir")
+            subdir.mkdir(exist_ok=True)
+            (subdir / "pyproject.toml").touch()
+
+        def assertion(deps):
+            self.assertIn("uv", deps)
+
+        original_dir = os.getcwd()
+        try:
+            os.chdir(self.test_dir)
+            setup()
+            deps = self.auto.required({"auto_search_root": "subdir"})
+            assertion(deps)
+        finally:
+            os.chdir(original_dir)
+
+    def test_detect_uv_poetry_lock(self):
+        """Test detection of poetry.lock for uv"""
+
+        def setup():
+            Path("poetry.lock").touch()
+
+        def assertion(deps):
+            self.assertIn("uv", deps)
+
+        self._test_in_dir(setup, assertion)
+
+    def test_detect_conda_environment_yaml(self):
+        """Test detection of environment.yaml for conda"""
+
+        def setup():
+            Path("environment.yaml").touch()
+
+        def assertion(deps):
+            self.assertIn("conda", deps)
+
+        self._test_in_dir(setup, assertion)
+
+    def test_detect_ccache_cc(self):
+        """Test detection of .cc files for ccache"""
+
+        def setup():
+            Path("main.cc").touch()
+
+        def assertion(deps):
+            self.assertIn("ccache", deps)
+
+        self._test_in_dir(setup, assertion)
+
+    def test_detect_ccache_cxx(self):
+        """Test detection of .cxx files for ccache"""
+
+        def setup():
+            Path("main.cxx").touch()
+
+        def assertion(deps):
+            self.assertIn("ccache", deps)
+
+        self._test_in_dir(setup, assertion)
+
+    def test_detect_ccache_h(self):
+        """Test detection of .h files for ccache"""
+
+        def setup():
+            Path("header.h").touch()
+
+        def assertion(deps):
+            self.assertIn("ccache", deps)
+
+        self._test_in_dir(setup, assertion)
+
+    def test_detect_ccache_c(self):
+        """Test detection of .c files for ccache"""
+
+        def setup():
+            Path("main.c").touch()
+
+        def assertion(deps):
+            self.assertIn("ccache", deps)
+
+        self._test_in_dir(setup, assertion)
+
+    def test_detect_ccache_hxx(self):
+        """Test detection of .hxx files for ccache"""
+
+        def setup():
+            Path("header.hxx").touch()
+
+        def assertion(deps):
+            self.assertIn("ccache", deps)
+
+        self._test_in_dir(setup, assertion)
+
+    def test_detect_uv_pyproject_and_requirements(self):
+        """Test detection of pyproject.toml and requirements.txt for overlapping uv triggers"""
+
+        def setup():
+            Path("pyproject.toml").touch()
+            Path("requirements.txt").touch()
+
+        def assertion(deps):
+            self.assertIn("uv", deps)
+
+        self._test_in_dir(setup, assertion)
+
+    def test_detect_conda_and_requirements(self):
+        """Test detection of environment.yml and requirements.txt for overlapping conda/uv triggers"""
+
+        def setup():
+            Path("environment.yml").touch()
+            Path("requirements.txt").touch()
+
+        def assertion(deps):
+            self.assertIn("conda", deps)
+            self.assertIn("uv", deps)
+
+        self._test_in_dir(setup, assertion)
+
     """Tests for the auto extension file detection logic"""
 
     def setUp(self):
