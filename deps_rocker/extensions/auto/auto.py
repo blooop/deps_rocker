@@ -2,6 +2,8 @@ import logging
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 from pathlib import Path
 
+"""Automatically detect and enable extensions based on workspace files"""
+
 
 class Auto(SimpleRockerExtension):
     """
@@ -20,8 +22,6 @@ class Auto(SimpleRockerExtension):
             default=None,
             help="Directory to start recursive search for project files (overrides default root)",
         )
-
-    """Automatically detect and enable extensions based on workspace files"""
 
     name = "auto"
 
@@ -42,26 +42,30 @@ class Auto(SimpleRockerExtension):
             "Cargo.toml": "cargo",
             "package.xml": "ros_jazzy",
         }
+        print(f"[AUTO] Starting exact file match checks in: {workspace}")
         extensions |= self._detect_exact(workspace, file_patterns)
 
         # requirements*.txt recursive
+        print(f"[AUTO] Searching recursively for requirements*.txt in: {workspace}")
         extensions |= self._detect_glob(workspace, "requirements*.txt", "uv")
 
         # conda env files recursive
+        print(f"[AUTO] Searching recursively for conda environment files in: {workspace}")
         extensions |= self._detect_conda(workspace)
 
         # C/C++ files
+        print(f"[AUTO] Searching recursively for C/C++ files in: {workspace}")
         extensions |= self._detect_cpp(workspace)
 
-        logging.info(f"[AUTO] Final detected extensions: {extensions}")
+        print(f"[AUTO] Final detected extensions: {extensions}")
         return extensions
 
     def _resolve_workspace(self, cliargs):
         root = cliargs.get("auto_search_root")
         path = Path(root).expanduser().resolve() if root else Path.cwd().expanduser().resolve()
-        logging.info(f"[AUTO] Scanning workspace: {path}")
-        logging.info(f"[AUTO] Workspace exists: {path.exists()}")
-        logging.info(f"[AUTO] Workspace is_dir: {path.is_dir()}")
+        print(f"[AUTO] Scanning workspace: {path}")
+        print(f"[AUTO] Workspace exists: {path.exists()}")
+        print(f"[AUTO] Workspace is_dir: {path.is_dir()}")
         return path
 
     def _detect_exact(self, workspace, patterns):
@@ -69,15 +73,15 @@ class Auto(SimpleRockerExtension):
         for fname, ext in patterns.items():
             file_path = workspace / fname
             if file_path.exists():
-                logging.info(f"[AUTO] ✓ Detected {fname} -> enabling {ext}")
+                print(f"[AUTO] ✓ Detected {fname} -> enabling {ext}")
                 found.add(ext)
         return found
 
     def _detect_glob(self, workspace, pattern, ext):
         files = list(workspace.rglob(pattern))
-        logging.info(f"[AUTO] Recursively checking {pattern}: found {len(files)} files")
+        print(f"[AUTO] Recursively checking {pattern}: found {len(files)} files")
         if files:
-            logging.info(f"[AUTO] ✓ Detected {pattern} files -> enabling {ext}")
+            print(f"[AUTO] ✓ Detected {pattern} files -> enabling {ext}")
             return {ext}
         return set()
 
@@ -85,11 +89,11 @@ class Auto(SimpleRockerExtension):
         env_files = list(workspace.rglob("environment.yml")) + list(
             workspace.rglob("environment.yaml")
         )
-        logging.info(
+        print(
             f"[AUTO] Checking conda: found {len(env_files)} environment.yml/environment.yaml files"
         )
         if env_files:
-            logging.info("[AUTO] ✓ Detected conda environment file(s) -> enabling conda")
+            print("[AUTO] ✓ Detected conda environment file(s) -> enabling conda")
             return {"conda"}
         return set()
 
@@ -97,9 +101,7 @@ class Auto(SimpleRockerExtension):
         cpp_patterns = ["*.cpp", "*.hpp", "*.cc", "*.cxx", "*.h", "*.c", "*.hxx"]
         for pattern in cpp_patterns:
             if cpp_files := list(workspace.rglob(pattern)):
-                logging.info(
-                    f"[AUTO] ✓ Detected {len(cpp_files)} {pattern} files -> enabling ccache"
-                )
+                print(f"[AUTO] ✓ Detected {len(cpp_files)} {pattern} files -> enabling ccache")
                 return {"ccache"}
         return set()
 
