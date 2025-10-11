@@ -16,7 +16,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
 RUN --mount=type=cache,target=/tmp/nvm-git-cache,id=nvm-git-cache \
     bash -c "set -e && \
     if [ -d /tmp/nvm-git-cache/.git ]; then \
-        cd /tmp/nvm-git-cache && git fetch --tags && git checkout v0.40.0; \
+        cd /tmp/nvm-git-cache && git fetch --tags && git checkout v0.40.3; \
     else \
         git clone https://github.com/nvm-sh/nvm.git /tmp/nvm-git-cache && \
         cd /tmp/nvm-git-cache && git checkout v0.40.0; \
