@@ -11,4 +11,3 @@ ENV NPM_CONFIG_FUND=false
 
 # Add node and npm to path
 ENV PATH="$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH"
-
