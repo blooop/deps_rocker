@@ -5,10 +5,5 @@ ENV NVM_DIR=/usr/local/nvm
 # Copy pre-installed nvm directory from builder
 @(f"COPY --from={builder_stage} $NVM_DIR $NVM_DIR")
 
-# Upgrade npm to specific version
-
-# Verify installed npm version
-RUN bash -c "source $NVM_DIR/nvm.sh && echo 'Installed npm version:' && npm --version"
-
 # Add node and npm to path
 ENV PATH="$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH"
