@@ -1,6 +1,6 @@
+ENV NODE_VERSION=24.9.0
 # Install nvm, node and npm
 ENV NVM_DIR=/usr/local/nvm
-ENV NODE_VERSION=24.9.0
 ENV NPM_VERSION=11.6.1
 
 # Copy pre-installed nvm directory from builder
