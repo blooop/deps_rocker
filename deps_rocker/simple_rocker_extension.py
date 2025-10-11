@@ -272,18 +272,8 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         """
         return set(self.depends_on_extension) if self.depends_on_extension else set()
 
-    @staticmethod
-    def get_workspace_path() -> Path:
-        """
-        Get the workspace directory path.
-
-        Returns the current working directory where rocker is invoked.
-        This is typically where the user's project files are located.
-
-        Returns:
-            Path: The workspace directory path
-        """
-        return get_workspace_path()
+    # alias the module-level function to avoid duplication
+    get_workspace_path = staticmethod(get_workspace_path)
 
     @staticmethod
     def get_apt_command(packages: list[str], use_cache_mount: bool = None) -> str:
