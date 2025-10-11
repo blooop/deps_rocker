@@ -12,6 +12,3 @@ ENV NPM_CONFIG_FUND=false
 # Add node and npm to path
 ENV PATH="$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH"
 
-# Use BuildKit cache for global npm installs
-RUN --mount=type=cache,target=/root/.npm,id=global-npm-cache \
-	npm install -g npm
