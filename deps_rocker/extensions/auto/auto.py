@@ -1,11 +1,14 @@
-import logging
-from deps_rocker.simple_rocker_extension import SimpleRockerExtension
-from pathlib import Path
-
 """Automatically detect and enable extensions based on workspace files"""
 
+from rocker.extensions import RockerExtension
+from pathlib import Path
 
-class Auto(SimpleRockerExtension):
+
+class Auto(RockerExtension):
+    @classmethod
+    def get_name(cls):
+        return cls.name
+
     """
     Detect project files and enable relevant extensions based on workspace contents.
     Use --auto-search-root to specify the root directory for recursive search.
@@ -17,10 +20,11 @@ class Auto(SimpleRockerExtension):
         Register command-line arguments for the auto extension.
         """
         parser.add_argument(
-            "--auto-search-root",
+            "--auto",
             type=str,
-            default=None,
-            help="Directory to start recursive search for project files (overrides default root)",
+            nargs="?",
+            const=str(Path.cwd()),
+            help="Enable auto extension and optionally specify a search root directory. Defaults to current working directory.",
         )
 
     name = "auto"
@@ -61,8 +65,14 @@ class Auto(SimpleRockerExtension):
         return extensions
 
     def _resolve_workspace(self, cliargs):
-        root = cliargs.get("auto_search_root")
-        path = Path(root).expanduser().resolve() if root else Path.cwd().expanduser().resolve()
+        root = cliargs.get("auto")
+        # If root is True (from --auto with no value), treat as None
+        if root is True or root is None:
+            path = Path.cwd().expanduser().resolve()
+        elif isinstance(root, (str, Path)):
+            path = Path(root).expanduser().resolve()
+        else:
+            path = Path.cwd().expanduser().resolve()
         print(f"[AUTO] Scanning workspace: {path}")
         print(f"[AUTO] Workspace exists: {path.exists()}")
         print(f"[AUTO] Workspace is_dir: {path.is_dir()}")
