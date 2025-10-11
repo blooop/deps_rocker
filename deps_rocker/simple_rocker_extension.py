@@ -82,6 +82,7 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
 
     depends_on_extension: tuple[str, ...] = ()  # Tuple of dependencies required by the extension
     apt_packages: list[str] = []  # List of apt packages required by the extension
+    builder_apt_packages: list[str] = []  # List of apt packages required in the builder stage
     builder_output_root = "/opt/deps_rocker"
 
     @classmethod
@@ -124,9 +125,19 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         return "\n\n".join(fragments)
 
     def get_builder_snippet(self, cliargs) -> str:
-        return self.get_and_expand_empy_template(
+        snippet = self.get_and_expand_empy_template(
             cliargs, getattr(self, "empy_builder_args", None), snippet_prefix="builder_"
         )
+
+        # If builder_apt_packages is defined, generate apt install command
+        if self.builder_apt_packages:
+            # Enable cache mounts when BuildKit is active
+            apt_snippet = self.get_apt_command(
+                self.builder_apt_packages, use_cache_mount=is_buildkit_enabled()
+            )
+            # If there's an existing snippet, append the apt command after the snippet (after FROM)
+            snippet = f"{snippet}\n\n{apt_snippet}" if snippet else apt_snippet
+        return snippet
 
     def get_and_expand_empy_template(self, cliargs, empy_args=None, snippet_prefix=""):
         """

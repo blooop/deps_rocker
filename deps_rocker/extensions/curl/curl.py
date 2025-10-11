@@ -6,3 +6,4 @@ class Curl(SimpleRockerExtension):
 
     name = "curl"
     apt_packages = ["curl", "ca-certificates"]
+    builder_apt_packages = ["curl", "ca-certificates"]

@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.4
 ARG NODE_VERSION=@NODE_VERSION@
 
-@(f"FROM {base_image} AS {builder_stage}")
+FROM curl_builder AS @(builder_stage)
 
 ARG NODE_VERSION
 ENV NVM_DIR=/usr/local/nvm
@@ -9,7 +9,7 @@ ENV NVM_DIR=/usr/local/nvm
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
     --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
     apt-get update && \
-    apt-get install -y --no-install-recommends curl ca-certificates git && \
+    apt-get install -y --no-install-recommends git && \
     rm -rf /var/lib/apt/lists/*
 
 # Clone nvm from git with caching
