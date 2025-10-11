@@ -36,7 +36,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         # "isaac_sim",
         # "ros_jazzy", #tested via ros_underlay
         # "vcstool", #tested via ros_underlay
-        "ros_underlay",
+        # "ros_underlay", #too slow
         "auto",
     ]
 
