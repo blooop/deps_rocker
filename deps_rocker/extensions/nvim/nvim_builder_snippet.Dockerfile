@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-FROM curl_builder AS @(builder_stage)
+@(f"FROM {base_image} AS {builder_stage}")
 ARG NVIM_VERSION=v0.11.4
 
 RUN --mount=type=cache,target=/root/.cache/nvim-downloads,id=nvim-downloads \

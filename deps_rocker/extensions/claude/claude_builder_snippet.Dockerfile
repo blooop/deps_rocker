@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 
-FROM curl_builder AS @(builder_stage)
+@(f"FROM {base_image} AS {builder_stage}")
 
 RUN --mount=type=cache,target=/tmp/claude-install-cache,id=claude-install-cache \
     bash -c "set -euxo pipefail && \

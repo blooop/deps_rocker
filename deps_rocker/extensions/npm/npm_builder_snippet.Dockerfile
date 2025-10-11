@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.4
 ARG NODE_VERSION=@NODE_VERSION@
 
-FROM curl_builder AS @(builder_stage)
+@(f"FROM {base_image} AS {builder_stage}")
 
 ARG NODE_VERSION
 ENV NVM_DIR=/usr/local/nvm

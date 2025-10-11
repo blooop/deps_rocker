@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 
-FROM curl_builder AS @(builder_stage)
+@(f"FROM {base_image} AS {builder_stage}")
 
 ENV CARGO_HOME=/root/.cargo
 ENV RUSTUP_HOME=/root/.rustup

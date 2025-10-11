@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.4
 @(f"ARG PIXI_VERSION={PIXI_VERSION}")
 
-FROM curl_builder AS @(builder_stage)
+@(f"FROM {base_image} AS {builder_stage}")
 
 RUN --mount=type=cache,target=/root/.cache/pixi-install-cache,id=pixi-install-cache \
     bash -c "set -euxo pipefail && \
