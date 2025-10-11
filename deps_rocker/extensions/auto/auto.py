@@ -21,8 +21,6 @@ class Auto(SimpleRockerExtension):
             help="Directory to start recursive search for project files (overrides default root)",
         )
 
-    """Automatically detect and enable extensions based on workspace files"""
-
     name = "auto"
 
     def _detect_files_in_workspace(self, _cliargs: dict) -> set[str]:
