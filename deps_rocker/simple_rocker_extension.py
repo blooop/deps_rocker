@@ -129,14 +129,35 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
             cliargs, getattr(self, "empy_builder_args", None), snippet_prefix="builder_"
         )
 
-        # If builder_apt_packages is defined, generate apt install command
-        if self.builder_apt_packages:
+        # If builder_apt_packages is defined, generate apt install command and insert after FROM
+        if self.builder_apt_packages and snippet:
             # Enable cache mounts when BuildKit is active
             apt_snippet = self.get_apt_command(
                 self.builder_apt_packages, use_cache_mount=is_buildkit_enabled()
             )
-            # If there's an existing snippet, append the apt command after the snippet (after FROM)
-            snippet = f"{snippet}\n\n{apt_snippet}" if snippet else apt_snippet
+
+            # Insert apt command after the FROM line
+            lines = snippet.split('\n')
+            insert_index = 0
+
+            # Find the last line that starts with FROM, ARG, or is empty/comment after FROM
+            for i, line in enumerate(lines):
+                stripped = line.strip()
+                if stripped.startswith('FROM ') or stripped.startswith('@(f"FROM'):
+                    insert_index = i + 1
+                elif insert_index > 0 and (stripped.startswith('ARG ') or
+                                          stripped.startswith('ENV ') or
+                                          stripped.startswith('#') or
+                                          not stripped):
+                    insert_index = i + 1
+                elif insert_index > 0:
+                    # Found first non-FROM/ARG/ENV/comment/empty line, stop here
+                    break
+
+            # Insert the apt snippet at the determined position
+            lines.insert(insert_index, '\n' + apt_snippet)
+            snippet = '\n'.join(lines)
+
         return snippet
 
     def get_and_expand_empy_template(self, cliargs, empy_args=None, snippet_prefix=""):
