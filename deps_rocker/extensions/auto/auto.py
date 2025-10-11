@@ -1,8 +1,26 @@
 import logging
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
+from pathlib import Path
 
 
 class Auto(SimpleRockerExtension):
+    """
+    Detect project files and enable relevant extensions based on workspace contents.
+    Use --auto-search-root to specify the root directory for recursive search.
+    """
+
+    @staticmethod
+    def register_arguments(parser, defaults=None):
+        """
+        Register command-line arguments for the auto extension.
+        """
+        parser.add_argument(
+            "--auto-search-root",
+            type=str,
+            default=None,
+            help="Directory to start recursive search for project files (overrides default root)",
+        )
+
     """Automatically detect and enable extensions based on workspace files"""
 
     name = "auto"
@@ -19,8 +37,12 @@ class Auto(SimpleRockerExtension):
         """
         extensions = set()
 
-        # Use centralized workspace path getter
-        workspace = self.get_workspace_path()
+        # Use --auto-search-root argument if provided, else cwd
+        cli_search_root = _cliargs.get("auto_search_root")
+        if cli_search_root:
+            workspace = Path(cli_search_root).expanduser().resolve()
+        else:
+            workspace = Path.cwd().expanduser().resolve()
 
         logging.warning(f"[AUTO] Scanning workspace: {workspace}")
         logging.warning(f"[AUTO] Workspace exists: {workspace.exists()}")
@@ -49,15 +71,17 @@ class Auto(SimpleRockerExtension):
         req_files = list(workspace.glob("requirements*.txt"))
         logging.warning(f"[AUTO] Checking requirements*.txt: found {len(req_files)} files")
         if req_files:
-            logging.warning(f"[AUTO] ✓ Detected requirements files -> enabling uv")
+            logging.warning("[AUTO] ✓ Detected requirements files -> enabling uv")
             extensions.add("uv")
 
         # Check for conda environment files
         env_yml = (workspace / "environment.yml").exists()
         env_yaml = (workspace / "environment.yaml").exists()
-        logging.warning(f"[AUTO] Checking conda: environment.yml={env_yml}, environment.yaml={env_yaml}")
+        logging.warning(
+            f"[AUTO] Checking conda: environment.yml={env_yml}, environment.yaml={env_yaml}"
+        )
         if env_yml or env_yaml:
-            logging.warning(f"[AUTO] ✓ Detected conda environment file -> enabling conda")
+            logging.warning("[AUTO] ✓ Detected conda environment file -> enabling conda")
             extensions.add("conda")
 
         # Check for C/C++ files (for ccache)
@@ -65,7 +89,9 @@ class Auto(SimpleRockerExtension):
         for pattern in cpp_patterns:
             cpp_files = list(workspace.rglob(pattern))
             if cpp_files:
-                logging.warning(f"[AUTO] ✓ Detected {len(cpp_files)} {pattern} files -> enabling ccache")
+                logging.warning(
+                    f"[AUTO] ✓ Detected {len(cpp_files)} {pattern} files -> enabling ccache"
+                )
                 extensions.add("ccache")
                 break  # Found at least one C++ file, no need to continue
 
