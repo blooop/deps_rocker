@@ -1,11 +1,5 @@
 @(f"FROM {base_image} AS {builder_stage}")
 
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
-    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
-    apt-get update && \
-    apt-get install -y --no-install-recommends ca-certificates curl jq tar && \
-    rm -rf /var/lib/apt/lists/*
-
 RUN --mount=type=cache,target=/tmp/urdf-viz-cache,id=urdf-viz-cache \
     set -euxo pipefail && \
     OUTPUT_DIR="@builder_output_dir@" && \

@@ -5,12 +5,6 @@ ARG CONDA_VERSION=@CONDA_VERSION@
 
 ENV CONDA_DIR=/opt/miniconda3
 
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
-    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
-    apt-get update && \
-    apt-get install -y --no-install-recommends bzip2 ca-certificates curl && \
-    rm -rf /var/lib/apt/lists/*
-
 RUN --mount=type=cache,target=/tmp/miniforge-cache,id=conda-installer-cache \
     bash -c "set -euxo pipefail && \
     OUTPUT_DIR='@(f"{builder_output_dir}")' && \

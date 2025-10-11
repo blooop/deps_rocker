@@ -2,12 +2,6 @@
 
 @(f"FROM {base_image} AS {builder_stage}")
 
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
-    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
-    apt-get update && \
-    apt-get install -y --no-install-recommends curl ca-certificates && \
-    rm -rf /var/lib/apt/lists/*
-
 RUN --mount=type=cache,target=/tmp/claude-install-cache,id=claude-install-cache \
     bash -c "set -euxo pipefail && \
     mkdir -p /tmp/claude-install-cache && \
