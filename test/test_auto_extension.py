@@ -6,8 +6,8 @@ from deps_rocker.extensions.auto.auto import Auto
 
 
 class TestAutoExtension(unittest.TestCase):
-    def test_detect_pixi_with_auto_search_root(self):
-        """Test detection of pixi.toml with --auto-search-root argument"""
+    def test_detect_pixi_with_auto_path(self):
+        """Test detection of pixi.toml with --auto=/path argument"""
 
         def setup():
             subdir = Path("subdir")
@@ -21,13 +21,13 @@ class TestAutoExtension(unittest.TestCase):
         try:
             os.chdir(self.test_dir)
             setup()
-            deps = self.auto.required({"auto_search_root": "subdir"})
+            deps = self.auto.required({"auto": str(Path(self.test_dir) / "subdir")})
             assertion(deps)
         finally:
             os.chdir(original_dir)
 
-    def test_detect_uv_pyproject_with_auto_search_root(self):
-        """Test detection of pyproject.toml for uv with --auto-search-root argument"""
+    def test_detect_uv_pyproject_with_auto_path(self):
+        """Test detection of pyproject.toml for uv with --auto=/path argument"""
 
         def setup():
             subdir = Path("subdir")
@@ -41,7 +41,7 @@ class TestAutoExtension(unittest.TestCase):
         try:
             os.chdir(self.test_dir)
             setup()
-            deps = self.auto.required({"auto_search_root": "subdir"})
+            deps = self.auto.required({"auto": str(Path(self.test_dir) / "subdir")})
             assertion(deps)
         finally:
             os.chdir(original_dir)
