@@ -54,15 +54,18 @@ class RepositoryDiscoveryMixin:
 
         self._ensure_empy_args()
 
+        # Get workspace path using centralized method
+        workspace = self.get_workspace_path()
+
         # Search for both *.repos and depends.repos.yaml files
         repos_patterns = [
-            Path.cwd().rglob("*.repos"),
-            Path.cwd().rglob("depends.repos.yaml"),
+            workspace.rglob("*.repos"),
+            workspace.rglob("depends.repos.yaml"),
         ]
 
         for r in itertools.chain(*repos_patterns):
             if r.is_file():
-                rel_path = r.relative_to(Path.cwd()).as_posix()
+                rel_path = r.relative_to(workspace).as_posix()
                 self.empy_args["depend_repos"].append(
                     dict(dep=rel_path, path=Path(rel_path).parent.as_posix())
                 )
@@ -76,8 +79,9 @@ class RepositoryDiscoveryMixin:
         files_content = {}
 
         if hasattr(self, "empy_args") and "depend_repos" in self.empy_args:
+            workspace = self.get_workspace_path()
             for repo_info in self.empy_args["depend_repos"]:
-                repo_path = Path.cwd() / repo_info["dep"]
+                repo_path = workspace / repo_info["dep"]
                 if repo_path.is_file():
                     with repo_path.open(encoding="utf-8") as f:
                         files_content[repo_info["dep"]] = f.read()

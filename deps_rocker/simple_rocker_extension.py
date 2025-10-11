@@ -1,11 +1,25 @@
 import pkgutil
 import logging
 import em
+from pathlib import Path
 from rocker.extensions import RockerExtension
 from typing import Type
 from argparse import ArgumentParser
 from typing import Dict, Optional
 from deps_rocker.buildkit import is_buildkit_enabled
+
+
+def get_workspace_path() -> Path:
+    """
+    Get the workspace directory path.
+
+    Returns the current working directory where rocker is invoked.
+    This is typically where the user's project files are located.
+
+    Returns:
+        Path: The workspace directory path
+    """
+    return Path.cwd()
 
 
 class SimpleRockerExtensionMeta(type):
@@ -257,6 +271,9 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         If deps is defined, returns it as a set.
         """
         return set(self.depends_on_extension) if self.depends_on_extension else set()
+
+    # alias the module-level function to avoid duplication
+    get_workspace_path = staticmethod(get_workspace_path)
 
     @staticmethod
     def get_apt_command(packages: list[str], use_cache_mount: bool = None) -> str:
