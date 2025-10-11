@@ -21,7 +21,9 @@ RUN --mount=type=cache,target=/tmp/nvm-git-cache,id=nvm-git-cache \
         git clone https://github.com/nvm-sh/nvm.git /tmp/nvm-git-cache && \
         cd /tmp/nvm-git-cache && git checkout v0.40.0; \
     fi && \
-    cp -r /tmp/nvm-git-cache /usr/local/nvm"
+    # Use tar to copy nvm cache, excluding .git, test, and .github for smaller image and security
+    # Ensure /usr/local/nvm exists before extracting
+    mkdir -p /usr/local/nvm && tar --exclude='.git' --exclude='test' --exclude='.github' -cf - -C /tmp/nvm-git-cache . | tar -xf - -C /usr/local/nvm"
 
 # Install Node.js using nvm with cached downloads - use template substitution for version
 RUN --mount=type=cache,target=/usr/local/nvm/.cache,id=nvm-node-cache \
