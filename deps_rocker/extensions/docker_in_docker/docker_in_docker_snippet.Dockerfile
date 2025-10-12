@@ -128,7 +128,7 @@ while [ ! -S /var/run/docker.sock ]; do
     fi
     sleep 0.5
     TRIES=$((TRIES + 1))
-fi
+done
 
 chown root:docker /var/run/docker.sock || true
 chmod 660 /var/run/docker.sock || true
