@@ -1,0 +1,6 @@
+# Auto detection rules for npm extension
+files:
+  - package.json
+  - package-lock.json
+  - npm-shrinkwrap.json
+  - .npmrc

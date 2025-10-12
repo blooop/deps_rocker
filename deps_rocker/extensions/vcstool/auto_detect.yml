@@ -1,0 +1,6 @@
+# Auto detection rules for vcstool extension
+files:
+  - *.repos
+  - *.rosinstall
+  - vcs.yaml
+  - vcs.yml

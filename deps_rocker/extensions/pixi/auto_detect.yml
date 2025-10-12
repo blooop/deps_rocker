@@ -1,0 +1,6 @@
+# Auto detection rules for pixi extension
+files:
+  - pixi.toml
+  - pyproject.toml
+  - .python-version
+  - poetry.lock

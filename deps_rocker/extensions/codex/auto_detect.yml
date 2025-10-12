@@ -1,0 +1,3 @@
+# Auto detection rules for codex extension
+config_dirs:
+  - .codex

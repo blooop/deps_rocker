@@ -36,36 +36,26 @@ class Auto(RockerExtension):
         workspace = self._resolve_workspace(_cliargs)
         extensions = set()
 
-        # Data-driven exact file checks
-        file_patterns = {
-            "pixi.toml": "pixi",
-            "pyproject.toml": "uv",
-            ".python-version": "uv",
-            "poetry.lock": "uv",
-            "package.json": "npm",
-            "Cargo.toml": "cargo",
-            "package.xml": "ros_jazzy",
-        }
+        # Load detection rules from auto_detect.yml in each extension
+        import yaml
+        from pathlib import Path
+        extensions_dir = Path(__file__).parent.parent
+        file_patterns = {}
+        dir_patterns = {}
+        for ext_dir in extensions_dir.iterdir():
+            rule_file = ext_dir / "auto_detect.yml"
+            if rule_file.exists():
+                with rule_file.open() as f:
+                    rules = yaml.safe_load(f)
+                ext_name = ext_dir.name
+                # File patterns
+                for fname in rules.get("files", []):
+                    file_patterns[fname] = ext_name
+                # Directory patterns
+                for dname in rules.get("config_dirs", []):
+                    dir_patterns[dname] = ext_name
         print(f"[AUTO] Starting exact file match checks in: {workspace}")
         extensions |= self._detect_exact(workspace, file_patterns)
-
-        # Data-driven exact directory checks
-        dir_patterns = {
-            # Gemini config
-            ".gemini": "gemini",
-            # Codex config
-            ".codex": "codex",
-            # Claude config (legacy)
-            ".claude": "claude",
-            # Claude XDG config
-            ".config/claude": "claude",
-            # Claude cache (optional)
-            ".cache/claude": "claude",
-            # Neovim config
-            ".config/nvim": "nvim",
-            # Vim config (used by nvim)
-            ".vim": "nvim",
-        }
         print(f"[AUTO] Starting exact directory match checks in: {workspace}")
         extensions |= self._detect_exact_dir(workspace, dir_patterns)
 

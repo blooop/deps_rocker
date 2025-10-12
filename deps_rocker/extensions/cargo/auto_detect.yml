@@ -1,0 +1,6 @@
+# Auto detection rules for cargo extension
+files:
+  - Cargo.toml
+  - Cargo.lock
+  - .cargo/config
+  - .cargo/config.toml

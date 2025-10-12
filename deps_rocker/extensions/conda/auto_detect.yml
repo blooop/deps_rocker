@@ -1,0 +1,6 @@
+# Auto detection rules for conda extension
+files:
+  - environment.yml
+  - environment.yaml
+  - conda.yaml
+  - conda.yml

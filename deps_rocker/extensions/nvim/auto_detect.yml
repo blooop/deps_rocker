@@ -1,0 +1,4 @@
+# Auto detection rules for nvim extension
+config_dirs:
+  - .config/nvim
+  - .vim
