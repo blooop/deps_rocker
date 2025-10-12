@@ -2,19 +2,17 @@
 
 from rocker.extensions import RockerExtension
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed  # pylint: disable=E0611
 
 
 class Auto(RockerExtension):
     def _resolve_workspace(self, cliargs):
         root = cliargs.get("auto")
         # If root is True (from --auto with no value), treat as None
-        if root is True or root is None:
+        if root is True or root is None or not isinstance(root, (str, Path)):
             path = Path.cwd().expanduser().resolve()
-        elif isinstance(root, (str, Path)):
-            path = Path(root).expanduser().resolve()
         else:
-            path = Path.cwd().expanduser().resolve()
+            path = Path(root).expanduser().resolve()
         print(f"[auto-detect] Scanning workspace: {path}")
         print(f"[auto-detect] Workspace exists: {path.exists()}")
         print(f"[auto-detect] Workspace is_dir: {path.is_dir()}")
@@ -54,6 +52,8 @@ class Auto(RockerExtension):
         file_patterns = {}
         dir_patterns = {}
         for ext_dir in extensions_dir.iterdir():
+            if not ext_dir.is_dir():
+                continue
             rule_file = ext_dir / "auto_detect.yml"
             if rule_file.exists():
                 with rule_file.open() as f:
@@ -69,7 +69,6 @@ class Auto(RockerExtension):
         # Prepare detection functions and their arguments
         # Use only patterns from auto_detect.yml files for all extensions
         tasks = [
-            (self._detect_exact, (workspace, file_patterns)),
             (self._detect_exact_dir, (workspace, dir_patterns)),
             (self._detect_glob_patterns, (workspace, file_patterns)),
         ]
@@ -91,23 +90,33 @@ class Auto(RockerExtension):
         return results
 
     def _detect_glob_patterns(self, workspace, file_patterns):
-        """
-        Search for all file patterns in auto_detect.yml using rglob, and print timing for each pattern.
-        """
         import time
         import os
         import fnmatch
 
         found = set()
         start_total = time.time()
-        # Walk the tree once
+        # Walk the tree once, handling symlinks and permission errors
         all_files = []
         workspace_path = str(workspace)
-        for root, _, files in os.walk(workspace_path):
+        walk_errors = []
+
+        def walk_onerror(err):
+            walk_errors.append(err)
+
+        for root, dirs, files in os.walk(workspace_path, onerror=walk_onerror, followlinks=False):
+            # Remove symlinked directories from dirs to prevent walking them
+            dirs[:] = [d for d in dirs if not os.path.islink(os.path.join(root, d))]
             for fname in files:
                 fpath = os.path.join(root, fname)
-                relpath = os.path.relpath(fpath, workspace_path)
-                all_files.append(relpath)
+                # Skip symlinked files
+                if os.path.islink(fpath):
+                    continue
+                try:
+                    relpath = os.path.relpath(fpath, workspace_path)
+                    all_files.append(relpath)
+                except Exception as e:
+                    walk_errors.append(e)
         # Match patterns in memory
         for pattern, ext in file_patterns.items():
             start = time.time()
@@ -123,15 +132,6 @@ class Auto(RockerExtension):
                     f"[auto-detect] Pattern {pattern} found no matches [search took {duration:.3f}s]"
                 )
         print(f"[auto-detect] Total file walk and match time: {time.time() - start_total:.3f}s")
-        return found
-
-    def _detect_exact(self, workspace, patterns):
-        found = set()
-        for fname, ext in patterns.items():
-            file_path = workspace / fname
-            if file_path.exists():
-                print(f"[auto-detect] ✓ Detected {fname} -> enabling {ext}")
-                found.add(ext)
         return found
 
     def _detect_exact_dir(self, workspace, patterns):
