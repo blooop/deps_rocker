@@ -51,9 +51,20 @@ class Auto(RockerExtension):
 
         # Data-driven exact directory checks
         dir_patterns = {
+            # Gemini config
             ".gemini": "gemini",
+            # Codex config
             ".codex": "codex",
+            # Claude config (legacy)
             ".claude": "claude",
+            # Claude XDG config
+            ".config/claude": "claude",
+            # Claude cache (optional)
+            ".cache/claude": "claude",
+            # Neovim config
+            ".config/nvim": "nvim",
+            # Vim config (used by nvim)
+            ".vim": "nvim",
         }
         print(f"[AUTO] Starting exact directory match checks in: {workspace}")
         extensions |= self._detect_exact_dir(workspace, dir_patterns)
@@ -98,10 +109,18 @@ class Auto(RockerExtension):
 
     def _detect_exact_dir(self, workspace, patterns):
         found = set()
+        # Check in workspace
         for dname, ext in patterns.items():
             dir_path = workspace / dname
             if dir_path.is_dir():
-                print(f"[AUTO] ✓ Detected {dname} directory -> enabling {ext}")
+                print(f"[AUTO] ✓ Detected {dname} directory in workspace -> enabling {ext}")
+                found.add(ext)
+        # Check in user's home directory
+        home = Path.home()
+        for dname, ext in patterns.items():
+            dir_path = home / dname
+            if dir_path.is_dir():
+                print(f"[AUTO] ✓ Detected {dname} directory in home -> enabling {ext}")
                 found.add(ext)
         return found
 
