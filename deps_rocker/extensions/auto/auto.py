@@ -49,6 +49,15 @@ class Auto(RockerExtension):
         print(f"[AUTO] Starting exact file match checks in: {workspace}")
         extensions |= self._detect_exact(workspace, file_patterns)
 
+        # Data-driven exact directory checks
+        dir_patterns = {
+            ".gemini": "gemini",
+            ".codex": "codex",
+            ".claude": "claude",
+        }
+        print(f"[AUTO] Starting exact directory match checks in: {workspace}")
+        extensions |= self._detect_exact_dir(workspace, dir_patterns)
+
         # requirements*.txt recursive
         print(f"[AUTO] Searching recursively for requirements*.txt in: {workspace}")
         extensions |= self._detect_glob(workspace, "requirements*.txt", "uv")
@@ -84,6 +93,15 @@ class Auto(RockerExtension):
             file_path = workspace / fname
             if file_path.exists():
                 print(f"[AUTO] ✓ Detected {fname} -> enabling {ext}")
+                found.add(ext)
+        return found
+
+    def _detect_exact_dir(self, workspace, patterns):
+        found = set()
+        for dname, ext in patterns.items():
+            dir_path = workspace / dname
+            if dir_path.is_dir():
+                print(f"[AUTO] ✓ Detected {dname} directory -> enabling {ext}")
                 found.add(ext)
         return found
 
