@@ -202,7 +202,7 @@ class TestAutoExtension(unittest.TestCase):
         """Test detection of pyproject.toml with [tool.pixi] section for pixi"""
 
         def setup():
-            with open("pyproject.toml", "w") as f:
+            with open("pyproject.toml", "w", encoding="utf-8") as f:
                 f.write("[tool.pixi]\nfoo = 'bar'\n")
 
         def assertion(deps):
@@ -214,7 +214,7 @@ class TestAutoExtension(unittest.TestCase):
         """Test detection of pyproject.toml without [tool.pixi] section for pixi (should not activate)"""
 
         def setup():
-            with open("pyproject.toml", "w") as f:
+            with open("pyproject.toml", "w", encoding="utf-8") as f:
                 f.write("[project]\nname = 'test'\n")
 
         def assertion(deps):
