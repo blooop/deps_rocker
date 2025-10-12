@@ -172,26 +172,23 @@ class TestAutoExtension(unittest.TestCase):
         finally:
             os.chdir(original_dir)
 
-    def test_detect_pixi(self):
-        """Test detection of pixi.toml"""
 
+    def test_detect_pixi_pyproject_with_section(self):
+        """Test detection of pyproject.toml with [tool.pixi] section for pixi"""
         def setup():
-            Path("pixi.toml").touch()
-
+            with open("pyproject.toml", "w") as f:
+                f.write("[tool.pixi]\nfoo = 'bar'\n")
         def assertion(deps):
             self.assertIn("pixi", deps)
-
         self._test_in_dir(setup, assertion)
 
-    def test_detect_uv_pyproject(self):
-        """Test detection of pyproject.toml for uv"""
-
+    def test_detect_pixi_pyproject_without_section(self):
+        """Test detection of pyproject.toml without [tool.pixi] section for pixi (should not activate)"""
         def setup():
-            Path("pyproject.toml").touch()
-
+            with open("pyproject.toml", "w") as f:
+                f.write("[project]\nname = 'test'\n")
         def assertion(deps):
-            self.assertIn("uv", deps)
-
+            self.assertNotIn("pixi", deps)
         self._test_in_dir(setup, assertion)
 
     def test_detect_uv_requirements(self):

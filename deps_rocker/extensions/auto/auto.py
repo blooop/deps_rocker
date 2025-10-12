@@ -50,6 +50,7 @@ class Auto(RockerExtension):
 
         extensions_dir = Path(__file__).parent.parent
         file_patterns = {}
+        content_search_patterns = {}
         dir_patterns = {}
         for ext_dir in extensions_dir.iterdir():
             if not ext_dir.is_dir():
@@ -59,9 +60,18 @@ class Auto(RockerExtension):
                 with rule_file.open() as f:
                     rules = yaml.safe_load(f)
                 ext_name = ext_dir.name
-                # File patterns
-                for fname in rules.get("files", []):
-                    file_patterns[fname] = ext_name
+                # File patterns and content search
+                for entry in rules.get("files", []):
+                    if isinstance(entry, str):
+                        file_patterns[entry] = ext_name
+                    elif isinstance(entry, dict):
+                        for fname, opts in entry.items():
+                            file_patterns[fname] = ext_name
+                            if "content_search" in opts:
+                                content_search_patterns[fname] = {
+                                    "ext": ext_name,
+                                    "search": opts["content_search"],
+                                }
                 # Directory patterns
                 for dname in rules.get("config_dirs", []):
                     dir_patterns[dname] = ext_name
@@ -71,6 +81,7 @@ class Auto(RockerExtension):
         tasks = [
             (self._detect_exact_dir, (workspace, dir_patterns)),
             (self._detect_glob_patterns, (workspace, file_patterns)),
+            (self._detect_content_search, (workspace, content_search_patterns)),
         ]
 
         results = set()
@@ -89,14 +100,51 @@ class Auto(RockerExtension):
         print(f"[auto-detect] Final detected extensions: {results}")
         return results
 
+    def _detect_content_search(self, workspace, content_search_patterns):
+        found = set()
+        import os
+        import re
+        GREEN = "\033[92m"
+        CYAN = "\033[96m"
+        RESET = "\033[0m"
+        self._content_search_patterns = content_search_patterns
+        for fname, opts in content_search_patterns.items():
+            ext = opts["ext"]
+            search = opts["search"]
+            found_file = False
+            for root, dirs, files in os.walk(str(workspace), followlinks=False):
+                for file in files:
+                    if file == fname:
+                        found_file = True
+                        fpath = os.path.join(root, file)
+                        try:
+                            with open(fpath, "r", encoding="utf-8") as f:
+                                content = f.read()
+                            if re.search(search, content, re.MULTILINE):
+                                print(
+                                    f"{GREEN}[auto-detect] ✓ Found content '{search}' in {fpath} -> enabling {ext}{RESET}"
+                                )
+                                found.add(ext)
+                            else:
+                                print(
+                                    f"{CYAN}[auto-detect] Found {fname} but content '{search}' NOT found in {fpath} -> NOT enabling {ext}{RESET}"
+                                )
+                        except Exception as e:
+                            print(f"{CYAN}[auto-detect] Error reading {fpath}: {e}{RESET}")
+            if not found_file:
+                print(f"{CYAN}[auto-detect] Content search: {fname} not found in workspace.{RESET}")
+        return found
+
     def _detect_glob_patterns(self, workspace, file_patterns):
         import time
         import os
         import fnmatch
+        GREEN = "\033[92m"
+        CYAN = "\033[96m"
+        RESET = "\033[0m"
 
         found = set()
         start_total = time.time()
-        # Walk the tree once, handling symlinks and permission errors
         all_files = []
         workspace_path = str(workspace)
         walk_errors = []
@@ -105,11 +153,9 @@ class Auto(RockerExtension):
             walk_errors.append(err)
 
         for root, dirs, files in os.walk(workspace_path, onerror=walk_onerror, followlinks=False):
-            # Remove symlinked directories from dirs to prevent walking them
             dirs[:] = [d for d in dirs if not os.path.islink(os.path.join(root, d))]
             for fname in files:
                 fpath = os.path.join(root, fname)
-                # Skip symlinked files
                 if os.path.islink(fpath):
                     continue
                 try:
@@ -118,18 +164,25 @@ class Auto(RockerExtension):
                 except Exception as e:
                     walk_errors.append(e)
         # Match patterns in memory
+        content_search_patterns = getattr(self, "_content_search_patterns", {})
         for pattern, ext in file_patterns.items():
             start = time.time()
             matches = [f for f in all_files if fnmatch.fnmatch(f, pattern)]
             duration = time.time() - start
+            content_search_required = pattern in content_search_patterns
             if matches:
-                print(
-                    f"[auto-detect] ✓ Detected {pattern} ({len(matches)} matches) -> enabling {ext} [search took {duration:.3f}s]"
-                )
-                found.add(ext)
+                if content_search_required:
+                    print(
+                        f"{CYAN}[auto-detect] Detected {pattern} ({len(matches)} matches), but content search required. Will check contents next. [search took {duration:.3f}s]{RESET}"
+                    )
+                else:
+                    print(
+                        f"{GREEN}[auto-detect] ✓ Detected {pattern} ({len(matches)} matches) -> enabling {ext} [search took {duration:.3f}s]{RESET}"
+                    )
+                    found.add(ext)
             else:
                 print(
-                    f"[auto-detect] Pattern {pattern} found no matches [search took {duration:.3f}s]"
+                    f"{CYAN}[auto-detect] Pattern {pattern} found no matches [search took {duration:.3f}s]{RESET}"
                 )
         print(f"[auto-detect] Total file walk and match time: {time.time() - start_total:.3f}s")
         return found
