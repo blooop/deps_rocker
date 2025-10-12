@@ -42,7 +42,7 @@ RUN sudo add-apt-repository universe \
   python3-argcomplete \
   && rm -rf /var/lib/apt/lists/*
 
-RUN --mount=type=cache,target=/root/.cache/pip,id=pip-cache pip install colcon-common-extensions colcon-defaults colcon-spawn-shell colcon-runner colcon-clean rosdep colcon-top-level-workspace --break-system-packages
+RUN --mount=type=cache,target=/root/.cache/pip,id=pip-cache pip install colcon-common-extensions colcon-defaults colcon-spawn-shell colcon-runner colcon-clean rosdep --break-system-packages
 
 ENV ROS_DISTRO=jazzy
 ENV AMENT_PREFIX_PATH=/opt/ros/jazzy
