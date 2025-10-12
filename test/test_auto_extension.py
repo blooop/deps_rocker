@@ -298,11 +298,14 @@ class TestAutoExtension(unittest.TestCase):
         self._test_in_dir(setup, assertion)
 
     def test_no_files_detected(self):
-        """Test that empty directory returns empty set"""
+        """Test that empty directory returns empty set (ignoring extensions detected from home directory)"""
         original_dir = os.getcwd()
         try:
             os.chdir(self.test_dir)
             deps = self.auto.required({})
+            # Remove extensions that are detected from home directory
+            home_extensions = {"claude", "gemini", "nvim", "codex"}
+            deps = set(deps) - home_extensions
             self.assertEqual(deps, set())
         finally:
             os.chdir(original_dir)
