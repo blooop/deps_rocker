@@ -5,7 +5,7 @@ class DockerInDocker(SimpleRockerExtension):
     """Install Docker CE for Docker-in-Docker support. REQUIRES --privileged mode - will not function without it!"""
 
     name = "docker_in_docker"
-    depends_on_extension = ("curl",)
+    depends_on_extension = ("curl", "user")
 
     def get_docker_args(self, cliargs):
         """Return Docker arguments required for docker-in-docker to function"""

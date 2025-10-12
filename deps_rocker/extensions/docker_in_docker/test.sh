@@ -37,13 +37,16 @@ if [[ ! -x /usr/local/share/docker-init.sh ]]; then
     exit 1
 fi
 
-# Check if user is in docker group (if not root) - informational only
+
+# If not root and not in docker group, re-exec shell with docker group membership
 if [[ $(id -u) -ne 0 ]] && ! groups | grep -q docker; then
-    echo "Note: Current user is not in docker group (this may be expected in test environments)"
+    echo "Current user is not in docker group. Attempting to re-exec shell with docker group membership using 'newgrp docker'."
+    exec newgrp docker "$0" "$@"
 fi
 
 # Test basic Docker version
 docker --version
+
 
 # Docker-in-Docker functionality test (daemon should already be started by entrypoint)
 echo "Testing Docker daemon functionality..."
