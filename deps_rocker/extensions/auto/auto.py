@@ -2,6 +2,7 @@
 
 from rocker.extensions import RockerExtension
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 class Auto(RockerExtension):
@@ -31,14 +32,12 @@ class Auto(RockerExtension):
 
     def _detect_files_in_workspace(self, _cliargs: dict) -> set[str]:
         """
-        Detect files in the workspace and return a set of extension names to enable.
+        Detect files in the workspace and return a set of extension names to enable, in parallel.
         """
-        workspace = self._resolve_workspace(_cliargs)
-        extensions = set()
-
-        # Load detection rules from auto_detect.yml in each extension
         import yaml
-        from pathlib import Path
+
+        workspace = self._resolve_workspace(_cliargs)
+
         extensions_dir = Path(__file__).parent.parent
         file_patterns = {}
         dir_patterns = {}
@@ -54,25 +53,42 @@ class Auto(RockerExtension):
                 # Directory patterns
                 for dname in rules.get("config_dirs", []):
                     dir_patterns[dname] = ext_name
-        print(f"[AUTO] Starting exact file match checks in: {workspace}")
-        extensions |= self._detect_exact(workspace, file_patterns)
-        print(f"[AUTO] Starting exact directory match checks in: {workspace}")
-        extensions |= self._detect_exact_dir(workspace, dir_patterns)
 
-        # requirements*.txt recursive
-        print(f"[AUTO] Searching recursively for requirements*.txt in: {workspace}")
-        extensions |= self._detect_glob(workspace, "requirements*.txt", "uv")
+        # Prepare detection functions and their arguments
+        # Use only patterns from auto_detect.yml files for all extensions
+        tasks = [
+            (self._detect_exact, (workspace, file_patterns)),
+            (self._detect_exact_dir, (workspace, dir_patterns)),
+            (self._detect_glob_patterns, (workspace, file_patterns)),
+        ]
 
-        # conda env files recursive
-        print(f"[AUTO] Searching recursively for conda environment files in: {workspace}")
-        extensions |= self._detect_conda(workspace)
+        results = set()
+        print("[auto-detect] Running detection tasks in parallel...")
+        with ThreadPoolExecutor() as executor:
+            future_to_task = {executor.submit(func, *args): func.__name__ for func, args in tasks}
+            for future in as_completed(future_to_task):
+                task_name = future_to_task[future]
+                try:
+                    res = future.result()
+                    print(f"[auto-detect] {task_name} detected: {res}")
+                    results |= res
+                except Exception as e:
+                    print(f"[auto-detect] {task_name} failed: {e}")
 
-        # C/C++ files
-        print(f"[AUTO] Searching recursively for C/C++ files in: {workspace}")
-        extensions |= self._detect_cpp(workspace)
+        print(f"[auto-detect] Final detected extensions: {results}")
+        return results
 
-        print(f"[AUTO] Final detected extensions: {extensions}")
-        return extensions
+    def _detect_glob_patterns(self, workspace, file_patterns):
+        """
+        Search for all file patterns in auto_detect.yml using rglob.
+        """
+        found = set()
+        for pattern, ext in file_patterns.items():
+            matches = list(workspace.rglob(pattern))
+            if matches:
+                print(f"[auto-detect] ✓ Detected {pattern} ({len(matches)} matches) -> enabling {ext}")
+                found.add(ext)
+        return found
 
     def _resolve_workspace(self, cliargs):
         root = cliargs.get("auto")
@@ -83,9 +99,9 @@ class Auto(RockerExtension):
             path = Path(root).expanduser().resolve()
         else:
             path = Path.cwd().expanduser().resolve()
-        print(f"[AUTO] Scanning workspace: {path}")
-        print(f"[AUTO] Workspace exists: {path.exists()}")
-        print(f"[AUTO] Workspace is_dir: {path.is_dir()}")
+        print(f"[auto-detect] Scanning workspace: {path}")
+        print(f"[auto-detect] Workspace exists: {path.exists()}")
+        print(f"[auto-detect] Workspace is_dir: {path.is_dir()}")
         return path
 
     def _detect_exact(self, workspace, patterns):
@@ -93,7 +109,7 @@ class Auto(RockerExtension):
         for fname, ext in patterns.items():
             file_path = workspace / fname
             if file_path.exists():
-                print(f"[AUTO] ✓ Detected {fname} -> enabling {ext}")
+                print(f"[auto-detect] ✓ Detected {fname} -> enabling {ext}")
                 found.add(ext)
         return found
 
@@ -103,22 +119,22 @@ class Auto(RockerExtension):
         for dname, ext in patterns.items():
             dir_path = workspace / dname
             if dir_path.is_dir():
-                print(f"[AUTO] ✓ Detected {dname} directory in workspace -> enabling {ext}")
+                print(f"[auto-detect] ✓ Detected {dname} directory in workspace -> enabling {ext}")
                 found.add(ext)
         # Check in user's home directory
         home = Path.home()
         for dname, ext in patterns.items():
             dir_path = home / dname
             if dir_path.is_dir():
-                print(f"[AUTO] ✓ Detected {dname} directory in home -> enabling {ext}")
+                print(f"[auto-detect] ✓ Detected {dname} directory in home -> enabling {ext}")
                 found.add(ext)
         return found
 
     def _detect_glob(self, workspace, pattern, ext):
         files = list(workspace.rglob(pattern))
-        print(f"[AUTO] Recursively checking {pattern}: found {len(files)} files")
+        print(f"[auto-detect] Recursively checking {pattern}: found {len(files)} files")
         if files:
-            print(f"[AUTO] ✓ Detected {pattern} files -> enabling {ext}")
+            print(f"[auto-detect] ✓ Detected {pattern} files -> enabling {ext}")
             return {ext}
         return set()
 
@@ -127,10 +143,10 @@ class Auto(RockerExtension):
             workspace.rglob("environment.yaml")
         )
         print(
-            f"[AUTO] Checking conda: found {len(env_files)} environment.yml/environment.yaml files"
+            f"[auto-detect] Checking conda: found {len(env_files)} environment.yml/environment.yaml files"
         )
         if env_files:
-            print("[AUTO] ✓ Detected conda environment file(s) -> enabling conda")
+            print("[auto-detect] ✓ Detected conda environment file(s) -> enabling conda")
             return {"conda"}
         return set()
 
@@ -138,7 +154,7 @@ class Auto(RockerExtension):
         cpp_patterns = ["*.cpp", "*.hpp", "*.cc", "*.cxx", "*.h", "*.c", "*.hxx"]
         for pattern in cpp_patterns:
             if cpp_files := list(workspace.rglob(pattern)):
-                print(f"[AUTO] ✓ Detected {len(cpp_files)} {pattern} files -> enabling ccache")
+                print(f"[auto-detect] ✓ Detected {len(cpp_files)} {pattern} files -> enabling ccache")
                 return {"ccache"}
         return set()
 
