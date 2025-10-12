@@ -6,6 +6,28 @@ from deps_rocker.extensions.auto.auto import Auto
 
 
 class TestAutoExtension(unittest.TestCase):
+    def test_content_search_debug(self):
+        """Test that content search for '[tool.pixi]' only enables pixi when present, and prints debug info."""
+
+        def setup_with_section():
+            with open("pyproject.toml", "w", encoding="utf-8") as f:
+                f.write("[tool.pixi]\nfoo = 'bar'\n")
+
+        def setup_without_section():
+            with open("pyproject.toml", "w", encoding="utf-8") as f:
+                f.write("[project]\nname = 'test'\n")
+
+        def assertion_with_section(deps):
+            self.assertIn("pixi", deps)
+
+        def assertion_without_section(deps):
+            self.assertNotIn("pixi", deps)
+
+        # With section
+        self._test_in_dir(setup_with_section, assertion_with_section)
+        # Without section
+        self._test_in_dir(setup_without_section, assertion_without_section)
+
     def test_detect_pixi_with_auto_path(self):
         """Test detection of pixi.toml with --auto=/path argument"""
 
@@ -32,7 +54,11 @@ class TestAutoExtension(unittest.TestCase):
         def setup():
             subdir = Path("subdir")
             subdir.mkdir(exist_ok=True)
-            (subdir / "pyproject.toml").touch()
+            # Create pyproject.toml WITHOUT [tool.pixi] and WITH a .py file to trigger uv
+            with open(subdir / "pyproject.toml", "w", encoding="utf-8") as f:
+                f.write("[project]\nname = 'test'\n")
+            with open(subdir / "main.py", "w", encoding="utf-8") as f:
+                f.write("print('hello')\n")
 
         def assertion(deps):
             self.assertIn("uv", deps)
@@ -172,25 +198,27 @@ class TestAutoExtension(unittest.TestCase):
         finally:
             os.chdir(original_dir)
 
-    def test_detect_pixi(self):
-        """Test detection of pixi.toml"""
+    def test_detect_pixi_pyproject_with_section(self):
+        """Test detection of pyproject.toml with [tool.pixi] section for pixi"""
 
         def setup():
-            Path("pixi.toml").touch()
+            with open("pyproject.toml", "w", encoding="utf-8") as f:
+                f.write("[tool.pixi]\nfoo = 'bar'\n")
 
         def assertion(deps):
             self.assertIn("pixi", deps)
 
         self._test_in_dir(setup, assertion)
 
-    def test_detect_uv_pyproject(self):
-        """Test detection of pyproject.toml for uv"""
+    def test_detect_pixi_pyproject_without_section(self):
+        """Test detection of pyproject.toml without [tool.pixi] section for pixi (should not activate)"""
 
         def setup():
-            Path("pyproject.toml").touch()
+            with open("pyproject.toml", "w", encoding="utf-8") as f:
+                f.write("[project]\nname = 'test'\n")
 
         def assertion(deps):
-            self.assertIn("uv", deps)
+            self.assertNotIn("pixi", deps)
 
         self._test_in_dir(setup, assertion)
 
