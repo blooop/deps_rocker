@@ -1,3 +1,10 @@
+
 # Auto detection rules for ccache extension
 files:
-  - CMakeLists.txt
+  - "*.c"
+  - "*.cc"
+  - "*.cpp"
+  - "*.cxx"
+  - "*.h"
+  - "*.hpp"
+  - "*.hxx"
