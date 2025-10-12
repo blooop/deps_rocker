@@ -67,6 +67,46 @@ chmod 660 /var/run/docker.sock || true
 # drop privileges to the intended user and exec the default CMD (interactive shell via rocker)
 if [ "$TARGET_USER" != "root" ]; then
   exec gosu "$TARGET_USER" "$@"
+
+set -eu
+
+echo "[docker-entrypoint] UID: $(id -u), GID: $(id -g), USER: $(id -un)"
+echo "[docker-entrypoint] Groups: $(id -Gn)"
+echo "[docker-entrypoint] Docker socket: $(ls -l /var/run/docker.sock 2>&1 || echo 'not found')"
+
+# Ensure user is in docker group if group exists
+if getent group docker >/dev/null; then
+  if ! id -nG "$USER" | grep -qw docker; then
+    echo "[docker-entrypoint] Adding $USER to docker group"
+    sudo usermod -aG docker "$USER"
+  fi
+fi
+
+# Fix permissions on docker.sock if needed
+if [ -S /var/run/docker.sock ]; then
+  sudo chown root:docker /var/run/docker.sock || true
+  sudo chmod 660 /var/run/docker.sock || true
+fi
+
+# Start Docker daemon if not running
+if ! pgrep dockerd >/dev/null; then
+  echo "[docker-entrypoint] Starting Docker daemon..."
+  sudo dockerd > /tmp/dockerd.log 2>&1 &
+  sleep 2
+  if ! pgrep dockerd >/dev/null; then
+    echo "[docker-entrypoint] ERROR: Docker daemon failed to start. See /tmp/dockerd.log"
+    exit 1
+  fi
+fi
+
+# Print Docker version for diagnostics
+docker --version || echo "[docker-entrypoint] Docker not available"
+
+# Interactive mode: drop to shell, else continue
+if [ "$1" = "-i" ] || [ -t 0 ]; then
+  echo "[docker-entrypoint] Interactive shell detected. Dropping to shell."
+  exec "$SHELL"
 else
+  echo "[docker-entrypoint] Non-interactive mode."
   exec "$@"
 fi
