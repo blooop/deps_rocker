@@ -33,6 +33,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         # "spec_kit",
         # "palanteer", #very slow
         "conda",
+        "docker_in_docker",
         # "isaac_sim",
         # "ros_jazzy", #tested via ros_underlay
         # "vcstool", #tested via ros_underlay
@@ -80,11 +81,8 @@ CMD [\"echo\", \"Extension test complete\"]
                     working_extensions.append(name)
         return working_extensions
 
-    def run_extension_build_and_test(self, extension_name):
-        """Shared logic to build, run, and check an extension, including running test.sh if present"""
-        if extension_name not in self.working_extension_names:
-            self.skipTest(f"Extension '{extension_name}' not available or not from deps_rocker")
-
+    def _setup_extension_with_dependencies(self, extension_name, extra_cliargs=None):
+        """Helper to set up an extension with its dependencies. Returns (extension_instance, active_extensions, cliargs)"""
         extension_class = self.all_plugins[extension_name]
         extension_instance = extension_class()
 
@@ -92,17 +90,33 @@ CMD [\"echo\", \"Extension test complete\"]
             "base_image": self.base_dockerfile_tag,
             extension_name: True,
         }
+        if extra_cliargs:
+            cliargs.update(extra_cliargs)
+
         if extension_name == "odeps_dependencies":
             cliargs["deps"] = "deps_rocker.deps.yaml"
 
+        # Add all required dependencies
         required_deps = extension_instance.required(cliargs)
-        active_extensions = []
+        active_extensions = [
+            self.all_plugins[dep_name]()
+            for dep_name in required_deps
+            if dep_name in self.all_plugins
+        ]
+        # Update cliargs with dependency flags
         for dep_name in required_deps:
             if dep_name in self.all_plugins:
-                dep_class = self.all_plugins[dep_name]
-                active_extensions.append(dep_class())
                 cliargs[dep_name] = True
+
         active_extensions.append(extension_instance)
+        return extension_instance, active_extensions, cliargs
+
+    def run_extension_build_and_test(self, extension_name):
+        """Shared logic to build, run, and check an extension, including running test.sh if present"""
+        if extension_name not in self.working_extension_names:
+            self.skipTest(f"Extension '{extension_name}' not available or not from deps_rocker")
+
+        _, active_extensions, cliargs = self._setup_extension_with_dependencies(extension_name)
 
         import os
 
@@ -121,10 +135,10 @@ CMD [\"echo\", \"Extension test complete\"]
             tmpfile.seek(0)
             output = tmpfile.read()
             print(f"DEBUG: run_result={run_result}\nContainer output:\n{output}")
+
             self.assertEqual(
                 run_result, 0, f"Extension '{extension_name}' failed to run. Output: {output}"
             )
-            # If test.sh exists, just rely on run_result for pass/fail, no output string checks
         dig.clear_image()
 
     def test_uv_extension(self):
@@ -189,6 +203,121 @@ CMD [\"echo\", \"Extension test complete\"]
 
     def test_conda_extension(self):
         self.run_extension_build_and_test("conda")
+
+    def test_docker_in_docker_extension(self):
+        self.run_extension_build_and_test("docker_in_docker")
+
+    def _create_docker_privileged_test_script(self):
+        """Helper to create a test script for docker-in-docker privileged functionality"""
+        return """#!/bin/bash
+set -euo pipefail
+
+echo "Testing Docker-in-Docker entrypoint..."
+
+# Check if Docker is installed
+if ! docker --version; then
+    echo "ERROR: Docker is not installed" >&2
+    exit 1
+fi
+
+echo "Waiting for Docker daemon from entrypoint..."
+attempt=0
+until docker info >/dev/null 2>&1; do
+    sleep 1
+    attempt=$((attempt + 1))
+    if [[ $attempt -ge 60 ]]; then
+        echo "ERROR: Docker daemon did not become ready" >&2
+        if [[ -f /var/log/dockerd.log ]]; then
+            echo \"--------- dockerd.log ---------\" >&2
+            cat /var/log/dockerd.log >&2
+            echo \"------------------------------\" >&2
+        fi
+        exit 1
+    fi
+done
+echo "Docker daemon is accessible"
+
+echo "Running hello-world container..."
+if docker run --rm hello-world >/dev/null 2>&1; then
+    echo "Container ran successfully"
+else
+    echo "WARNING: Docker daemon running but cannot run containers" >&2
+    if [[ -f /var/log/dockerd.log ]]; then
+        cat /var/log/dockerd.log >&2
+    fi
+fi
+
+echo "Docker-in-Docker privileged test completed"
+"""
+
+    def test_docker_in_docker_privileged_functionality(self):
+        """Test docker-in-docker with privileged mode to verify daemon startup and container execution"""
+        if "docker_in_docker" not in self.working_extension_names:
+            self.skipTest("Extension 'docker_in_docker' not available or not from deps_rocker")
+
+        _, active_extensions, cliargs = self._setup_extension_with_dependencies("docker_in_docker")
+
+        # Create and add test script
+        import os
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".sh", delete=False) as script_file:
+            script_file.write(self._create_docker_privileged_test_script())
+            temp_script_path = script_file.name
+
+        try:
+            active_extensions.append(ScriptInjectionExtension(temp_script_path))
+            cliargs["command"] = "/tmp/test.sh"
+
+            dig = DockerImageGenerator(active_extensions, cliargs, self.base_dockerfile_tag)
+            build_result = dig.build()
+            self.assertEqual(build_result, 0, "Extension 'docker_in_docker' failed to build")
+
+            # Test with privileged mode (extension automatically adds --privileged)
+            with tempfile.NamedTemporaryFile(mode="r+") as tmpfile:
+                run_result = dig.run(console_output_file=tmpfile.name)
+                tmpfile.seek(0)
+                output = tmpfile.read()
+                print(f"DEBUG: Privileged run_result={run_result}\nContainer output:\n{output}")
+
+                # Verify the test completed successfully
+                self.assertEqual(
+                    run_result,
+                    0,
+                    f"Extension 'docker_in_docker' privileged mode test failed. Output: {output}",
+                )
+
+                # Verify Docker is installed and version check ran
+                self.assertIn("Docker version", output, "Docker version check missing from output")
+
+                # Verify the entrypoint test ran and waited for the daemon
+                self.assertIn(
+                    "Waiting for Docker daemon from entrypoint...",
+                    output,
+                    "Privileged mode did not wait for Docker daemon as expected",
+                )
+
+                # Verify daemon is accessible
+                self.assertIn(
+                    "Docker daemon is accessible",
+                    output,
+                    "Docker daemon not accessible after startup",
+                )
+
+                # Verify containers can be run
+                self.assertIn(
+                    "Container ran successfully",
+                    output,
+                    "Privileged mode did not run container as expected",
+                )
+
+                # Verify test completed
+                self.assertIn(
+                    "Docker-in-Docker privileged test completed", output, "Test did not complete"
+                )
+
+            dig.clear_image()
+        finally:
+            os.unlink(temp_script_path)
 
     # def test_isaac_sim_extension(self):
     #     self.run_extension_build_and_test("isaac_sim")

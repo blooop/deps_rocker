@@ -79,6 +79,7 @@ locales = "deps_rocker.extensions.locales.locales:Locales"
 tzdata = "deps_rocker.extensions.tzdata.tzdata:TzData"
 ssh_client = "deps_rocker.extensions.ssh_client.ssh_client:SshClient"
 git_clone = "deps_rocker.extensions.git_clone.git_clone:GitClone"
+docker_in_docker = "deps_rocker.extensions.docker_in_docker.docker_in_docker:DockerInDocker"
 detach = "deps_rocker.extensions.detach.detach:Detach"
 
 #dev tools
