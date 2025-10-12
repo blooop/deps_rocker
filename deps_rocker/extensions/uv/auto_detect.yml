@@ -4,3 +4,5 @@ files:
   - .python-version
   - poetry.lock
   - requirements.txt
+  - "*.py"
+  
