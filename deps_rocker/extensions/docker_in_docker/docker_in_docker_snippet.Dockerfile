@@ -48,17 +48,27 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     docker-compose-plugin \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Create docker group and add current user to docker group for non-root access
-RUN groupadd -f docker \
-    && if [ -n "${USER}" ] && id -u "${USER}" >/dev/null 2>&1; then usermod -aG docker "${USER}"; fi
+
+
+# Ensure gosu and file are installed for privilege dropping and diagnostics
+RUN apt-get update && apt-get install -y --no-install-recommends gosu file && rm -rf /var/lib/apt/lists/*
 
 # Install Docker-in-Docker initialization script
 COPY docker-init.sh /usr/local/share/docker-init.sh
 RUN chmod +x /usr/local/share/docker-init.sh
 
+
 # Create entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
+
+# Diagnostics: print file type and first lines of entrypoint
+RUN file /usr/local/bin/docker-entrypoint.sh
+RUN head -5 /usr/local/bin/docker-entrypoint.sh | cat -v
+# Diagnostics: check shell interpreters
+RUN ls -l /bin/sh /bin/bash /bin/dash || true
+RUN file /bin/sh /bin/bash /bin/dash || true
+
 # Set entrypoint to automatically start Docker daemon
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "/usr/local/bin/docker-entrypoint.sh"]
