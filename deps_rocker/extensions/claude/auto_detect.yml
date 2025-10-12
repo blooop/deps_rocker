@@ -1,5 +1,3 @@
 # Auto detection rules for claude extension
 config_dirs:
   - .claude
-  - .config/claude
-  - .cache/claude

@@ -4,4 +4,3 @@ files:
   - .python-version
   - poetry.lock
   - requirements.txt
-  - requirements-dev.txt

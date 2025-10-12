@@ -19,6 +19,7 @@ class Auto(RockerExtension):
         print(f"[auto-detect] Workspace exists: {path.exists()}")
         print(f"[auto-detect] Workspace is_dir: {path.is_dir()}")
         return path
+
     """
     Detect project files and enable relevant extensions based on workspace contents.
     Use --auto=~/renv to specify the root directory for recursive search.
@@ -115,10 +116,14 @@ class Auto(RockerExtension):
             matches = [f for f in all_files if fnmatch.fnmatch(f, pattern)]
             duration = time.time() - start
             if matches:
-                print(f"[auto-detect] ✓ Detected {pattern} ({len(matches)} matches) -> enabling {ext} [search took {duration:.3f}s]")
+                print(
+                    f"[auto-detect] ✓ Detected {pattern} ({len(matches)} matches) -> enabling {ext} [search took {duration:.3f}s]"
+                )
                 found.add(ext)
             else:
-                print(f"[auto-detect] Pattern {pattern} found no matches [search took {duration:.3f}s]")
+                print(
+                    f"[auto-detect] Pattern {pattern} found no matches [search took {duration:.3f}s]"
+                )
         print(f"[auto-detect] Total file walk and match time: {time.time() - start_total:.3f}s")
         return found
         path = Path.cwd().expanduser().resolve()

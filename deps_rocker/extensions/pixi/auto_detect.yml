@@ -2,5 +2,3 @@
 files:
   - pixi.toml
   - pyproject.toml
-  - .python-version
-  - poetry.lock

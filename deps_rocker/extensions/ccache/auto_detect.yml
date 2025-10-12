@@ -1,11 +1,3 @@
 # Auto detection rules for ccache extension
 files:
   - CMakeLists.txt
-  - meson.build
-  - configure.ac
-  - SConstruct
-  - build.ninja
-  - .bazelrc
-  - WORKSPACE
-  - BUILD
-  - build.gradle
