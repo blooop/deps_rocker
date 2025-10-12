@@ -22,10 +22,11 @@
 #
 # ⚠️  WARNING: Running without --privileged will result in test failures!
 
-# Install prerequisites
+# Install prerequisites for Docker CE and runtime helpers
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     gnupg \
+    gosu \
     lsb-release \
     sudo \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -48,27 +49,99 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     docker-compose-plugin \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Create Docker-in-Docker entrypoint script inline so no helper files are required
+RUN cat <<'EOF' >/usr/local/bin/docker-dind-entrypoint && chmod +x /usr/local/bin/docker-dind-entrypoint
+#!/bin/sh
+set -eu
 
+log() {
+    printf '[docker-in-docker] %s\n' "$*"
+}
 
-# Ensure gosu and file are installed for privilege dropping and diagnostics
-RUN apt-get update && apt-get install -y --no-install-recommends gosu file && rm -rf /var/lib/apt/lists/*
+ORIGINAL_USER="${USER:-}"
+if [ -z "$ORIGINAL_USER" ]; then
+    ORIGINAL_USER="$(id -un 2>/dev/null || echo root)"
+fi
 
-# Install Docker-in-Docker initialization script
-COPY docker-init.sh /usr/local/share/docker-init.sh
-RUN chmod +x /usr/local/share/docker-init.sh
+if [ "$(id -u)" -ne 0 ]; then
+    exec sudo -E DIND_TARGET_USER="$ORIGINAL_USER" "$0" "$@@"
+fi
 
+TARGET_USER="${DIND_TARGET_USER:-$ORIGINAL_USER}"
+unset DIND_TARGET_USER
 
-# Create entrypoint script
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+if [ -z "$TARGET_USER" ] || ! id -u "$TARGET_USER" >/dev/null 2>&1; then
+    TARGET_USER="root"
+fi
 
+log "starting docker daemon for user '$TARGET_USER'"
 
-# Diagnostics: print file type and first lines of entrypoint
-RUN file /usr/local/bin/docker-entrypoint.sh
-RUN head -5 /usr/local/bin/docker-entrypoint.sh | cat -v
-# Diagnostics: check shell interpreters
-RUN ls -l /bin/sh /bin/bash /bin/dash || true
-RUN file /bin/sh /bin/bash /bin/dash || true
+if [ -f /var/run/docker.pid ] && ! pgrep -x dockerd >/dev/null 2>&1; then
+    rm -f /var/run/docker.pid
+fi
 
-# Set entrypoint to automatically start Docker daemon
-ENTRYPOINT ["/bin/sh", "/usr/local/bin/docker-entrypoint.sh"]
+mkdir -p /var/run/docker /var/lib/docker
+
+if [ -d /sys/kernel/security ] && ! mountpoint -q /sys/kernel/security; then
+    if ! mount -t securityfs none /sys/kernel/security 2>/dev/null; then
+        log "warning: failed to mount /sys/kernel/security (AppArmor may be disabled)"
+    fi
+fi
+
+if ! mountpoint -q /tmp; then
+    mount -t tmpfs none /tmp || true
+fi
+
+if [ -f /sys/fs/cgroup/cgroup.controllers ]; then
+    mkdir -p /sys/fs/cgroup/init
+    xargs -rn1 </sys/fs/cgroup/cgroup.procs >/sys/fs/cgroup/init/cgroup.procs 2>/dev/null || true
+    sed -e 's/ / +/g' -e 's/^/+/' </sys/fs/cgroup/cgroup.controllers >/sys/fs/cgroup/cgroup.subtree_control
+fi
+
+if ! getent group docker >/dev/null 2>&1; then
+    groupadd -f docker
+fi
+
+if [ "$TARGET_USER" != "root" ] && id -u "$TARGET_USER" >/dev/null 2>&1; then
+    usermod -aG docker "$TARGET_USER" || true
+fi
+
+if ! pgrep -x dockerd >/dev/null 2>&1; then
+    dockerd --host=unix:///var/run/docker.sock \
+            --exec-root=/var/run/docker \
+            --data-root=/var/lib/docker \
+            > /var/log/dockerd.log 2>&1 &
+    DIND_DOCKERD_PID=$!
+else
+    DIND_DOCKERD_PID=""
+fi
+
+TRIES=0
+while [ ! -S /var/run/docker.sock ]; do
+    if [ -n "$DIND_DOCKERD_PID" ] && ! kill -0 "$DIND_DOCKERD_PID" 2>/dev/null; then
+        log "dockerd exited unexpectedly; see /var/log/dockerd.log"
+        exit 1
+    fi
+    if [ "$TRIES" -ge 120 ]; then
+        log "timeout waiting for /var/run/docker.sock"
+        exit 1
+    fi
+    sleep 0.5
+    TRIES=$((TRIES + 1))
+fi
+
+chown root:docker /var/run/docker.sock || true
+chmod 660 /var/run/docker.sock || true
+
+if [ "$#" -eq 0 ]; then
+    set -- /bin/bash
+fi
+
+if [ "$TARGET_USER" != "root" ]; then
+    exec gosu "$TARGET_USER" "$@@"
+else
+    exec "$@@"
+fi
+EOF
+
+ENTRYPOINT ["/usr/local/bin/docker-dind-entrypoint"]

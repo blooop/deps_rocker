@@ -26,17 +26,11 @@ if ! docker buildx version &> /dev/null; then
     exit 1
 fi
 
-# Check if required scripts exist and are executable
-if [[ ! -x /usr/local/bin/docker-entrypoint.sh ]]; then
-    echo "ERROR: docker-entrypoint.sh not found or not executable"
+# Check if required entrypoint exists and is executable
+if [[ ! -x /usr/local/bin/docker-dind-entrypoint ]]; then
+    echo "ERROR: docker-dind-entrypoint not found or not executable"
     exit 1
 fi
-
-if [[ ! -x /usr/local/share/docker-init.sh ]]; then
-    echo "ERROR: docker-init.sh not found or not executable"
-    exit 1
-fi
-
 
 # If not root and not in docker group, re-exec shell with docker group membership
 if [[ $(id -u) -ne 0 ]] && ! groups | grep -q docker; then

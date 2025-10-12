@@ -210,9 +210,9 @@ CMD [\"echo\", \"Extension test complete\"]
     def _create_docker_privileged_test_script(self):
         """Helper to create a test script for docker-in-docker privileged functionality"""
         return """#!/bin/bash
-set -e
+set -euo pipefail
 
-echo "Testing Docker-in-Docker with daemon startup..."
+echo "Testing Docker-in-Docker entrypoint..."
 
 # Check if Docker is installed
 if ! docker --version; then
@@ -220,31 +220,31 @@ if ! docker --version; then
     exit 1
 fi
 
-# Try to start Docker daemon using the init script
-echo "Starting Docker daemon..."
-if /usr/local/share/docker-init.sh true 2>&1 | tee /tmp/docker-init.log; then
-    echo "Docker daemon started successfully"
-
-    # Wait for daemon to be ready
-    sleep 2
-
-    # Test if we can connect to daemon
-    if docker info > /dev/null 2>&1; then
-        echo "Docker daemon is accessible"
-
-        # Try to run a simple container
-        if docker run --rm hello-world > /dev/null 2>&1; then
-            echo "Container ran successfully"
-        else
-            echo "WARNING: Docker daemon running but cannot run containers" >&2
+echo "Waiting for Docker daemon from entrypoint..."
+attempt=0
+until docker info >/dev/null 2>&1; do
+    sleep 1
+    attempt=$((attempt + 1))
+    if [[ $attempt -ge 60 ]]; then
+        echo "ERROR: Docker daemon did not become ready" >&2
+        if [[ -f /var/log/dockerd.log ]]; then
+            echo \"--------- dockerd.log ---------\" >&2
+            cat /var/log/dockerd.log >&2
+            echo \"------------------------------\" >&2
         fi
-    else
-        echo "WARNING: Docker daemon started but not accessible" >&2
-        cat /tmp/docker-init.log >&2
+        exit 1
     fi
+done
+echo "Docker daemon is accessible"
+
+echo "Running hello-world container..."
+if docker run --rm hello-world >/dev/null 2>&1; then
+    echo "Container ran successfully"
 else
-    echo "WARNING: Could not start Docker daemon (requires --privileged)" >&2
-    cat /tmp/docker-init.log >&2
+    echo "WARNING: Docker daemon running but cannot run containers" >&2
+    if [[ -f /var/log/dockerd.log ]]; then
+        cat /var/log/dockerd.log >&2
+    fi
 fi
 
 echo "Docker-in-Docker privileged test completed"
@@ -289,11 +289,11 @@ echo "Docker-in-Docker privileged test completed"
                 # Verify Docker is installed and version check ran
                 self.assertIn("Docker version", output, "Docker version check missing from output")
 
-                # Verify daemon started successfully (privileged mode required)
+                # Verify the entrypoint test ran and waited for the daemon
                 self.assertIn(
-                    "Docker daemon started successfully",
+                    "Waiting for Docker daemon from entrypoint...",
                     output,
-                    "Privileged mode did not start Docker daemon as expected",
+                    "Privileged mode did not wait for Docker daemon as expected",
                 )
 
                 # Verify daemon is accessible
