@@ -597,7 +597,7 @@ packages:
 - pypi: ./
   name: deps-rocker
   version: 0.21.1
-  sha256: 08fd3c00c9fd0737775aaf603d65fdb0598e00f0e1650586d97ae7c5d9bdc4a0
+  sha256: 0cf1d2d0eee7045b78c9dbc73ab9c2c82efda4f50cf46579cc2f1ae003880d80
   requires_dist:
   - rocker>=0.2.19
   - off-your-rocker>=0.1.0
