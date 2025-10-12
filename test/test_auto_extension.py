@@ -6,6 +6,28 @@ from deps_rocker.extensions.auto.auto import Auto
 
 
 class TestAutoExtension(unittest.TestCase):
+    def test_content_search_debug(self):
+        """Test that content search for '[tool.pixi]' only enables pixi when present, and prints debug info."""
+
+        def setup_with_section():
+            with open("pyproject.toml", "w", encoding="utf-8") as f:
+                f.write("[tool.pixi]\nfoo = 'bar'\n")
+
+        def setup_without_section():
+            with open("pyproject.toml", "w", encoding="utf-8") as f:
+                f.write("[project]\nname = 'test'\n")
+
+        def assertion_with_section(deps):
+            self.assertIn("pixi", deps)
+
+        def assertion_without_section(deps):
+            self.assertNotIn("pixi", deps)
+
+        # With section
+        self._test_in_dir(setup_with_section, assertion_with_section)
+        # Without section
+        self._test_in_dir(setup_without_section, assertion_without_section)
+
     def test_detect_pixi_with_auto_path(self):
         """Test detection of pixi.toml with --auto=/path argument"""
 
@@ -172,23 +194,28 @@ class TestAutoExtension(unittest.TestCase):
         finally:
             os.chdir(original_dir)
 
-
     def test_detect_pixi_pyproject_with_section(self):
         """Test detection of pyproject.toml with [tool.pixi] section for pixi"""
+
         def setup():
             with open("pyproject.toml", "w") as f:
                 f.write("[tool.pixi]\nfoo = 'bar'\n")
+
         def assertion(deps):
             self.assertIn("pixi", deps)
+
         self._test_in_dir(setup, assertion)
 
     def test_detect_pixi_pyproject_without_section(self):
         """Test detection of pyproject.toml without [tool.pixi] section for pixi (should not activate)"""
+
         def setup():
             with open("pyproject.toml", "w") as f:
                 f.write("[project]\nname = 'test'\n")
+
         def assertion(deps):
             self.assertNotIn("pixi", deps)
+
         self._test_in_dir(setup, assertion)
 
     def test_detect_uv_requirements(self):
