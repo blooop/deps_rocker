@@ -86,7 +86,9 @@ class Auto(RockerExtension):
         for pattern, ext in file_patterns.items():
             matches = list(workspace.rglob(pattern))
             if matches:
-                print(f"[auto-detect] ✓ Detected {pattern} ({len(matches)} matches) -> enabling {ext}")
+                print(
+                    f"[auto-detect] ✓ Detected {pattern} ({len(matches)} matches) -> enabling {ext}"
+                )
                 found.add(ext)
         return found
 
@@ -154,7 +156,9 @@ class Auto(RockerExtension):
         cpp_patterns = ["*.cpp", "*.hpp", "*.cc", "*.cxx", "*.h", "*.c", "*.hxx"]
         for pattern in cpp_patterns:
             if cpp_files := list(workspace.rglob(pattern)):
-                print(f"[auto-detect] ✓ Detected {len(cpp_files)} {pattern} files -> enabling ccache")
+                print(
+                    f"[auto-detect] ✓ Detected {len(cpp_files)} {pattern} files -> enabling ccache"
+                )
                 return {"ccache"}
         return set()
 
