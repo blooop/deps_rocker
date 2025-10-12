@@ -52,15 +52,6 @@ ENV PATH=/opt/ros/jazzy/bin:$PATH
 ENV PYTHONPATH=/opt/ros/jazzy/local/lib/python3.12/dist-packages:/opt/ros/jazzy/lib/python3.12/site-packages
 ENV ROS_PYTHON_VERSION=3
 ENV ROS_VERSION=2
-
-RUN if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then \
-    rosdep init; \
-  else \
-    echo "rosdep already initialized, skipping init"; \
-  fi
-
-RUN mkdir -p /ros_ws/{repos,src,underlay,build,log} && chmod -R 777 /ros_ws
-
 ENV ROS_WORKSPACE_ROOT=/ros_ws
 ENV ROS_REPOS_ROOT=/ros_ws/repos
 ENV ROS_DEPENDENCIES_ROOT=/ros_ws/src
@@ -68,4 +59,14 @@ ENV ROS_UNDERLAY_PATH=/ros_ws/underlay
 ENV ROS_BUILD_BASE=/ros_ws/build
 ENV ROS_LOG_BASE=/ros_ws/log
 ENV COLCON_LOG_PATH=/ros_ws/log
+
+RUN if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then \
+    rosdep init; \
+  else \
+    echo "rosdep already initialized, skipping init"; \
+  fi
+
+RUN mkdir -p "$ROS_REPOS_ROOT" "$ROS_DEPENDENCIES_ROOT" "$ROS_UNDERLAY_PATH" "$ROS_BUILD_BASE" "$ROS_LOG_BASE" && chmod -R 777 /ros_ws
+
+
 
