@@ -10,7 +10,7 @@ if ! command -v build-underlay &> /dev/null; then
 fi
 
 # Check if the underlay directory was created
-UNDERLAY_ROOT="${ROS_UNDERLAY_PATH:-/ros_ws/ros_ws/underlay}"
+UNDERLAY_ROOT="${ROS_UNDERLAY_PATH:-/ros_ws/underlay}"
 if [ ! -d "$UNDERLAY_ROOT" ]; then
     echo "ERROR: $UNDERLAY_ROOT directory not found"
     exit 1

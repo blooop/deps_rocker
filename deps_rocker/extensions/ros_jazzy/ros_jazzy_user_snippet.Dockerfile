@@ -1,7 +1,7 @@
 
 #ROS user snippet
 
-RUN DEPS_ROOT="${ROS_DEPENDENCIES_ROOT:-/ros_ws/ros_ws/src}" && \
+RUN DEPS_ROOT="${ROS_DEPENDENCIES_ROOT:-/ros_ws/src}" && \
     if [ -d "$DEPS_ROOT" ]; then \
         rosdep update && \
         rosdep install --from-paths "$DEPS_ROOT" --ignore-src -r -y; \
@@ -18,3 +18,4 @@ RUN cp /defaults.yaml $HOME/.colcon/defaults.yaml
 
 RUN echo "source /opt/ros/jazzy/setup.bash" >> $HOME/.bashrc
 RUN printf '%s\n' '[ -n "${ROS_UNDERLAY_PATH:-}" ] && [ -f "${ROS_UNDERLAY_PATH}/setup.bash" ] && source "${ROS_UNDERLAY_PATH}/setup.bash"' >> $HOME/.bashrc
+
