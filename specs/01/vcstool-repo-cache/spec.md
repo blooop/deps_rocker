@@ -12,6 +12,6 @@ Use BuildKit cache mount to store imported repositories, then copy to final dest
 
 ## Benefits
 - Avoid re-cloning repositories on every build
-- Significant speedup for workspaces with many/large repos
+- Significant speedup for /ros_ws with many/large repos
 - Reduced network bandwidth usage
 - Safer than git reference repositories (no corruption risk)

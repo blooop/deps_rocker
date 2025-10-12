@@ -6,7 +6,7 @@ from pathlib import Path
 import itertools
 
 
-DEFAULT_WORKSPACE_ROOT = Path("/workspaces/ros_ws")
+DEFAULT_WORKSPACE_ROOT = Path("/ros_ws/ros_ws")
 
 
 class RepositoryDiscoveryMixin:

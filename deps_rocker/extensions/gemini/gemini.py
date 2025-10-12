@@ -37,7 +37,7 @@ class Gemini(SimpleRockerExtension):
         # Mount project-specific .gemini directory if it exists in current working directory
         cwd_gemini_config = os.path.join(os.getcwd(), ".gemini")
         if os.path.exists(cwd_gemini_config):
-            mounts.append(f' -v "{os.path.realpath(cwd_gemini_config)}:/workspaces/.gemini"')
+            mounts.append(f' -v "{os.path.realpath(cwd_gemini_config)}:/ros_ws/.gemini"')
 
         # Preserve important Gemini environment variables
         env_vars = [

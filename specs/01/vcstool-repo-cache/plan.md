@@ -1,7 +1,7 @@
 # Plan: VCS Tool Repository Caching
 
 ## Background
-Currently, vcstool runs `vcs import` directly to the final destination on every Docker build. This means all repositories are cloned fresh each time, which is slow and bandwidth-intensive for workspaces with many dependencies.
+Currently, vcstool runs `vcs import` directly to the final destination on every Docker build. This means all repositories are cloned fresh each time, which is slow and bandwidth-intensive for /ros_ws with many dependencies.
 
 Following the pattern from palanteer extension (which caches git clones), we can cache the vcs import output and copy it to the final destination.
 

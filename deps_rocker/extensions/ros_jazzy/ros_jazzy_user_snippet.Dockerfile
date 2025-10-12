@@ -1,7 +1,7 @@
 
 #ROS user snippet
 
-RUN DEPS_ROOT="${ROS_DEPENDENCIES_ROOT:-/workspaces/ros_ws/src}" && \
+RUN DEPS_ROOT="${ROS_DEPENDENCIES_ROOT:-/ros_ws/ros_ws/src}" && \
     if [ -d "$DEPS_ROOT" ]; then \
         rosdep update && \
         rosdep install --from-paths "$DEPS_ROOT" --ignore-src -r -y; \

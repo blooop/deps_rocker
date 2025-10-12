@@ -1,19 +1,30 @@
-# Build options
-cmake-args:
-  - -DCMAKE_BUILD_TYPE=Release
-  - -DBUILD_TESTING=ON
-
-"": #applies to all colcon subcommands
-  log-base: /workspaces/ros_ws/log   
-
-build: 
-  build-base: /workspaces/ros_ws/build
-  install-base: /workspaces/ros_ws/install
-  symlink-install: true
-
-test: 
-  build-base: /workspaces/ros_ws/build
-  install-base: /workspaces/ros_ws/install
-  test-result-base: /workspaces/ros_ws/test_results
-
-executor: multi-threaded
+{
+  "build": {
+    "symlink-install": true,
+    "base-paths": ["/ros_ws/src"],
+    "build-base": "/ros_ws/ros_build/build",
+    "install-base": "/ros_ws/ros_build/install",
+    "cmake-args": [
+      "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+      "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+    ]
+  },
+  "test": {
+    "build-base": "/ros_ws/ros_build/build",
+    "install-base": "/ros_ws/ros_build/install",
+    "log-base": "/ros_ws/ros_build/logs",
+    "event-handlers": ["console_direct+"]
+  },
+  "test-result": {
+    "test-result-base": "/ros_ws/ros_build/build"
+  },
+  "clean.workspace": {
+    "yes": true,
+    "base-select": ["build", "install", "log", "test_result"],
+    "build-base": "/ros_ws/ros_build/build",
+    "install-base": "/ros_ws/ros_build/install",
+    "log-base": "/ros_ws/ros_build/logs",
+    "test-result-base": "/ros_ws/ros_build/build"
+  },
+  "": {"log-base": "/ros_ws/ros_build/logs"}
+}
