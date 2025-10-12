@@ -96,13 +96,12 @@ class Auto(RockerExtension):
                 task_name = future_to_task[future]
                 try:
                     res = future.result()
-                    # Color and indent task summary output
+                    # Color and task summary output
                     CYAN = "\033[96m"
                     GREEN = "\033[92m"
                     RESET = "\033[0m"
                     color = GREEN if res else CYAN
-                    indent = "    "
-                    print(f"{indent}{color}[auto-detect] {task_name} detected: {res}{RESET}")
+                    print(f"{color}[auto-detect] {task_name} detected: {res}{RESET}")
                     results |= res
                 except Exception as e:
                     print(f"    \033[91m[auto-detect] {task_name} failed: {e}\033[0m")
@@ -118,7 +117,6 @@ class Auto(RockerExtension):
         GREEN = "\033[92m"
         CYAN = "\033[96m"
         RESET = "\033[0m"
-        INDENT = "    "
         self._content_search_patterns = content_search_patterns
         for fname, opts in content_search_patterns.items():
             ext = opts["ext"]
@@ -132,9 +130,6 @@ class Auto(RockerExtension):
                         try:
                             with open(fpath, "r", encoding="utf-8") as f:
                                 content = f.read()
-                            print(
-                                f"{INDENT}[auto-detect] DEBUG: Checking file {fpath} for content '{search}'. Actual content:\n{content}"
-                            )
                             # Use plain substring match for '[tool.pixi]' pattern
                             if search == "[tool.pixi]":
                                 found_section = "[tool.pixi]" in content
@@ -142,20 +137,18 @@ class Auto(RockerExtension):
                                 found_section = bool(re.search(search, content, re.MULTILINE))
                             if found_section:
                                 print(
-                                    f"{INDENT}{GREEN}[auto-detect] {ext}: ✓ Found content '{search}' in {fpath} -> enabling{RESET}"
+                                    f"{GREEN}[auto-detect] {ext}: Found content '{search}' in {fpath} -> enabling{RESET}"
                                 )
                                 found.add(ext)
                             else:
                                 print(
-                                    f"{INDENT}{CYAN}[auto-detect] {ext}: Found {fname} but content '{search}' NOT found in {fpath} -> NOT enabling{RESET}"
+                                    f"{CYAN}[auto-detect] {ext}: Found {fname} but content '{search}' NOT found in {fpath} -> NOT enabling{RESET}"
                                 )
                         except Exception as e:
-                            print(
-                                f"{INDENT}{CYAN}[auto-detect] {ext}: Error reading {fpath}: {e}{RESET}"
-                            )
+                            print(f"{CYAN}[auto-detect] {ext}: Error reading {fpath}: {e}{RESET}")
             if not found_file:
                 print(
-                    f"{INDENT}{CYAN}[auto-detect] {ext}: Content search: {fname} not found in workspace.{RESET}"
+                    f"{CYAN}[auto-detect] {ext}: Content search: {fname} not found in workspace.{RESET}"
                 )
         return found
 
@@ -167,7 +160,6 @@ class Auto(RockerExtension):
         GREEN = "\033[92m"
         CYAN = "\033[96m"
         RESET = "\033[0m"
-        INDENT = "    "
 
         found = set()
         start_total = time.time()
@@ -212,31 +204,29 @@ class Auto(RockerExtension):
                         if ext == "uv":
                             if not pixi_section:
                                 print(
-                                    f"{INDENT}{GREEN}[auto-detect] {ext}: ✓ Detected {pattern} ({f}) without [tool.pixi] -> enabling [search took {duration:.3f}s]{RESET}"
+                                    f"{GREEN}[auto-detect] {ext}: ✓ Detected {pattern} ({f}) without [tool.pixi] -> enabling [search took {duration:.3f}s]{RESET}"
                                 )
                                 found.add(ext)
                             else:
                                 print(
-                                    f"{INDENT}{CYAN}[auto-detect] {ext}: Detected {pattern} ({f}) but [tool.pixi] present, NOT enabling [search took {duration:.3f}s]{RESET}"
+                                    f"{CYAN}[auto-detect] {ext}: Detected {pattern} ({f}) but [tool.pixi] present, NOT enabling [search took {duration:.3f}s]{RESET}"
                                 )
                     except Exception as e:
-                        print(
-                            f"{INDENT}{CYAN}[auto-detect] {ext}: Error reading {fpath}: {e}{RESET}"
-                        )
+                        print(f"{CYAN}[auto-detect] {ext}: Error reading {fpath}: {e}{RESET}")
                 continue
             if matches:
                 if content_search_required:
                     print(
-                        f"{INDENT}{CYAN}[auto-detect] {ext}: Detected {pattern} ({len(matches)} matches), but content search required. Will check contents next. [search took {duration:.3f}s]{RESET}"
+                        f"{CYAN}[auto-detect] {ext}: Detected {pattern} ({len(matches)} matches), but content search required. Will check contents next. [search took {duration:.3f}s]{RESET}"
                     )
                 else:
                     print(
-                        f"{INDENT}{GREEN}[auto-detect] {ext}: ✓ Detected {pattern} ({len(matches)} matches) -> enabling [search took {duration:.3f}s]{RESET}"
+                        f"{GREEN}[auto-detect] {ext}: ✓ Detected {pattern} ({len(matches)} matches) -> enabling [search took {duration:.3f}s]{RESET}"
                     )
                     found.add(ext)
             else:
                 print(
-                    f"{INDENT}{CYAN}[auto-detect] {ext}: Pattern {pattern} found no matches [search took {duration:.3f}s]{RESET}"
+                    f"{CYAN}[auto-detect] {ext}: Pattern {pattern} found no matches [search took {duration:.3f}s]{RESET}"
                 )
         print(f"[auto-detect] Total file walk and match time: {time.time() - start_total:.3f}s")
         return found
@@ -244,12 +234,11 @@ class Auto(RockerExtension):
     def _detect_exact_dir(self, workspace, patterns):
         found = set()
         # Check in workspace
-        INDENT = "    "
         for dname, ext in patterns.items():
             dir_path = workspace / dname
             if dir_path.is_dir():
                 print(
-                    f"{INDENT}\033[92m[auto-detect] {ext}: ✓ Detected {dname} directory in workspace -> enabling\033[0m"
+                    f"\033[92m[auto-detect] {ext}: ✓ Detected {dname} directory in workspace -> enabling\033[0m"
                 )
                 found.add(ext)
         # Check in user's home directory
@@ -258,7 +247,7 @@ class Auto(RockerExtension):
             dir_path = home / dname
             if dir_path.is_dir():
                 print(
-                    f"{INDENT}\033[92m[auto-detect] {ext}: ✓ Detected {dname} directory in home -> enabling\033[0m"
+                    f"\033[92m[auto-detect] {ext}: ✓ Detected {dname} directory in home -> enabling\033[0m"
                 )
                 found.add(ext)
         return found
