@@ -1,0 +1,10 @@
+
+# Auto detection rules for ccache extension
+files:
+  - "*.c"
+  - "*.cc"
+  - "*.cpp"
+  - "*.cxx"
+  - "*.h"
+  - "*.hpp"
+  - "*.hxx"
