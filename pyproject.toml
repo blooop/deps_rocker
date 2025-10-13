@@ -93,7 +93,6 @@ deps-devtools = "deps_rocker.extensions.deps_devtools.deps_devtools:DepsDevtools
 
 #robotics
 ros_jazzy = "deps_rocker.extensions.ros_jazzy.ros_jazzy:RosJazzy"
-ros_underlay = "deps_rocker.extensions.ros_underlay.ros_underlay:RosUnderlay"
 isaac_sim = "deps_rocker.extensions.isaac_sim.isaac_sim:IsaacSim"
 urdf_viz = "deps_rocker.extensions.urdf_viz.urdf_viz:UrdfViz"
 
