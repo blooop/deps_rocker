@@ -1,5 +1,6 @@
 import os
 import hashlib
+from pathlib import Path
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
@@ -30,7 +31,17 @@ class RosJazzy(SimpleRockerExtension):
 
     def get_files(self, cliargs) -> dict[str, str]:
         dat = self.get_config_file("configs/defaults.yaml")
-        return {"defaults.yaml": dat}
+
+        # Get underlay build scripts
+        script_dir = Path(__file__).parent
+        underlay_deps = (script_dir / "underlay_deps.sh").read_text()
+        underlay_build = (script_dir / "underlay_build.sh").read_text()
+
+        return {
+            "defaults.yaml": dat,
+            "underlay_deps.sh": underlay_deps,
+            "underlay_build.sh": underlay_build,
+        }
 
     def get_docker_args(self, cliargs) -> str:
         """Set the ROS_DOMAIN_ID env var from the host machine if it exists, otherwise generate one from a hash of the username"""

@@ -32,20 +32,10 @@ RUN if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then \
 ENV COLCON_LOG_PATH=/ros_ws/log
 ENV COLCON_DEFAULTS_FILE=/ros_ws/colcon-defaults.yaml
 
+# Install underlay build scripts
+COPY underlay_deps.sh underlay_build.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/underlay_deps.sh /usr/local/bin/underlay_build.sh
+
 # Build the underlay workspace if it contains packages
 RUN --mount=type=cache,target=/var/cache/apt,id=apt-cache \
-    if [ -d "$ROS_UNDERLAY_PATH" ] && [ -n "$(find $ROS_UNDERLAY_PATH -name 'package.xml' -print -quit)" ]; then \
-      echo "Building underlay workspace..." && \
-      cd /ros_ws && \
-      rosdep update && \
-      rosdep install --from-paths $ROS_UNDERLAY_PATH --ignore-src -y --rosdistro $ROS_DISTRO && \
-      . /opt/ros/$ROS_DISTRO/setup.sh && \
-      colcon build \
-        --base-paths $ROS_UNDERLAY_PATH \
-        --build-base $ROS_BUILD_BASE/underlay \
-        --install-base $ROS_INSTALL_BASE/underlay \
-        --merge-install \
-        --cmake-args -DCMAKE_BUILD_TYPE=Release; \
-    else \
-      echo "No packages found in underlay, skipping build"; \
-    fi 
+    underlay_deps.sh && underlay_build.sh 
