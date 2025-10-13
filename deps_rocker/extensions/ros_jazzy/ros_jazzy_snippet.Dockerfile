@@ -27,19 +27,19 @@ RUN if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then \
     echo "rosdep already initialized, skipping init"; \
   fi
 
-RUN mkdir -p /workspaces/ros_ws/{repos,src,underlay,build,log} && chmod -R 777 /workspaces/ros_ws
+RUN mkdir -p /ros_ws/{repos,src,underlay,build,log} && chmod -R 777 /ros_ws
 
-ENV ROS_WORKSPACE_ROOT=/workspaces/ros_ws
-ENV ROS_REPOS_ROOT=/workspaces/ros_ws/repos
-ENV ROS_DEPENDENCIES_ROOT=/workspaces/ros_ws/src
-ENV ROS_UNDERLAY_PATH=/workspaces/ros_ws/underlay
-ENV ROS_BUILD_BASE=/workspaces/ros_ws/build
-ENV ROS_INSTALL_BASE=/workspaces/ros_ws/install
-ENV ROS_LOG_BASE=/workspaces/ros_ws/log
-ENV COLCON_LOG_PATH=/workspaces/ros_ws/log
-ENV COLCON_LOG_PATH=/workspaces/ros_ws/log
-ENV COLCON_DEFAULTS_FILE=/workspaces/ros_ws/colcon-defaults.yaml
+ENV ROS_WORKSPACE_ROOT=/ros_ws
+ENV ROS_REPOS_ROOT=/ros_ws/repos
+ENV ROS_DEPENDENCIES_ROOT=/ros_ws/src
+ENV ROS_UNDERLAY_PATH=/ros_ws/underlay
+ENV ROS_BUILD_BASE=/ros_ws/build
+ENV ROS_INSTALL_BASE=/ros_ws/install
+ENV ROS_LOG_BASE=/ros_ws/log
+ENV COLCON_LOG_PATH=/ros_ws/log
+ENV COLCON_LOG_PATH=/ros_ws/log
+ENV COLCON_DEFAULTS_FILE=/ros_ws/colcon-defaults.yaml
 
 RUN mkdir -p "$ROS_REPOS_ROOT" "$ROS_DEPENDENCIES_ROOT" "$ROS_UNDERLAY_PATH" "$ROS_BUILD_BASE" "$ROS_LOG_BASE" \
   "$ROS_INSTALL_BASE" \
-  && chmod -R 777 /workspaces/ros_ws 
+  && chmod -R 777 /ros_ws 

@@ -1,30 +1,30 @@
 {
   "build": {
     "symlink-install": true,
-    # "base-paths": ["/workspaces/ros_ws/src"],
-    "build-base": "/workspaces/ros_ws/build",
-    "install-base": "/workspaces/ros_ws/install",
+    # "base-paths": ["/ros_ws/src"],
+    "build-base": "/ros_ws/build",
+    "install-base": "/ros_ws/install",
     "cmake-args": [
       "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
       "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
     ]
   },
   "test": {
-    "build-base": "/workspaces/ros_ws/build",
-    "install-base": "/workspaces/ros_ws/install",
-    "log-base": "/workspaces/ros_ws/logs",
+    "build-base": "/ros_ws/build",
+    "install-base": "/ros_ws/install",
+    "log-base": "/ros_ws/logs",
     "event-handlers": ["console_direct+"]
   },
   "test-result": {
-    "test-result-base": "/workspaces/ros_ws/build"
+    "test-result-base": "/ros_ws/build"
   },
   "clean.workspace": {
     "yes": true,
     "base-select": ["build", "install", "log", "test_result"],
-    "build-base": "/workspaces/ros_ws/build",
-    "install-base": "/workspaces/ros_ws/install",
-    "log-base": "/workspaces/ros_ws/logs",
-    "test-result-base": "/workspaces/ros_ws/build"
+    "build-base": "/ros_ws/build",
+    "install-base": "/ros_ws/install",
+    "log-base": "/ros_ws/logs",
+    "test-result-base": "/ros_ws/build"
   },
-  "": {"log-base": "/workspaces/ros_ws/logs"}
+  "": {"log-base": "/ros_ws/logs"}
 }
