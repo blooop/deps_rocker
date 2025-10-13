@@ -8,8 +8,8 @@ RUN DEPS_ROOT="${ROS_DEPENDENCIES_ROOT}" && \
 
 
 #need to work out why I can't just copy directly to the right location...
-COPY defaults.yaml /defaults.yaml
-RUN cp /defaults.yaml $COLCON_DEFAULTS_FILE
+COPY colcon-defaults.yaml /colcon-defaults.yaml
+RUN cp /colcon-defaults.yaml $COLCON_DEFAULTS_FILE
 
 RUN echo "source /opt/ros/jazzy/setup.bash" >> $HOME/.bashrc
 RUN printf '%s\n' '[ -n "${ROS_UNDERLAY_PATH:-}" ] && [ -f "${ROS_UNDERLAY_PATH}/setup.bash" ] && source "${ROS_UNDERLAY_PATH}/setup.bash"' >> $HOME/.bashrc

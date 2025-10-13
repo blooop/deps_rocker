@@ -30,7 +30,7 @@ class RosJazzy(SimpleRockerExtension):
         return super().invoke_after(set(["gemini", "claude", "codex"]))
 
     def get_files(self, cliargs) -> dict[str, str]:
-        dat = self.get_config_file("configs/defaults.yaml")
+        dat = self.get_config_file("configs/colcon-defaults.yaml")
 
         # Get underlay build scripts
         script_dir = Path(__file__).parent
@@ -38,7 +38,7 @@ class RosJazzy(SimpleRockerExtension):
         underlay_build = (script_dir / "underlay_build.sh").read_text()
 
         return {
-            "defaults.yaml": dat,
+            "colcon-defaults.yaml": dat,
             "underlay_deps.sh": underlay_deps,
             "underlay_build.sh": underlay_build,
         }
