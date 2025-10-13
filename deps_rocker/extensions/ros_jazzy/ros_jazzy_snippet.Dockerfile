@@ -29,12 +29,12 @@ RUN if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then \
 
 # Workspace layout is defined by vcstool extension
 # Set colcon-specific environment variables
-ENV COLCON_LOG_PATH=/ros_ws/log
-ENV COLCON_DEFAULTS_FILE=/ros_ws/colcon-defaults.yaml
-
 # Install underlay build scripts
 COPY underlay_deps.sh underlay_build.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/underlay_deps.sh /usr/local/bin/underlay_build.sh
+
+ENV COLCON_LOG_PATH=/ros_ws/log
+ENV COLCON_DEFAULTS_FILE=/ros_ws/colcon-defaults.yaml
 
 # Build the underlay workspace if it contains packages
 RUN --mount=type=cache,target=/var/cache/apt,id=apt-cache \
