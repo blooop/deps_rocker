@@ -38,4 +38,5 @@ RUN chmod +x /usr/local/bin/underlay_deps.sh /usr/local/bin/underlay_build.sh
 
 # Build the underlay workspace if it contains packages
 RUN --mount=type=cache,target=/var/cache/apt,id=apt-cache \
-    underlay_deps.sh && underlay_build.sh 
+    underlay_deps.sh && underlay_build.sh && \
+    chmod -R a+rwX "$ROS_UNDERLAY_BUILD" "$ROS_UNDERLAY_INSTALL" 
