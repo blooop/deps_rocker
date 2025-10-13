@@ -30,8 +30,5 @@ class VcsTool(SimpleRockerExtension):
                         # Merge repositories from this file into the consolidated manifest
                         merged_repos["repositories"].update(repos_data["repositories"])
 
-        # Only return the file if we found repositories
-        if merged_repos["repositories"]:
-            return {"consolidated.repos": yaml.dump(merged_repos, default_flow_style=False)}
-
-        return {}
+        # Always return consolidated.repos file, even if empty
+        return {"consolidated.repos": yaml.dump(merged_repos, default_flow_style=False)}
