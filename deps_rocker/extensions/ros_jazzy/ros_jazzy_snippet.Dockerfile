@@ -27,16 +27,7 @@ RUN if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then \
     echo "rosdep already initialized, skipping init"; \
   fi
 
-ENV ROS_WORKSPACE_ROOT=/ros_ws
-ENV ROS_REPOS_ROOT=/ros_ws/repos
-ENV ROS_DEPENDENCIES_ROOT=/ros_ws/src
-ENV ROS_UNDERLAY_PATH=/ros_ws/underlay
-ENV ROS_BUILD_BASE=/ros_ws/build
-ENV ROS_INSTALL_BASE=/ros_ws/install
-ENV ROS_LOG_BASE=/ros_ws/log
+# Workspace layout is defined by vcstool extension
+# Set colcon-specific environment variables
 ENV COLCON_LOG_PATH=/ros_ws/log
-ENV COLCON_DEFAULTS_FILE=/ros_ws/colcon-defaults.yaml
-
-RUN mkdir -p "$ROS_REPOS_ROOT" "$ROS_DEPENDENCIES_ROOT" "$ROS_UNDERLAY_PATH" "$ROS_BUILD_BASE" "$ROS_LOG_BASE" \
-  "$ROS_INSTALL_BASE" \
-  && chmod -R 777 /ros_ws 
+ENV COLCON_DEFAULTS_FILE=/ros_ws/colcon-defaults.yaml 
