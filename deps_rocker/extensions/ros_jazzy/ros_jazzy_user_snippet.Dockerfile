@@ -18,3 +18,5 @@ RUN cp /defaults.yaml $HOME/.colcon/defaults.yaml
 
 RUN echo "source /opt/ros/jazzy/setup.bash" >> $HOME/.bashrc
 RUN printf '%s\n' '[ -n "${ROS_UNDERLAY_PATH:-}" ] && [ -f "${ROS_UNDERLAY_PATH}/setup.bash" ] && source "${ROS_UNDERLAY_PATH}/setup.bash"' >> $HOME/.bashrc
+
+RUN echo 'source ${ROS_INSTALL_BASE}/setup.bash ' >> $HOME/.bashrc

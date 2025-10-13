@@ -66,5 +66,10 @@ ENV ROS_REPOS_ROOT=/workspaces/ros_ws/repos
 ENV ROS_DEPENDENCIES_ROOT=/workspaces/ros_ws/src
 ENV ROS_UNDERLAY_PATH=/workspaces/ros_ws/underlay
 ENV ROS_BUILD_BASE=/workspaces/ros_ws/build
+ENV ROS_INSTALL_BASE=/workspaces/ros_ws/install
 ENV ROS_LOG_BASE=/workspaces/ros_ws/log
 ENV COLCON_LOG_PATH=/workspaces/ros_ws/log
+
+RUN mkdir -p "$ROS_REPOS_ROOT" "$ROS_DEPENDENCIES_ROOT" "$ROS_UNDERLAY_PATH" "$ROS_BUILD_BASE" "$ROS_LOG_BASE" \
+  "$ROS_INSTALL_BASE" \
+  && chmod -R 777 /workspaces/ros_ws 
