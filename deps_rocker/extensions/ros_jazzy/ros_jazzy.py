@@ -9,6 +9,21 @@ class RosJazzy(SimpleRockerExtension):
     name = "ros_jazzy"
 
     depends_on_extension = ("vcstool", "curl")
+    # Use apt_packages feature for ROS dependencies
+    apt_packages = [
+        "locales",
+        "tzdata",
+        "curl",
+        "gnupg2",
+        "lsb-release",
+        "sudo",
+        "software-properties-common",
+        "wget",
+        "python3-pip",
+        "cmake",
+        "build-essential",
+        "python3-argcomplete",
+    ]
 
     def invoke_after(self, cliargs):
         return super().invoke_after(set(["gemini", "claude", "codex"]))
@@ -25,8 +40,8 @@ class RosJazzy(SimpleRockerExtension):
             if username:
                 # Hash the username
                 hashed_value = int(hashlib.sha256(username.encode()).hexdigest(), 16)
-                # Scale the hash to a value between 1 and 99
-                ROS_DOMAIN_ID = str((hashed_value % 99) + 1)
+                # Scale the hash to a value between 2 and 99
+                ROS_DOMAIN_ID = str((hashed_value % 98) + 2)
             else:
                 raise ValueError("Unable to determine username and no ROS_DOMAIN_ID provided.")
 
