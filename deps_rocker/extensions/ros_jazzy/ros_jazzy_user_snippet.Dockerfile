@@ -14,8 +14,7 @@ RUN cp /colcon-defaults.yaml $COLCON_DEFAULTS_FILE
 RUN echo "source /opt/ros/jazzy/setup.bash" >> $HOME/.bashrc
 RUN printf '%s\n' '[ -n "${ROS_UNDERLAY_INSTALL:-}" ] && [ -f "${ROS_UNDERLAY_INSTALL}/setup.bash" ] && source "${ROS_UNDERLAY_INSTALL}/setup.bash"' >> $HOME/.bashrc
 
-ENV ROS_FIRST_BUILD=1
-RUN echo "\n# Run colcon build on first container start\nif [ \"\$ROS_FIRST_BUILD\" = \"1\" ]; then\n  echo 'Running colcon build for first time setup...'\n  colcon build\n  export ROS_FIRST_BUILD=0\nfi\n" >> $HOME/.bashrc
+RUN echo "\n# Run colcon build on first container start\nif [ ! -f \"\$HOME/.colcon_built\" ]; then\n  echo 'Running colcon build for first time setup...'\n  colcon build\n  touch \$HOME/.colcon_built\nfi\n" >> $HOME/.bashrc
 
 RUN echo 'source $ROS_INSTALL_BASE/setup.bash' >> $HOME/.bashrc
 
