@@ -35,4 +35,5 @@ class VcsTool(SimpleRockerExtension):
                         merged_repos["repositories"].update(repos_data["repositories"])
 
         # Always return consolidated.repos file, even if empty
+        print("merged repos:", merged_repos)
         return {"consolidated.repos": yaml.dump(merged_repos, default_flow_style=False)}
