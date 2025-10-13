@@ -38,6 +38,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         # "vcstool", #tested via ros_underlay
         # "ros_underlay", #too slow
         "auto",
+        "poetry",
     ]
 
     @classmethod
