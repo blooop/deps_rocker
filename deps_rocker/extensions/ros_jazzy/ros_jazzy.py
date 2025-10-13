@@ -26,7 +26,7 @@ class RosJazzy(SimpleRockerExtension):
     ]
 
     def invoke_after(self, cliargs):
-        return super().invoke_after(set(["gemini", "claude", "codex"]))
+        return super().invoke_after({"gemini", "claude", "codex"})
 
     def get_files(self, cliargs) -> dict[str, str]:
         dat = self.get_config_file("configs/defaults.yaml")
