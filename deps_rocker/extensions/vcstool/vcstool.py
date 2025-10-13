@@ -2,7 +2,7 @@ from __future__ import annotations
 
 
 import yaml
-
+from pathlib import Path
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
@@ -19,10 +19,16 @@ class VcsTool(SimpleRockerExtension):
             dict: Single consolidated.repos file containing all discovered repositories
         """
         workspace = self.get_workspace_path()
+
+        workspace = Path(cliargs.get("auto", workspace)).expanduser()
+        print(cliargs)
+
+        print("vsc tool search root:", workspace)
         merged_repos = {"repositories": {}}
 
         # Search only for files named exactly "depends.repos"
-        for repos_file in workspace.rglob("depends.repos"):
+        for repos_file in workspace.rglob("depends.repos*"):
+            print("found repos file:", repos_file)
             if repos_file.is_file():
                 with repos_file.open(encoding="utf-8") as f:
                     repos_data = yaml.safe_load(f)

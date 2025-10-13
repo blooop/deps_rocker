@@ -18,3 +18,5 @@ ENV ROS_FIRST_BUILD=1
 RUN echo "\n# Run colcon build on first container start\nif [ \"\$ROS_FIRST_BUILD\" = \"1\" ]; then\n  echo 'Running colcon build for first time setup...'\n  colcon build\n  export ROS_FIRST_BUILD=0\nfi\n" >> $HOME/.bashrc
 
 RUN echo 'source $ROS_INSTALL_BASE/setup.bash' >> $HOME/.bashrc
+
+WORKDIR $ROS_WORKSPACE_ROOT
