@@ -6,8 +6,8 @@ set -e
 
 # Use workspace layout from environment
 UNDERLAY_PATH="${ROS_UNDERLAY_PATH:-/ros_ws/underlay}"
-BUILD_BASE="${ROS_BUILD_BASE:-/ros_ws/build}"
-INSTALL_BASE="${ROS_INSTALL_BASE:-/ros_ws/install}"
+UNDERLAY_BUILD="${ROS_UNDERLAY_BUILD:-/ros_ws/underlay_build}"
+UNDERLAY_INSTALL="${ROS_UNDERLAY_INSTALL:-/ros_ws/underlay_install}"
 ROS_DISTRO="${ROS_DISTRO:-jazzy}"
 
 echo "Building underlay workspace"
@@ -32,10 +32,10 @@ cd /ros_ws
 echo "Building packages from ${UNDERLAY_PATH}..."
 colcon build \
     --base-paths "${UNDERLAY_PATH}" \
-    --build-base "${BUILD_BASE}/underlay" \
-    --install-base "${INSTALL_BASE}/underlay" \
+    --build-base "${UNDERLAY_BUILD}" \
+    --install-base "${UNDERLAY_INSTALL}" \
     --merge-install \
     --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 echo "Underlay built successfully"
-echo "Source with: source ${INSTALL_BASE}/underlay/setup.bash"
+echo "Source with: source ${UNDERLAY_INSTALL}/setup.bash"
