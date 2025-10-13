@@ -2,33 +2,37 @@
 
 ## Changes Required
 
-### 1. Update vcstool.py
+### 1. Simplify vcstool.py
 **File:** `deps_rocker/extensions/vcstool/vcstool.py`
 
-- Modify `_get_workspace_layout()` to add `depends_root` path (`/ros_ws/depends`)
-- Update `discover_repos()` to:
-  - Only discover files named exactly `depends.repos` (not `*.repos` or `depends.repos.yaml`)
-  - Set all entries to use the same consolidated path (`depends`)
-  - Store original file location for COPY command but use fixed destination for import
+- Remove empy-based workspace layout methods
+- Remove `_get_workspace_layout()` and `_ensure_empy_args()` methods
+- Implement simple `get_files()` method that:
+  - Scans for all `depends.repos` files
+  - Merges all repositories into single `consolidated.repos` manifest
+  - Returns the consolidated manifest as a YAML file
 
-### 2. Update vcstool_snippet.Dockerfile
+### 2. Simplify vcstool_snippet.Dockerfile
 **File:** `deps_rocker/extensions/vcstool/vcstool_snippet.Dockerfile`
 
-- Add environment variable for depends root path
-- Update COPY to preserve source paths under repos_root
-- Update vcs import and cp commands to always target the consolidated depends_root
-- Simplify caching since all imports go to same destination
+- Define only essential workspace env vars:
+  - `ROS_WORKSPACE_ROOT=/ros_ws`
+  - `ROS_UNDERLAY_PATH=/ros_ws/underlay`
+  - `ROS_BUILD_BASE`, `ROS_INSTALL_BASE`, `ROS_LOG_BASE`
+- Create only necessary directories (no repos, src, or depends dirs)
+- Import consolidated.repos directly to `/ros_ws/underlay`
+- Use BuildKit cache for vcs clones
 
-### 3. Testing Considerations
-- Verify multiple depends.repos files all import to /ros_ws/depends/
-- Ensure no conflicts when repos overlap between different depends.repos files
-- Confirm BuildKit cache still works correctly
-- Test that workspace layout is correctly exposed to extensions
+### 3. Simplify ros_jazzy_snippet.Dockerfile
+**File:** `deps_rocker/extensions/ros_jazzy/ros_jazzy_snippet.Dockerfile`
+
+- Remove duplicate workspace env vars (now defined by vcstool)
+- Remove duplicate directory creation
+- Only define colcon-specific variables
 
 ## Implementation Steps
 
-1. Update workspace layout in `_get_workspace_layout()`
-2. Modify `discover_repos()` to filter and consolidate paths
-3. Update Dockerfile snippet to use consolidated import path
-4. Run CI tests to verify functionality
-5. Update documentation if needed
+1. Rewrite vcstool.py to merge all depends.repos into single manifest
+2. Update vcstool Dockerfile to import to underlay with minimal env vars
+3. Update ros_jazzy Dockerfile to remove duplicates
+4. Commit with updated spec and plan
