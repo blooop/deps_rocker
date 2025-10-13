@@ -17,8 +17,6 @@ RUN ln -fs /usr/share/zoneinfo/UTC /etc/localtime \
   && dpkg-reconfigure --frontend noninteractive tzdata \
   && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get -y upgrade \
-  && rm -rf /var/lib/apt/lists/*
 
 # Install common programs
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -69,6 +67,8 @@ ENV ROS_BUILD_BASE=/workspaces/ros_ws/build
 ENV ROS_INSTALL_BASE=/workspaces/ros_ws/install
 ENV ROS_LOG_BASE=/workspaces/ros_ws/log
 ENV COLCON_LOG_PATH=/workspaces/ros_ws/log
+ENV COLCON_LOG_PATH=/workspaces/ros_ws/log
+ENV COLCON_DEFAULTS_FILE=/workspaces/ros_ws/colcon-defaults.yaml
 
 RUN mkdir -p "$ROS_REPOS_ROOT" "$ROS_DEPENDENCIES_ROOT" "$ROS_UNDERLAY_PATH" "$ROS_BUILD_BASE" "$ROS_LOG_BASE" \
   "$ROS_INSTALL_BASE" \
