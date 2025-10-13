@@ -10,11 +10,11 @@ BUILD_BASE="${ROS_BUILD_BASE:-/ros_ws/build}"
 INSTALL_BASE="${ROS_INSTALL_BASE:-/ros_ws/install}"
 ROS_DISTRO="${ROS_DISTRO:-jazzy}"
 
-echo "🔨 Building underlay workspace"
+echo "Building underlay workspace"
 
 # Check if underlay has any packages
 if [ ! -d "${UNDERLAY_PATH}" ] || [ -z "$(find "${UNDERLAY_PATH}" -name 'package.xml' -print -quit)" ]; then
-    echo "ℹ️  No packages found in underlay, skipping build"
+    echo "No packages found in underlay, skipping build"
     exit 0
 fi
 
@@ -23,13 +23,13 @@ if [ -f "/opt/ros/${ROS_DISTRO}/setup.bash" ]; then
     # shellcheck disable=SC1090
     source "/opt/ros/${ROS_DISTRO}/setup.bash"
 else
-    echo "❌ ROS environment not found at /opt/ros/${ROS_DISTRO}/setup.bash"
+    echo "ROS environment not found at /opt/ros/${ROS_DISTRO}/setup.bash"
     exit 1
 fi
 
 # Build underlay
 cd /ros_ws
-echo "🏗️  Building packages from ${UNDERLAY_PATH}..."
+echo "Building packages from ${UNDERLAY_PATH}..."
 colcon build \
     --base-paths "${UNDERLAY_PATH}" \
     --build-base "${BUILD_BASE}/underlay" \
@@ -37,5 +37,5 @@ colcon build \
     --merge-install \
     --cmake-args -DCMAKE_BUILD_TYPE=Release
 
-echo "✅ Underlay built successfully"
-echo "ℹ️  Source with: source ${INSTALL_BASE}/underlay/setup.bash"
+echo "Underlay built successfully"
+echo "Source with: source ${INSTALL_BASE}/underlay/setup.bash"
