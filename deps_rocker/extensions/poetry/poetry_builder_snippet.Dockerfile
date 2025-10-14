@@ -3,7 +3,7 @@
 
 @(f"FROM {base_image} AS {builder_stage}")
 
-# Re-declare ARG after FROM to make it available in this stage
+# Redeclare ARG after FROM to make it available in this stage
 @(f"ARG POETRY_VERSION={POETRY_VERSION}")
 
 # Install Poetry in builder stage with cache for installer script and pip packages
