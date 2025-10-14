@@ -206,6 +206,9 @@ CMD [\"echo\", \"Extension test complete\"]
     def test_auto_extension(self):
         self.run_extension_build_and_test("auto")
 
+    def test_poetry_extension(self):
+        self.run_extension_build_and_test("poetry")
+
     def test_z_all_extensions_together(self):
         if not self.working_extension_names:
             self.skipTest("No working extensions found")
