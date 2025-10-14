@@ -3,5 +3,4 @@
 RUN mkdir -p "$HOME/.local/bin" && \
     cp /tmp/claude-binary "$HOME/.local/bin/claude" && \
     chmod +x "$HOME/.local/bin/claude" && \
-    rm /tmp/claude-binary && \
     echo "Claude CLI installed from cached binary to $HOME/.local/bin/claude"
