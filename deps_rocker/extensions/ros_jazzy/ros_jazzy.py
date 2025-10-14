@@ -1,5 +1,6 @@
 import os
 import hashlib
+import yaml
 from pathlib import Path
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
@@ -9,7 +10,7 @@ class RosJazzy(SimpleRockerExtension):
 
     name = "ros_jazzy"
 
-    depends_on_extension = ("vcstool", "curl")
+    depends_on_extension = ("curl", "git_clone")
     # Use apt_packages feature for ROS dependencies
     apt_packages = [
         "locales",
@@ -37,10 +38,30 @@ class RosJazzy(SimpleRockerExtension):
         underlay_deps = (script_dir / "underlay_deps.sh").read_text()
         underlay_build = (script_dir / "underlay_build.sh").read_text()
 
+        # Discover and merge all depends.repos files
+        workspace = self.get_workspace_path()
+        workspace = Path(cliargs.get("auto", workspace)).expanduser()
+
+        print("ROS Jazzy: searching for depends.repos in:", workspace)
+        merged_repos = {"repositories": {}}
+
+        # Search for files named "depends.repos"
+        for repos_file in workspace.rglob("depends.repos*"):
+            if repos_file.is_file():
+                print("ROS Jazzy: found repos file:", repos_file)
+                with repos_file.open(encoding="utf-8") as f:
+                    repos_data = yaml.safe_load(f)
+                    if repos_data and "repositories" in repos_data:
+                        # Merge repositories from this file into the consolidated manifest
+                        merged_repos["repositories"].update(repos_data["repositories"])
+
+        print("ROS Jazzy: merged repos:", merged_repos)
+
         return {
             "colcon-defaults.yaml": dat,
             "underlay_deps.sh": underlay_deps,
             "underlay_build.sh": underlay_build,
+            "consolidated.repos": yaml.dump(merged_repos, default_flow_style=False),
         }
 
     def get_docker_args(self, cliargs) -> str:

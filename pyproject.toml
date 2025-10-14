@@ -60,7 +60,6 @@ deps-rocker = "deps_rocker.dep_rocker_cli:gen_dockerfile"
 [project.entry-points."rocker.extensions"]
 #dependency managers
 odeps_dependencies = "deps_rocker.dependencies:Dependencies"
-vcstool = "deps_rocker.extensions.vcstool.vcstool:VcsTool"
 
 #package managers
 uv = "deps_rocker.extensions.uv.uv:UV"
