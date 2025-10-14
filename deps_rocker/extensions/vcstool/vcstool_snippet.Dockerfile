@@ -16,6 +16,7 @@ RUN mkdir -p "$ROS_UNDERLAY_PATH" "$ROS_UNDERLAY_BUILD" "$ROS_UNDERLAY_INSTALL" 
 # Import the consolidated depends.repos manifest to underlay
 COPY consolidated.repos /ros_ws/consolidated.repos
 RUN --mount=type=cache,target=/root/.cache/vcs-repos,id=vcs-repos-cache \
+    rm -rf /root/.cache/vcs-repos/underlay && \
     mkdir -p /root/.cache/vcs-repos/underlay && \
     vcs import --recursive /root/.cache/vcs-repos/underlay < /ros_ws/consolidated.repos && \
     cp -r /root/.cache/vcs-repos/underlay/. /ros_ws/underlay/
