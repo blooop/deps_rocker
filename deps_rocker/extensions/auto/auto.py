@@ -266,17 +266,31 @@ class Auto(RockerExtension):
         detected_extensions = self._detect_files_in_workspace(cliargs)
         all_required = set(detected_extensions)
 
-        # Also include dependencies of detected extensions
+        # Also include dependencies of detected extensions with cycle detection
         from rocker.core import list_plugins
 
         all_plugins = list_plugins()
+        visited = set()  # Track visited extensions to prevent infinite recursion
 
-        for ext_name in detected_extensions:
+        def collect_dependencies(ext_name: str):
+            """Recursively collect dependencies with cycle detection"""
+            if ext_name in visited:
+                return  # Avoid infinite recursion
+
+            visited.add(ext_name)
+
             if ext_name in all_plugins:
                 ext_class = all_plugins[ext_name]
                 ext_instance = ext_class()
                 ext_deps = ext_instance.required(cliargs)
                 all_required.update(ext_deps)
+
+                # Recursively collect dependencies of dependencies
+                for dep_name in ext_deps:
+                    collect_dependencies(dep_name)
+
+        for ext_name in detected_extensions:
+            collect_dependencies(ext_name)
 
         # WORKAROUND: rocker's topological sort has issues when multiple extensions
         # share the same dependencies (like codex and gemini both depending on npm).
@@ -285,6 +299,8 @@ class Auto(RockerExtension):
         if "codex" in all_required and "gemini" in all_required:
             # Prefer codex over gemini for auto-detection to avoid ordering conflicts
             all_required.discard("gemini")
-            print("[auto-detect] Detected both codex and gemini - including only codex to avoid dependency ordering issues")
+            print(
+                "[auto-detect] Detected both codex and gemini - including only codex to avoid dependency ordering issues"
+            )
 
         return all_required
