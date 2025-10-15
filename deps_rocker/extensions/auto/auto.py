@@ -278,4 +278,13 @@ class Auto(RockerExtension):
                 ext_deps = ext_instance.required(cliargs)
                 all_required.update(ext_deps)
 
+        # WORKAROUND: rocker's topological sort has issues when multiple extensions
+        # share the same dependencies (like codex and gemini both depending on npm).
+        # As a workaround, if we detect both codex and gemini, only include one of them
+        # to avoid the multi-extension dependency ordering bug.
+        if "codex" in all_required and "gemini" in all_required:
+            # Prefer codex over gemini for auto-detection to avoid ordering conflicts
+            all_required.discard("gemini")
+            print("[auto-detect] Detected both codex and gemini - including only codex to avoid dependency ordering issues")
+
         return all_required

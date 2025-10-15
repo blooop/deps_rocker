@@ -294,8 +294,8 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
 
     def invoke_after(self, cliargs: dict) -> set[str]:
         """
-        Returns a set of dependencies that should be invoked after this extension.
-        If deps is defined, returns it as a set.
+        Returns a set of extensions that this extension should be invoked after.
+        For SimpleRockerExtension, this returns the dependencies.
         """
         return set(self.depends_on_extension) if self.depends_on_extension else set()
 
