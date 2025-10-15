@@ -8,7 +8,9 @@ set -e
 UNDERLAY_PATH="${ROS_UNDERLAY_PATH:-/ros_ws/underlay}"
 UNDERLAY_BUILD="${ROS_UNDERLAY_BUILD:-/ros_ws/underlay_build}"
 UNDERLAY_INSTALL="${ROS_UNDERLAY_INSTALL:-/ros_ws/underlay_install}"
+WORKSPACE_ROOT="${ROS_WORKSPACE_ROOT:-/ros_ws}"
 ROS_DISTRO="${ROS_DISTRO:-jazzy}"
+ROS_SETUP_SCRIPT="${ROS_SETUP_SCRIPT:-/opt/ros/${ROS_DISTRO}/setup.bash}"
 
 echo "Building underlay workspace"
 
@@ -19,11 +21,11 @@ if [ ! -d "${UNDERLAY_PATH}" ] || [ -z "$(find "${UNDERLAY_PATH}" -name 'package
 fi
 
 # Source ROS environment
-if [ -f "/opt/ros/${ROS_DISTRO}/setup.bash" ]; then
+if [ -f "${ROS_SETUP_SCRIPT}" ]; then
     # shellcheck disable=SC1090
-    source "/opt/ros/${ROS_DISTRO}/setup.bash"
+    source "${ROS_SETUP_SCRIPT}"
 else
-    echo "ROS environment not found at /opt/ros/${ROS_DISTRO}/setup.bash"
+    echo "ROS environment not found at ${ROS_SETUP_SCRIPT}"
     exit 1
 fi
 
@@ -34,26 +36,42 @@ CURRENT_UID="$(id -u)"
 CURRENT_GID="$(id -g)"
 
 ensure_owner_for_paths() {
-    local paths=("$@")
-    if [ "${CURRENT_UID}" -eq 0 ]; then
-        chown -R "${CURRENT_UID}:${CURRENT_GID}" "${paths[@]}"
-    else
-        if command -v sudo >/dev/null 2>&1; then
-            sudo chown -R "${CURRENT_UID}:${CURRENT_GID}" "${paths[@]}"
+    local path current_owner target_owner
+    target_owner="${CURRENT_UID}:${CURRENT_GID}"
+    for path in "$@"; do
+        [ ! -e "${path}" ] && continue
+        current_owner="$(stat -c '%u:%g' "${path}")"
+        if [ "${current_owner}" = "${target_owner}" ]; then
+            continue
+        fi
+
+        if [ "${CURRENT_UID}" -eq 0 ]; then
+            chown -R "${target_owner}" "${path}"
+        elif command -v sudo >/dev/null 2>&1; then
+            sudo chown -R "${target_owner}" "${path}"
         else
-            echo "ERROR: sudo is required to adjust underlay ownership when running as a non-root user."
+            echo "ERROR: Unable to adjust ownership for ${path}; run as root or install sudo." >&2
             exit 1
         fi
-    fi
+    done
 }
 
 ensure_world_accessible() {
-    local paths=("$@")
-    if [ "${CURRENT_UID}" -eq 0 ]; then
-        chmod -R a+rwX "${paths[@]}"
-    else
-        sudo chmod -R a+rwX "${paths[@]}"
-    fi
+    local path
+    for path in "$@"; do
+        [ ! -e "${path}" ] && continue
+        if chmod -R a+rwX "${path}" 2>/dev/null; then
+            continue
+        fi
+
+        if [ "${CURRENT_UID}" -eq 0 ]; then
+            chmod -R a+rwX "${path}"
+        elif command -v sudo >/dev/null 2>&1; then
+            sudo chmod -R a+rwX "${path}"
+        else
+            echo "WARNING: Unable to adjust permissions for ${path}; some users may lack access." >&2
+        fi
+    done
 }
 
 # Ensure the active user owns the build/install directories before building so CMake can modify timestamps
@@ -68,7 +86,7 @@ if [ -n "$(ls -A "${UNDERLAY_INSTALL}")" ]; then
 fi
 
 # Build underlay
-cd /ros_ws
+cd "${WORKSPACE_ROOT}"
 echo "Building packages from ${UNDERLAY_PATH}..."
 colcon build \
     --base-paths "${UNDERLAY_PATH}" \
