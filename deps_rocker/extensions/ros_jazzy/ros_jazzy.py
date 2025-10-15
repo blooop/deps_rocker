@@ -40,7 +40,12 @@ class RosJazzy(SimpleRockerExtension):
 
         # Discover and merge all depends.repos files
         workspace = self.get_workspace_path()
-        workspace = Path(cliargs.get("auto", workspace)).expanduser()
+        auto_value = cliargs.get("auto", workspace)
+        # Handle case where auto is True (from CLI flag) vs actual path
+        if auto_value is True or auto_value is None:
+            workspace = Path(workspace).expanduser()
+        else:
+            workspace = Path(auto_value).expanduser()
 
         print("ROS Jazzy: searching for depends.repos in:", workspace)
         merged_repos = {"repositories": {}}

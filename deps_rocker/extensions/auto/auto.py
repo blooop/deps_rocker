@@ -255,6 +255,7 @@ class Auto(RockerExtension):
     def required(self, cliargs: dict) -> set[str]:
         """
         Returns a set of dependencies required by this extension based on detected files.
+        Also includes dependencies of the detected extensions.
 
         Args:
             cliargs: CLI arguments dict
@@ -262,4 +263,19 @@ class Auto(RockerExtension):
         Returns:
             Set of extension names to enable
         """
-        return self._detect_files_in_workspace(cliargs)
+        detected_extensions = self._detect_files_in_workspace(cliargs)
+        all_required = set(detected_extensions)
+
+        # Also include dependencies of detected extensions
+        from rocker.core import list_plugins
+
+        all_plugins = list_plugins()
+
+        for ext_name in detected_extensions:
+            if ext_name in all_plugins:
+                ext_class = all_plugins[ext_name]
+                ext_instance = ext_class()
+                ext_deps = ext_instance.required(cliargs)
+                all_required.update(ext_deps)
+
+        return all_required
