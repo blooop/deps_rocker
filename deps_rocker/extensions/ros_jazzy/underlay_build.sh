@@ -30,6 +30,43 @@ fi
 # Create build and install directories if they don't exist
 mkdir -p "${UNDERLAY_BUILD}" "${UNDERLAY_INSTALL}"
 
+CURRENT_UID="$(id -u)"
+CURRENT_GID="$(id -g)"
+
+ensure_owner_for_paths() {
+    local paths=("$@")
+    if [ "${CURRENT_UID}" -eq 0 ]; then
+        chown -R "${CURRENT_UID}:${CURRENT_GID}" "${paths[@]}"
+    else
+        if command -v sudo >/dev/null 2>&1; then
+            sudo chown -R "${CURRENT_UID}:${CURRENT_GID}" "${paths[@]}"
+        else
+            echo "ERROR: sudo is required to adjust underlay ownership when running as a non-root user."
+            exit 1
+        fi
+    fi
+}
+
+ensure_world_accessible() {
+    local paths=("$@")
+    if [ "${CURRENT_UID}" -eq 0 ]; then
+        chmod -R a+rwX "${paths[@]}"
+    else
+        sudo chmod -R a+rwX "${paths[@]}"
+    fi
+}
+
+# Ensure the active user owns the build/install directories before building so CMake can modify timestamps
+ensure_owner_for_paths "${UNDERLAY_BUILD}" "${UNDERLAY_INSTALL}"
+
+# Clean out any stale artifacts left by previous builds (especially ones created by a different user)
+if [ -n "$(ls -A "${UNDERLAY_BUILD}")" ]; then
+    rm -rf "${UNDERLAY_BUILD:?}/"*
+fi
+if [ -n "$(ls -A "${UNDERLAY_INSTALL}")" ]; then
+    rm -rf "${UNDERLAY_INSTALL:?}/"*
+fi
+
 # Build underlay
 cd /ros_ws
 echo "Building packages from ${UNDERLAY_PATH}..."
@@ -40,9 +77,9 @@ colcon build \
     --merge-install \
     --cmake-args -DCMAKE_BUILD_TYPE=Release
 
-# Ensure built artifacts are accessible by all users
-# This is critical for non-root users to source and use the underlay
-chmod -R a+rX "${UNDERLAY_BUILD}" "${UNDERLAY_INSTALL}"
+# Ensure built artifacts are accessible/writeable by all users. CMake expects to be able to update timestamps,
+# so we need both ownership (handled above) and world-readable/executable bits for follow-up consumers.
+ensure_world_accessible "${UNDERLAY_BUILD}" "${UNDERLAY_INSTALL}"
 
 echo "Underlay built successfully"
 echo "Source with: source ${UNDERLAY_INSTALL}/setup.bash"

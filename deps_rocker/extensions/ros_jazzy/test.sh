@@ -183,11 +183,35 @@ fi
 # Test permissions
 echo ""
 echo "11. Testing file permissions..."
-if [ ! -r "${ROS_UNDERLAY_BUILD}" ] || [ ! -r "${ROS_UNDERLAY_INSTALL}" ]; then
-    echo "ERROR: Underlay directories not readable"
-    exit 1
+for dir in "${ROS_UNDERLAY_BUILD}" "${ROS_UNDERLAY_INSTALL}"; do
+    if [ ! -r "${dir}" ] || [ ! -x "${dir}" ]; then
+        echo "ERROR: Underlay directory ${dir} is not readable/executable"
+        exit 1
+    fi
+done
+echo "✓ Underlay directories are readable"
+
+NON_ROOT_TEST_USER="rospermtest"
+CREATED_TEST_USER=0
+if ! id "${NON_ROOT_TEST_USER}" >/dev/null 2>&1; then
+    useradd --create-home --shell /bin/bash "${NON_ROOT_TEST_USER}"
+    CREATED_TEST_USER=1
 fi
-echo "✓ Underlay directories have correct permissions"
+
+cleanup_test_user() {
+    if [ "${CREATED_TEST_USER}" -eq 1 ]; then
+        userdel -r "${NON_ROOT_TEST_USER}" >/dev/null 2>&1 || true
+    fi
+}
+trap cleanup_test_user EXIT
+
+for dir in "${ROS_UNDERLAY_BUILD}" "${ROS_UNDERLAY_INSTALL}"; do
+    if ! sudo -n -u "${NON_ROOT_TEST_USER}" bash -c "touch \"${dir}/.permission_test\" && rm -f \"${dir}/.permission_test\""; then
+        echo "ERROR: Non-root user ${NON_ROOT_TEST_USER} cannot write to ${dir}"
+        exit 1
+    fi
+done
+echo "✓ Non-root user can write to underlay directories"
 
 echo ""
 echo "=========================================="
