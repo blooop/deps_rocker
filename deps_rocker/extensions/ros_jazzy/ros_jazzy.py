@@ -45,7 +45,16 @@ class RosJazzy(SimpleRockerExtension):
         print("ROS Jazzy: searching for depends.repos in:", workspace)
         merged_repos = {"repositories": {}}
 
-        # Search for files named "depends.repos"
+        # Check for test depends.repos in extension directory (for testing)
+        test_depends_file = script_dir / "test_depends.repos"
+        if test_depends_file.is_file():
+            print("ROS Jazzy: found test depends file:", test_depends_file)
+            with test_depends_file.open(encoding="utf-8") as f:
+                repos_data = yaml.safe_load(f)
+                if repos_data and "repositories" in repos_data:
+                    merged_repos["repositories"].update(repos_data["repositories"])
+
+        # Search for files named "depends.repos" in workspace
         for repos_file in workspace.rglob("depends.repos*"):
             if repos_file.is_file():
                 print("ROS Jazzy: found repos file:", repos_file)
