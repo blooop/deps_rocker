@@ -17,9 +17,15 @@ fi
 
 cd "${UNDERLAY_PATH}"
 
-# Update rosdep
+# Update rosdep (with caching to speed up repeated builds)
 echo "Updating rosdep..."
-rosdep update
+if [ ! -f /root/.ros/rosdep/sources.cache ] || \
+   [ -z "$(find /root/.ros/rosdep/sources.cache -mmin -1440 2>/dev/null)" ]; then
+    # Cache is missing or older than 24 hours
+    rosdep update
+else
+    echo "Rosdep cache is recent, skipping update"
+fi
 
 # Install dependencies
 echo "Installing rosdep dependencies from ${UNDERLAY_PATH}"

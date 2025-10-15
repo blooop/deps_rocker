@@ -8,11 +8,15 @@ RUN --mount=type=cache,target=/var/cache/apt,id=apt-cache \
   && curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg \
   && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null \
   && apt-get update && apt-get install -y --no-install-recommends \
-  ros-jazzy-ros-core
+  ros-jazzy-ros-core \
+  python3-dev \
+  python3-numpy
 
-# Install colcon and vcstool via pip
+# Install colcon, vcstool, numpy, and lark via pip
+# Installing numpy via pip ensures CMake can find Python3_NumPy_INCLUDE_DIRS
+# lark is required by rosidl_parser
 RUN --mount=type=cache,target=/root/.cache/pip,id=pip-cache \
-  pip install colcon-common-extensions colcon-defaults colcon-spawn-shell colcon-runner colcon-clean rosdep colcon-top-level-workspace vcstool --break-system-packages
+  pip install colcon-common-extensions colcon-defaults colcon-spawn-shell colcon-runner colcon-clean rosdep colcon-top-level-workspace vcstool numpy lark --break-system-packages
 
 ENV ROS_DISTRO=jazzy
 ENV AMENT_PREFIX_PATH=/opt/ros/jazzy
@@ -60,7 +64,7 @@ COPY test_package.xml test_setup.py /tmp/
 
 # Build the underlay workspace if it contains packages
 RUN --mount=type=cache,target=/var/cache/apt,id=apt-cache \
-    underlay_deps.sh && underlay_build.sh && \
-    chmod -R a+rwX "$ROS_UNDERLAY_BUILD" "$ROS_UNDERLAY_INSTALL"
+    --mount=type=cache,target=/root/.ros/rosdep,id=rosdep-cache \
+    underlay_deps.sh && underlay_build.sh
 
 ENV COLCON_DEFAULTS_FILE=/ros_ws/colcon-defaults.yaml

@@ -22,6 +22,8 @@ class RosJazzy(SimpleRockerExtension):
         "software-properties-common",
         "wget",
         "python3-pip",
+        "python3-dev",  # Required for Python development headers
+        "python3-numpy",  # Required for rosidl_generator_py when building ROS packages
         "cmake",
         "build-essential",
         "python3-argcomplete",

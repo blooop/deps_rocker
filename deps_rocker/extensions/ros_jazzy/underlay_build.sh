@@ -27,6 +27,9 @@ else
     exit 1
 fi
 
+# Create build and install directories if they don't exist
+mkdir -p "${UNDERLAY_BUILD}" "${UNDERLAY_INSTALL}"
+
 # Build underlay
 cd /ros_ws
 echo "Building packages from ${UNDERLAY_PATH}..."
@@ -36,6 +39,10 @@ colcon build \
     --install-base "${UNDERLAY_INSTALL}" \
     --merge-install \
     --cmake-args -DCMAKE_BUILD_TYPE=Release
+
+# Ensure built artifacts are accessible by all users
+# This is critical for non-root users to source and use the underlay
+chmod -R a+rX "${UNDERLAY_BUILD}" "${UNDERLAY_INSTALL}"
 
 echo "Underlay built successfully"
 echo "Source with: source ${UNDERLAY_INSTALL}/setup.bash"
