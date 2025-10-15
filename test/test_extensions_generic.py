@@ -79,31 +79,33 @@ CMD [\"echo\", \"Extension test complete\"]
                     working_extensions.append(name)
         return working_extensions
 
+    def _build_base_cliargs(self, **additional_args):
+        """Helper to build base cliargs with common settings"""
+        cliargs = {
+            "base_image": self.base_dockerfile_tag,
+            "extension_blacklist": [],
+            "strict_extension_selection": False,
+        }
+        cliargs.update(additional_args)
+        return cliargs
+
     def run_extension_build_and_test(self, extension_name):
         """Shared logic to build, run, and check an extension, including running test.sh if present"""
         if extension_name not in self.working_extension_names:
             self.skipTest(f"Extension '{extension_name}' not available or not from deps_rocker")
 
-        extension_class = self.all_plugins[extension_name]
-        extension_instance = extension_class()
+        from rocker.core import RockerExtensionManager
+        import os
 
-        cliargs = {
-            "base_image": self.base_dockerfile_tag,
-            extension_name: True,
-        }
+        # Use rocker's extension manager to properly resolve and sort dependencies
+        manager = RockerExtensionManager()
+
+        cliargs = self._build_base_cliargs(**{extension_name: True})
         if extension_name == "odeps_dependencies":
             cliargs["deps"] = "deps_rocker.deps.yaml"
 
-        required_deps = extension_instance.required(cliargs)
-        active_extensions = []
-        for dep_name in required_deps:
-            if dep_name in self.all_plugins:
-                dep_class = self.all_plugins[dep_name]
-                active_extensions.append(dep_class())
-                cliargs[dep_name] = True
-        active_extensions.append(extension_instance)
-
-        import os
+        # Let rocker's extension manager handle dependency resolution and sorting
+        active_extensions = manager.get_active_extensions(cliargs)
 
         test_sh_path = f"deps_rocker/extensions/{extension_name}/test.sh"
         if os.path.isfile(test_sh_path):
@@ -207,46 +209,80 @@ CMD [\"echo\", \"Extension test complete\"]
     def test_auto_extension(self):
         self.run_extension_build_and_test("auto")
 
+    def _build_and_test_extensions(self, extensions_to_enable):
+        """Helper to build and test a set of extensions together"""
+        from rocker.core import RockerExtensionManager
+
+        manager = RockerExtensionManager()
+
+        # Build cliargs with specified extensions enabled
+        cliargs = self._build_base_cliargs()
+        for ext_name in extensions_to_enable:
+            cliargs[ext_name] = True
+            if ext_name == "odeps_dependencies":
+                cliargs["deps"] = "deps_rocker.deps.yaml"
+
+        # Let rocker's extension manager handle dependency resolution and sorting
+        active_extensions = manager.get_active_extensions(cliargs)
+
+        # Assert the order includes npm before codex/gemini for proper dependency ordering
+        ext_names = [ext.get_name() for ext in active_extensions]
+        if "npm" in ext_names and "codex" in ext_names:
+            npm_idx = ext_names.index("npm")
+            codex_idx = ext_names.index("codex")
+            self.assertLess(npm_idx, codex_idx, "npm must come before codex")
+        if "npm" in ext_names and "gemini" in ext_names:
+            npm_idx = ext_names.index("npm")
+            gemini_idx = ext_names.index("gemini")
+            self.assertLess(npm_idx, gemini_idx, "npm must come before gemini")
+
+        dig = DockerImageGenerator(active_extensions, cliargs, self.base_dockerfile_tag)
+        build_result = dig.build()
+        self.assertEqual(build_result, 0, "Extensions failed to build")
+        with tempfile.NamedTemporaryFile(mode="r+") as tmpfile:
+            run_result = dig.run(console_output_file=tmpfile.name)
+            self.assertEqual(run_result, 0, "Extensions failed to run")
+            tmpfile.seek(0)
+            output = tmpfile.read()
+            self.assertIn("Extension test complete", output)
+        dig.clear_image()
+        return active_extensions
+
+    def test_npm_codex_gemini_ordering(self):
+        """Test that npm is properly ordered before codex and gemini"""
+        if "npm" not in self.working_extension_names:
+            self.skipTest("npm extension not available")
+        if "codex" not in self.working_extension_names:
+            self.skipTest("codex extension not available")
+        if "gemini" not in self.working_extension_names:
+            self.skipTest("gemini extension not available")
+
+        # Test that npm, codex, and gemini work together with proper ordering
+        extensions_to_enable = ["npm", "codex", "gemini"]
+        try:
+            active_extensions = self._build_and_test_extensions(extensions_to_enable)
+            # Additional verification that dependencies are properly resolved
+            ext_names = [ext.get_name() for ext in active_extensions]
+            self.assertIn("npm", ext_names)
+            self.assertIn("codex", ext_names)
+            self.assertIn("gemini", ext_names)
+            self.assertIn("user", ext_names)  # Should be included as transitive dep
+            self.assertIn("curl", ext_names)  # Should be included as transitive dep
+        except Exception as e:
+            self.fail(f"npm/codex/gemini ordering test raised an exception: {e}")
+
     def test_z_all_extensions_together(self):
+        """Test that all extensions can be built and run together"""
         if not self.working_extension_names:
             self.skipTest("No working extensions found")
+
+        # Get unique extension names from EXTENSIONS_TO_TEST that are available
+        extensions_to_enable = [
+            ext_name for ext_name in set(self.EXTENSIONS_TO_TEST) if ext_name in self.all_plugins
+        ]
+
         try:
-            active_extensions = []
-            cliargs = {"base_image": self.base_dockerfile_tag}
-            all_deps = set()
-            for ext_name in self.EXTENSIONS_TO_TEST:
-                if ext_name in self.all_plugins:
-                    extension_class = self.all_plugins[ext_name]
-                    extension_instance = extension_class()
-                    temp_cliargs = {
-                        "base_image": self.base_dockerfile_tag,
-                        ext_name: True,
-                    }
-                    if ext_name == "odeps_dependencies":
-                        temp_cliargs["deps"] = "deps_rocker.deps.yaml"
-                        cliargs["deps"] = "deps_rocker.deps.yaml"
-                    required_deps = extension_instance.required(temp_cliargs)
-                    all_deps.update(required_deps)
-            for dep_name in all_deps:
-                if dep_name in self.all_plugins:
-                    dep_class = self.all_plugins[dep_name]
-                    active_extensions.append(dep_class())
-                    cliargs[dep_name] = True
-            for ext_name in self.EXTENSIONS_TO_TEST:
-                if ext_name in self.all_plugins:
-                    extension_class = self.all_plugins[ext_name]
-                    active_extensions.append(extension_class())
-                    cliargs[ext_name] = True
-            dig = DockerImageGenerator(active_extensions, cliargs, self.base_dockerfile_tag)
-            build_result = dig.build()
-            self.assertEqual(build_result, 0, "All extensions together failed to build")
-            with tempfile.NamedTemporaryFile(mode="r+") as tmpfile:
-                run_result = dig.run(console_output_file=tmpfile.name)
-                self.assertEqual(run_result, 0, "All extensions together failed to run")
-                tmpfile.seek(0)
-                output = tmpfile.read()
-                self.assertIn("Extension test complete", output)
-            dig.clear_image()
+            self._build_and_test_extensions(extensions_to_enable)
         except Exception as e:
             self.fail(f"All extensions together raised an exception: {e}")
 

@@ -331,12 +331,29 @@ class TestAutoExtension(unittest.TestCase):
         try:
             os.chdir(self.test_dir)
             deps = self.auto.required({})
-            # Remove extensions that are detected from home directory
-            home_extensions = {"claude", "gemini", "nvim", "codex"}
+            # Remove extensions that are detected from home directory and their transitive dependencies
+            # Auto now properly collects transitive dependencies, so if codex/gemini are detected from home,
+            # their dependencies (npm, user, curl) will also be included
+            home_extensions = {"claude", "gemini", "nvim", "codex", "npm", "user", "curl"}
             deps = set(deps) - home_extensions
             self.assertEqual(deps, set())
         finally:
             os.chdir(original_dir)
+
+    def test_transitive_dependencies_collected(self):
+        """Test that transitive dependencies are properly collected"""
+
+        def setup():
+            # Create package.json to trigger npm detection
+            Path("package.json").touch()
+
+        def assertion(deps):
+            # npm should be detected
+            self.assertIn("npm", deps)
+            # curl should be included as npm's transitive dependency
+            self.assertIn("curl", deps)
+
+        self._test_in_dir(setup, assertion)
 
 
 if __name__ == "__main__":
