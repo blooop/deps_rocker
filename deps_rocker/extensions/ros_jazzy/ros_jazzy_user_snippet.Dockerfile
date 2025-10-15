@@ -15,12 +15,12 @@ COPY colcon-defaults.yaml /colcon-defaults.yaml
 RUN cp /colcon-defaults.yaml $COLCON_DEFAULTS_FILE
 
 RUN echo "source /opt/ros/jazzy/setup.bash" >> $HOME/.bashrc
-RUN printf '%s\n' '[ -n "${ROS_UNDERLAY_INSTALL:-}" ] && [ -f "${ROS_UNDERLAY_INSTALL}/setup.bash" ] && source "${ROS_UNDERLAY_INSTALL}/setup.bash"' >> $HOME/.bashrc
+RUN printf '%s\n' 'if [ -n "${ROS_UNDERLAY_INSTALL:-}" ] && [ -f "${ROS_UNDERLAY_INSTALL}/setup.bash" ]; then source "${ROS_UNDERLAY_INSTALL}/setup.bash"; fi' >> $HOME/.bashrc
 
-RUN echo "\n# Run colcon build on first container start\nif [ ! -f \"\$HOME/.colcon_built\" ]; then\n  echo 'Running colcon build for first time setup...'\n  colcon build\n  touch \$HOME/.colcon_built\nfi\n" >> $HOME/.bashrc
+RUN printf '%s\n' '' '# Run colcon build on first container start' 'if [ ! -f "$HOME/.colcon_built" ]; then' '  echo "Running colcon build for first time setup..."' '  colcon build' '  touch $HOME/.colcon_built' 'fi' >> $HOME/.bashrc
 
-RUN echo "source /usr/local/share/vcstool-completion/vcs.bash" >> $HOME/.bashrc
+RUN printf '%s\n' 'if [ -f "/usr/local/share/vcstool-completion/vcs.bash" ]; then source "/usr/local/share/vcstool-completion/vcs.bash"; fi' >> $HOME/.bashrc
 
-RUN echo 'source $ROS_INSTALL_BASE/setup.bash' >> $HOME/.bashrc
+RUN printf '%s\n' 'if [ -f "$ROS_INSTALL_BASE/setup.bash" ]; then source "$ROS_INSTALL_BASE/setup.bash"; fi' >> $HOME/.bashrc
 
 WORKDIR $ROS_WORKSPACE_ROOT
