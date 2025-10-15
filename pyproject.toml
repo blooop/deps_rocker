@@ -1,6 +1,6 @@
 [project]
 name = "deps_rocker"
-version = "0.21.1"
+version = "0.22.0"
 authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
 description = "A rocker plugin to help installing apt and pip dependencies"
 readme = "README.md"
@@ -83,6 +83,7 @@ detach = "deps_rocker.extensions.detach.detach:Detach"
 #dev tools
 ccache = "deps_rocker.extensions.ccache.ccache:Ccache"
 fzf = "deps_rocker.extensions.fzf.fzf:Fzf"
+gitui = "deps_rocker.extensions.gitui.gitui:GitUI"
 lazygit = "deps_rocker.extensions.lazygit.lazygit:Lazygit"
 nvim = "deps_rocker.extensions.nvim.nvim:Nvim"
 palanteer = "deps_rocker.extensions.palanteer.palanteer:Palanteer"

@@ -59,7 +59,11 @@ When a user asks to implement a new extension, follow this checklist:
 - [ ] Test basic functionality of the installed tool
 - [ ] Echo success message at the end
 
-### 7. **Documentation**
+### 7. **Update Configuration Files**
+- [ ] Add extension name (commented out) to `rockerc.yaml` template for discoverability
+- [ ] Update README.md with the new extension in the available extensions list
+
+### 8. **Documentation**
 - [ ] Update README.md if the extension adds significant functionality
 - [ ] Add example usage in docstring or separate documentation
 
