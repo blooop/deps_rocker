@@ -68,4 +68,45 @@ echo "Testing basic ROS functionality..."
 ros2 --help > /dev/null
 echo "✓ ros2 help working"
 
+# Test building a package that depends on the underlay
+if [ -f "${ROS_UNDERLAY_INSTALL}/setup.bash" ]; then
+    echo "Testing workspace build with underlay dependencies..."
+
+    # Create a test package in the main workspace
+    mkdir -p src/test_package
+    cp /tmp/test_package.xml src/test_package/package.xml
+    cp /tmp/test_setup.py src/test_package/setup.py
+    mkdir -p src/test_package/resource
+    touch src/test_package/resource/test_package
+    mkdir -p src/test_package/test_package
+    touch src/test_package/test_package/__init__.py
+
+    # Source environments and build
+    source /opt/ros/jazzy/setup.bash
+    source "${ROS_UNDERLAY_INSTALL}/setup.bash"
+
+    # Test that we can find the dependency
+    if ! ros2 pkg list | grep -q unique_identifier_msgs; then
+        echo "ERROR: unique_identifier_msgs still not found after sourcing underlay"
+        exit 1
+    fi
+
+    # Test building the main workspace
+    echo "Building main workspace with underlay dependency..."
+    if ! colcon build --packages-select test_package; then
+        echo "ERROR: Failed to build test package that depends on underlay"
+        exit 1
+    fi
+    echo "✓ Successfully built package depending on underlay"
+
+    # Test that we can source the built workspace
+    if [ -f install/setup.bash ]; then
+        source install/setup.bash
+        echo "✓ Successfully sourced built workspace"
+    else
+        echo "ERROR: Built workspace setup.bash not found"
+        exit 1
+    fi
+fi
+
 echo "ROS Jazzy extension test completed successfully!"

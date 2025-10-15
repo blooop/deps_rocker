@@ -55,6 +55,9 @@ RUN --mount=type=cache,target=/root/.cache/vcs-repos,id=vcs-repos-cache \
 COPY underlay_deps.sh underlay_build.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/underlay_deps.sh /usr/local/bin/underlay_build.sh
 
+# Copy test files for the test script
+COPY test_package.xml test_setup.py /tmp/
+
 # Build the underlay workspace if it contains packages
 RUN --mount=type=cache,target=/var/cache/apt,id=apt-cache \
     underlay_deps.sh && underlay_build.sh && \

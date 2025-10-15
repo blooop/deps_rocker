@@ -66,11 +66,17 @@ class RosJazzy(SimpleRockerExtension):
 
         print("ROS Jazzy: merged repos:", merged_repos)
 
+        # Include test files for the test script
+        test_package_xml = (script_dir / "test_package.xml").read_text()
+        test_setup_py = (script_dir / "test_setup.py").read_text()
+
         return {
             "colcon-defaults.yaml": dat,
             "underlay_deps.sh": underlay_deps,
             "underlay_build.sh": underlay_build,
             "consolidated.repos": yaml.dump(merged_repos, default_flow_style=False),
+            "test_package.xml": test_package_xml,
+            "test_setup.py": test_setup_py,
         }
 
     def get_docker_args(self, cliargs) -> str:
