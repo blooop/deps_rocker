@@ -256,31 +256,43 @@ class Auto(RockerExtension):
         """
         Returns a set of dependencies required by this extension based on detected files.
 
-        This method returns the directly detected extensions AND their immediate dependencies
+        This method returns the directly detected extensions AND their transitive dependencies
         to ensure proper ordering. Rocker's topological sort will handle the rest.
 
         Args:
             cliargs: CLI arguments dict
 
         Returns:
-            Set of extension names to enable (detected + their immediate dependencies)
+            Set of extension names to enable (detected + their transitive dependencies)
         """
         from rocker.core import list_plugins
 
         detected_extensions = self._detect_files_in_workspace(cliargs)
 
-        # Collect immediate dependencies of detected extensions to ensure they're included
+        # Collect transitive dependencies of detected extensions with cycle detection
         # This is necessary because when auto is used standalone (not through RockerExtensionManager),
         # the dependencies need to be explicitly returned for proper ordering.
         all_plugins = list_plugins()
-        all_required = set(detected_extensions)
+        all_required = set()
+        visited = set()  # Track visited extensions to prevent infinite recursion
 
-        for ext_name in detected_extensions:
+        def collect_deps(ext_name: str):
+            """Recursively collect dependencies with cycle detection"""
+            if ext_name in visited:
+                return  # Already processed, avoid cycle
+            visited.add(ext_name)
+            all_required.add(ext_name)
+
             if ext_name in all_plugins:
                 ext_class = all_plugins[ext_name]
                 ext_instance = ext_class()
-                # Add immediate dependencies
+                # Recursively collect dependencies
                 ext_deps = ext_instance.required(cliargs)
-                all_required.update(ext_deps)
+                for dep in ext_deps:
+                    collect_deps(dep)
+
+        # Start with detected extensions
+        for ext_name in detected_extensions:
+            collect_deps(ext_name)
 
         return all_required

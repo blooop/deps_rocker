@@ -340,6 +340,21 @@ class TestAutoExtension(unittest.TestCase):
         finally:
             os.chdir(original_dir)
 
+    def test_transitive_dependencies_collected(self):
+        """Test that transitive dependencies are properly collected"""
+
+        def setup():
+            # Create package.json to trigger npm detection
+            Path("package.json").touch()
+
+        def assertion(deps):
+            # npm should be detected
+            self.assertIn("npm", deps)
+            # curl should be included as npm's transitive dependency
+            self.assertIn("curl", deps)
+
+        self._test_in_dir(setup, assertion)
+
 
 if __name__ == "__main__":
     unittest.main()
