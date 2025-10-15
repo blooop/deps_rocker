@@ -68,7 +68,7 @@ class RosJazzy(SimpleRockerExtension):
 
         # Include test files for the test script
         test_package_xml = (script_dir / "test_package.xml").read_text()
-        test_setup_py = (script_dir / "test_setup.py").read_text()
+        test_setup_py = (script_dir / "setup_py_template").read_text()
 
         return {
             "colcon-defaults.yaml": dat,
