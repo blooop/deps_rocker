@@ -84,26 +84,23 @@ CMD [\"echo\", \"Extension test complete\"]
         if extension_name not in self.working_extension_names:
             self.skipTest(f"Extension '{extension_name}' not available or not from deps_rocker")
 
-        extension_class = self.all_plugins[extension_name]
-        extension_instance = extension_class()
+        from rocker.core import RockerExtensionManager
+        import os
+
+        # Use rocker's extension manager to properly resolve and sort dependencies
+        manager = RockerExtensionManager()
 
         cliargs = {
             "base_image": self.base_dockerfile_tag,
+            "extension_blacklist": [],
+            "strict_extension_selection": False,
             extension_name: True,
         }
         if extension_name == "odeps_dependencies":
             cliargs["deps"] = "deps_rocker.deps.yaml"
 
-        required_deps = extension_instance.required(cliargs)
-        active_extensions = []
-        for dep_name in required_deps:
-            if dep_name in self.all_plugins:
-                dep_class = self.all_plugins[dep_name]
-                active_extensions.append(dep_class())
-                cliargs[dep_name] = True
-        active_extensions.append(extension_instance)
-
-        import os
+        # Let rocker's extension manager handle dependency resolution and sorting
+        active_extensions = manager.get_active_extensions(cliargs)
 
         test_sh_path = f"deps_rocker/extensions/{extension_name}/test.sh"
         if os.path.isfile(test_sh_path):
@@ -211,32 +208,28 @@ CMD [\"echo\", \"Extension test complete\"]
         if not self.working_extension_names:
             self.skipTest("No working extensions found")
         try:
-            active_extensions = []
-            cliargs = {"base_image": self.base_dockerfile_tag}
-            all_deps = set()
-            for ext_name in self.EXTENSIONS_TO_TEST:
+            # Use rocker's extension manager to properly resolve and sort dependencies
+            from rocker.core import RockerExtensionManager
+
+            manager = RockerExtensionManager()
+
+            # Build cliargs with all extensions enabled
+            cliargs = {
+                "base_image": self.base_dockerfile_tag,
+                "extension_blacklist": [],
+                "strict_extension_selection": False,  # Allow rocker to auto-add missing dependencies
+            }
+
+            # Enable all extensions in EXTENSIONS_TO_TEST
+            for ext_name in set(self.EXTENSIONS_TO_TEST):  # Use set to remove duplicates
                 if ext_name in self.all_plugins:
-                    extension_class = self.all_plugins[ext_name]
-                    extension_instance = extension_class()
-                    temp_cliargs = {
-                        "base_image": self.base_dockerfile_tag,
-                        ext_name: True,
-                    }
-                    if ext_name == "odeps_dependencies":
-                        temp_cliargs["deps"] = "deps_rocker.deps.yaml"
-                        cliargs["deps"] = "deps_rocker.deps.yaml"
-                    required_deps = extension_instance.required(temp_cliargs)
-                    all_deps.update(required_deps)
-            for dep_name in all_deps:
-                if dep_name in self.all_plugins:
-                    dep_class = self.all_plugins[dep_name]
-                    active_extensions.append(dep_class())
-                    cliargs[dep_name] = True
-            for ext_name in self.EXTENSIONS_TO_TEST:
-                if ext_name in self.all_plugins:
-                    extension_class = self.all_plugins[ext_name]
-                    active_extensions.append(extension_class())
                     cliargs[ext_name] = True
+                    if ext_name == "odeps_dependencies":
+                        cliargs["deps"] = "deps_rocker.deps.yaml"
+
+            # Let rocker's extension manager handle dependency resolution and sorting
+            active_extensions = manager.get_active_extensions(cliargs)
+
             dig = DockerImageGenerator(active_extensions, cliargs, self.base_dockerfile_tag)
             build_result = dig.build()
             self.assertEqual(build_result, 0, "All extensions together failed to build")

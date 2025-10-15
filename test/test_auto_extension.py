@@ -331,8 +331,10 @@ class TestAutoExtension(unittest.TestCase):
         try:
             os.chdir(self.test_dir)
             deps = self.auto.required({})
-            # Remove extensions that are detected from home directory
-            home_extensions = {"claude", "gemini", "nvim", "codex"}
+            # Remove extensions that are detected from home directory and their transitive dependencies
+            # Auto now properly collects transitive dependencies, so if codex/gemini are detected from home,
+            # their dependencies (npm, user, curl) will also be included
+            home_extensions = {"claude", "gemini", "nvim", "codex", "npm", "user", "curl"}
             deps = set(deps) - home_extensions
             self.assertEqual(deps, set())
         finally:
