@@ -27,10 +27,20 @@ if ! grep -Fq "$UV_ENV/bin" "$HOME/.bashrc"; then
     echo "Added venv bin to ~/.bashrc (open a new shell or source ~/.bashrc to use)"
 fi
 
+
 # Install projects editable
 uv pip install --python "$UV_ENV" -U pip
 uv pip install --python "$UV_ENV" -e "$PROJ_A"
 uv pip install --python "$UV_ENV" -e "$PROJ_B"
+
+# Also add ~/projects/rocker as editable if present
+ROCKER_DEV="$HOME/projects/rocker"
+if [ -d "$ROCKER_DEV" ]; then
+    uv pip install --python "$UV_ENV" -e "$ROCKER_DEV"
+    echo "✅ Installed rocker from $ROCKER_DEV as editable."
+else
+    echo "$ROCKER_DEV directory not found. Skipping editable install."
+fi
 
 echo "✅ Setup complete."
 echo "Restart your shell or run:  source ~/.bashrc"
