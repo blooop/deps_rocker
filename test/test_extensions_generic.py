@@ -35,7 +35,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         # "palanteer", #very slow
         "conda",
         # "isaac_sim",
-        # "ros_jazzy",  # too slow
+        "ros_jazzy",  # too slow
         "auto",
     ]
 
