@@ -5,107 +5,126 @@ echo "=========================================="
 echo "Testing ROS Jazzy Extension"
 echo "=========================================="
 
-# Test that ROS environment is available
-echo "1. Testing ROS installation..."
-if ! command -v ros2 &> /dev/null; then
-    echo "ERROR: ros2 command not found"
-    exit 1
-fi
-echo "✓ ros2 command available"
-
-# Test ROS environment variables
-echo ""
-echo "2. Testing ROS environment variables..."
-if [ -z "$ROS_DISTRO" ]; then
-    echo "ERROR: ROS_DISTRO not set"
-    exit 1
-fi
-
-if [ "$ROS_DISTRO" != "jazzy" ]; then
-    echo "ERROR: Expected ROS_DISTRO=jazzy, got $ROS_DISTRO"
-    exit 1
-fi
-echo "✓ ROS_DISTRO=$ROS_DISTRO"
-
-# Test additional required environment variables
-for var in AMENT_PREFIX_PATH COLCON_PREFIX_PATH ROS_VERSION ROS_PYTHON_VERSION; do
-    if [ -z "${!var}" ]; then
-        echo "ERROR: $var not set"
+# Function to test basic ROS installation
+test_ros_installation() {
+    echo "1. Testing ROS installation..."
+    if ! command -v ros2 &> /dev/null; then
+        echo "ERROR: ros2 command not found"
         exit 1
     fi
-    echo "✓ $var=${!var}"
-done
+    echo "✓ ros2 command available"
+}
 
-# Test that workspace directories exist
-echo ""
-echo "3. Testing workspace structure..."
-for dir in ROS_WORKSPACE_ROOT ROS_UNDERLAY_PATH ROS_UNDERLAY_BUILD ROS_UNDERLAY_INSTALL; do
-    if [ ! -d "${!dir}" ]; then
-        echo "ERROR: $dir not found at ${!dir}"
+# Function to test ROS environment variables
+test_ros_environment() {
+    echo ""
+    echo "2. Testing ROS environment variables..."
+    if [ -z "$ROS_DISTRO" ]; then
+        echo "ERROR: ROS_DISTRO not set"
         exit 1
     fi
-    echo "✓ $dir=${!dir}"
-done
 
-# Test that colcon is available
-echo ""
-echo "4. Testing build tools..."
-if ! command -v colcon &> /dev/null; then
-    echo "ERROR: colcon command not found"
-    exit 1
-fi
-echo "✓ colcon command available"
-
-# Test that vcstool is available
-if ! command -v vcs &> /dev/null; then
-    echo "ERROR: vcs command not found"
-    exit 1
-fi
-echo "✓ vcstool command available"
-
-# Test that rosdep is available
-if ! command -v rosdep &> /dev/null; then
-    echo "ERROR: rosdep command not found"
-    exit 1
-fi
-echo "✓ rosdep command available"
-
-# Source ROS environment
-echo ""
-echo "5. Testing ROS environment sourcing..."
-source /opt/ros/jazzy/setup.bash
-echo "✓ Successfully sourced /opt/ros/jazzy/setup.bash"
-
-# Test basic ROS functionality
-echo ""
-echo "6. Testing basic ROS functionality..."
-if ! ros2 --help > /dev/null 2>&1; then
-    echo "ERROR: ros2 --help failed"
-    exit 1
-fi
-echo "✓ ros2 --help working"
-
-# Test ros2 pkg list
-if ! ros2 pkg list > /dev/null 2>&1; then
-    echo "ERROR: ros2 pkg list failed"
-    exit 1
-fi
-echo "✓ ros2 pkg list working"
-
-# Check if underlay was built
-echo ""
-echo "7. Testing underlay workspace..."
-if [ -f "${ROS_UNDERLAY_INSTALL}/setup.bash" ]; then
-    echo "✓ Underlay install found at ${ROS_UNDERLAY_INSTALL}"
-
-    # Test underlay can be sourced
-    if ! source "${ROS_UNDERLAY_INSTALL}/setup.bash" 2>&1; then
-        echo "ERROR: Failed to source underlay"
+    if [ "$ROS_DISTRO" != "jazzy" ]; then
+        echo "ERROR: Expected ROS_DISTRO=jazzy, got $ROS_DISTRO"
         exit 1
     fi
-    echo "✓ Successfully sourced underlay"
+    echo "✓ ROS_DISTRO=$ROS_DISTRO"
 
-    # Test that underlay packages are available
+    # Test additional required environment variables
+    for var in AMENT_PREFIX_PATH COLCON_PREFIX_PATH ROS_VERSION ROS_PYTHON_VERSION; do
+        if [ -z "${!var}" ]; then
+            echo "ERROR: $var not set"
+            exit 1
+        fi
+        echo "✓ $var=${!var}"
+    done
+}
+
+# Function to test workspace structure
+test_workspace_structure() {
+    echo ""
+    echo "3. Testing workspace structure..."
+    for dir in ROS_WORKSPACE_ROOT ROS_UNDERLAY_PATH ROS_UNDERLAY_BUILD ROS_UNDERLAY_INSTALL; do
+        if [ ! -d "${!dir}" ]; then
+            echo "ERROR: $dir not found at ${!dir}"
+            exit 1
+        fi
+        echo "✓ $dir=${!dir}"
+    done
+}
+
+# Function to test build tools availability
+test_build_tools() {
+    echo ""
+    echo "4. Testing build tools..."
+    if ! command -v colcon &> /dev/null; then
+        echo "ERROR: colcon command not found"
+        exit 1
+    fi
+    echo "✓ colcon command available"
+
+    if ! command -v vcs &> /dev/null; then
+        echo "ERROR: vcs command not found"
+        exit 1
+    fi
+    echo "✓ vcstool command available"
+
+    if ! command -v rosdep &> /dev/null; then
+        echo "ERROR: rosdep command not found"
+        exit 1
+    fi
+    echo "✓ rosdep command available"
+}
+
+# Function to test ROS environment sourcing and basic functionality
+test_ros_functionality() {
+    echo ""
+    echo "5. Testing ROS environment sourcing..."
+    source /opt/ros/jazzy/setup.bash
+    echo "✓ Successfully sourced /opt/ros/jazzy/setup.bash"
+
+    echo ""
+    echo "6. Testing basic ROS functionality..."
+    if ! ros2 --help > /dev/null 2>&1; then
+        echo "ERROR: ros2 --help failed"
+        exit 1
+    fi
+    echo "✓ ros2 --help working"
+
+    if ! ros2 pkg list > /dev/null 2>&1; then
+        echo "ERROR: ros2 pkg list failed"
+        exit 1
+    fi
+    echo "✓ ros2 pkg list working"
+}
+
+# Function to test underlay workspace
+test_underlay_workspace() {
+    echo ""
+    echo "7. Testing underlay workspace..."
+    if [ -f "${ROS_UNDERLAY_INSTALL}/setup.bash" ]; then
+        echo "✓ Underlay install found at ${ROS_UNDERLAY_INSTALL}"
+
+        # Test underlay can be sourced
+        if ! source "${ROS_UNDERLAY_INSTALL}/setup.bash" 2>&1; then
+            echo "ERROR: Failed to source underlay"
+            exit 1
+        fi
+        echo "✓ Successfully sourced underlay"
+
+        # Test that underlay packages are available
+        test_underlay_packages
+
+        # Test workspace chaining and building
+        test_workspace_chaining
+    else
+        echo "⚠ No underlay install found - skipping underlay tests"
+        echo "  This is expected if no depends.repos was provided"
+    fi
+}
+
+# Function to test underlay package availability
+test_underlay_packages() {
     echo ""
     echo "8. Testing underlay package availability..."
     if ! ros2 pkg list | grep -q unique_identifier_msgs; then
@@ -115,8 +134,10 @@ if [ -f "${ROS_UNDERLAY_INSTALL}/setup.bash" ]; then
         exit 1
     fi
     echo "✓ Underlay package unique_identifier_msgs found"
+}
 
-    # Test workspace chaining
+# Function to test workspace chaining and package building
+test_workspace_chaining() {
     echo ""
     echo "9. Testing workspace chaining and package build..."
 
@@ -174,46 +195,70 @@ if [ -f "${ROS_UNDERLAY_INSTALL}/setup.bash" ]; then
         exit 1
     fi
     echo "✓ Workspace chaining working correctly"
-
-else
-    echo "⚠ No underlay install found - skipping underlay tests"
-    echo "  This is expected if no depends.repos was provided"
-fi
-
-# Test permissions
-echo ""
-echo "11. Testing file permissions..."
-for dir in "${ROS_UNDERLAY_BUILD}" "${ROS_UNDERLAY_INSTALL}"; do
-    if [ ! -r "${dir}" ] || [ ! -x "${dir}" ]; then
-        echo "ERROR: Underlay directory ${dir} is not readable/executable"
-        exit 1
-    fi
-done
-echo "✓ Underlay directories are readable"
-
-NON_ROOT_TEST_USER="rospermtest"
-CREATED_TEST_USER=0
-if ! id "${NON_ROOT_TEST_USER}" >/dev/null 2>&1; then
-    useradd --create-home --shell /bin/bash "${NON_ROOT_TEST_USER}"
-    CREATED_TEST_USER=1
-fi
-
-cleanup_test_user() {
-    if [ "${CREATED_TEST_USER}" -eq 1 ]; then
-        userdel -r "${NON_ROOT_TEST_USER}" >/dev/null 2>&1 || true
-    fi
 }
-trap cleanup_test_user EXIT
 
-for dir in "${ROS_UNDERLAY_BUILD}" "${ROS_UNDERLAY_INSTALL}"; do
-    if ! sudo -n -u "${NON_ROOT_TEST_USER}" bash -c "touch \"${dir}/.permission_test\" && rm -f \"${dir}/.permission_test\""; then
-        echo "ERROR: Non-root user ${NON_ROOT_TEST_USER} cannot write to ${dir}"
+# Function to test file permissions
+test_file_permissions() {
+    echo ""
+    echo "11. Testing file permissions..."
+
+    # Test basic directory readability
+    if [ ! -r "${ROS_UNDERLAY_BUILD}" ] || [ ! -x "${ROS_UNDERLAY_BUILD}" ]; then
+        echo "ERROR: Underlay directory ${ROS_UNDERLAY_BUILD} is not readable/executable"
         exit 1
     fi
-done
-echo "✓ Non-root user can write to underlay directories"
+    if [ ! -r "${ROS_UNDERLAY_INSTALL}" ] || [ ! -x "${ROS_UNDERLAY_INSTALL}" ]; then
+        echo "ERROR: Underlay directory ${ROS_UNDERLAY_INSTALL} is not readable/executable"
+        exit 1
+    fi
+    echo "✓ Underlay directories are readable"
 
-echo ""
-echo "=========================================="
-echo "✓ All ROS Jazzy tests passed successfully!"
-echo "=========================================="
+    # Test non-root user permissions
+    test_non_root_permissions
+}
+
+# Function to test non-root user permissions
+test_non_root_permissions() {
+    NON_ROOT_TEST_USER="rospermtest"
+    CREATED_TEST_USER=0
+    if ! id "${NON_ROOT_TEST_USER}" >/dev/null 2>&1; then
+        useradd --create-home --shell /bin/bash "${NON_ROOT_TEST_USER}"
+        CREATED_TEST_USER=1
+    fi
+
+    cleanup_test_user() {
+        if [ "${CREATED_TEST_USER}" -eq 1 ]; then
+            userdel -r "${NON_ROOT_TEST_USER}" >/dev/null 2>&1 || true
+        fi
+    }
+    trap cleanup_test_user EXIT
+
+    if ! sudo -n -u "${NON_ROOT_TEST_USER}" bash -c "touch \"${ROS_UNDERLAY_BUILD}/.permission_test\" && rm -f \"${ROS_UNDERLAY_BUILD}/.permission_test\""; then
+        echo "ERROR: Non-root user ${NON_ROOT_TEST_USER} cannot write to ${ROS_UNDERLAY_BUILD}"
+        exit 1
+    fi
+    if ! sudo -n -u "${NON_ROOT_TEST_USER}" bash -c "touch \"${ROS_UNDERLAY_INSTALL}/.permission_test\" && rm -f \"${ROS_UNDERLAY_INSTALL}/.permission_test\""; then
+        echo "ERROR: Non-root user ${NON_ROOT_TEST_USER} cannot write to ${ROS_UNDERLAY_INSTALL}"
+        exit 1
+    fi
+    echo "✓ Non-root user can write to underlay directories"
+}
+
+# Main test execution
+main() {
+    test_ros_installation
+    test_ros_environment
+    test_workspace_structure
+    test_build_tools
+    test_ros_functionality
+    test_underlay_workspace
+    test_file_permissions
+
+    echo ""
+    echo "=========================================="
+    echo "✓ All ROS Jazzy tests passed successfully!"
+    echo "=========================================="
+}
+
+# Run main function
+main

@@ -66,10 +66,26 @@ class RosJazzy(SimpleRockerExtension):
             if repos_file.is_file():
                 print("ROS Jazzy: found repos file:", repos_file)
                 with repos_file.open(encoding="utf-8") as f:
-                    repos_data = yaml.safe_load(f)
+                    try:
+                        repos_data = yaml.safe_load(f)
+                    except Exception as e:
+                        print(f"ROS Jazzy: failed to parse {repos_file}: {e}")
+                        continue
                     if repos_data and "repositories" in repos_data:
-                        # Merge repositories from this file into the consolidated manifest
-                        merged_repos["repositories"].update(repos_data["repositories"])
+                        # Check for duplicate repository entries
+                        for repo_name, repo_info in repos_data["repositories"].items():
+                            if repo_name in merged_repos["repositories"]:
+                                existing_info = merged_repos["repositories"][repo_name]
+                                if existing_info != repo_info:
+                                    print(
+                                        f"ROS Jazzy: WARNING - Duplicate repo entry '{repo_name}' found in {repos_file} with conflicting details.\n"
+                                        f"  Existing: {existing_info}\n"
+                                        f"  New:      {repo_info}\n"
+                                        f"  Keeping the first entry."
+                                    )
+                                # By default, keep the first entry
+                                continue
+                            merged_repos["repositories"][repo_name] = repo_info
 
         # Improved printing of merged repos
         print("ROS Jazzy: merged repos:")

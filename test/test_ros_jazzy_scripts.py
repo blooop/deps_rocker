@@ -88,15 +88,19 @@ exit 2
 """
 
 
+def _create_executable_script(path: Path, content: str) -> None:
+    """Create an executable script at the given path."""
+    path.write_text(content)
+    path.chmod(0o755)
+
+
 def _create_fake_colcon(tmpdir: Path) -> Path:
     """Create a fake colcon executable that validates defaults and simulates build behaviour."""
     script = tmpdir / "colcon"
-    script.write_text(FAKE_COLCON_SCRIPT)
-    script.chmod(0o755)
+    _create_executable_script(script, FAKE_COLCON_SCRIPT)
 
     sudo = tmpdir / "sudo"
-    sudo.write_text(FAKE_SUDO_SCRIPT)
-    sudo.chmod(0o755)
+    _create_executable_script(sudo, FAKE_SUDO_SCRIPT)
     return script
 
 
@@ -106,10 +110,15 @@ class TestRosJazzyScripts(unittest.TestCase):
 
     def tearDown(self):
         os.environ.clear()
-        os.environ.update(self.original_env)
+        os.environ |= self.original_env
+
+    def _assert_directory_world_accessible(self, directory: Path) -> None:
+        """Assert that directory has world-accessible permissions."""
+        mode = stat.S_IMODE(directory.stat().st_mode)
+        self.assertEqual(mode & 0o007, 0o007, f"{directory} should be world-accessible")
 
     def _prepare_fake_colcon(self):
-        tmp = tempfile.TemporaryDirectory()
+        tmp = tempfile.TemporaryDirectory()  # pylint: disable=consider-using-with
         self.addCleanup(tmp.cleanup)
         tmp_path = Path(tmp.name)
         fake_bin = tmp_path / "bin"
@@ -142,7 +151,7 @@ class TestRosJazzyScripts(unittest.TestCase):
         self.assertIn("colcon test", log)
 
     def test_underlay_build_script_cleans_and_sets_permissions(self):
-        tmp_workspace = tempfile.TemporaryDirectory()
+        tmp_workspace = tempfile.TemporaryDirectory()  # pylint: disable=consider-using-with
         self.addCleanup(tmp_workspace.cleanup)
         workspace_root = Path(tmp_workspace.name) / "ros_ws"
         workspace_root.mkdir()
@@ -150,8 +159,10 @@ class TestRosJazzyScripts(unittest.TestCase):
         underlay_build = workspace_root / "underlay_build"
         underlay_install = workspace_root / "underlay_install"
 
-        for path in (underlay_path, underlay_build, underlay_install):
-            path.mkdir()
+        # Create all required directories
+        underlay_path.mkdir()
+        underlay_build.mkdir()
+        underlay_install.mkdir()
 
         pkg_dir = underlay_path / "dummy_pkg"
         pkg_dir.mkdir()
@@ -160,7 +171,7 @@ class TestRosJazzyScripts(unittest.TestCase):
         (underlay_build / "stale.txt").write_text("old", encoding="utf-8")
         (underlay_install / "stale.txt").write_text("old", encoding="utf-8")
 
-        tmp_path = self._prepare_fake_colcon()
+        self._prepare_fake_colcon()
         sentinel = Path(os.environ["COLCON_SENTINEL"])
 
         os.environ["ROS_UNDERLAY_PATH"] = str(underlay_path)
@@ -182,9 +193,8 @@ class TestRosJazzyScripts(unittest.TestCase):
         self.assertTrue((underlay_build / "artifact.txt").exists())
         self.assertTrue((underlay_install / "setup.bash").exists())
 
-        for directory in (underlay_build, underlay_install):
-            mode = stat.S_IMODE(directory.stat().st_mode)
-            self.assertEqual(mode & 0o007, 0o007, f"{directory} should be world-accessible")
+        self._assert_directory_world_accessible(underlay_build)
+        self._assert_directory_world_accessible(underlay_install)
 
         log = sentinel.read_text(encoding="utf-8")
         self.assertIn("--build-base", log)
