@@ -155,7 +155,6 @@ class Auto(RockerExtension):
     def _detect_glob_patterns(self, workspace, file_patterns):
         import time
         import os
-        import fnmatch
 
         GREEN = "\033[92m"
         CYAN = "\033[96m"
@@ -181,11 +180,12 @@ class Auto(RockerExtension):
                     all_files.append(relpath)
                 except Exception as e:
                     walk_errors.append(e)
-        # Match patterns in memory
+        # Match patterns in memory using pathlib for proper glob support
         content_search_patterns = getattr(self, "_content_search_patterns", {})
         for pattern, ext in file_patterns.items():
             start = time.time()
-            matches = [f for f in all_files if fnmatch.fnmatch(f, pattern)]
+            # Use pathlib.Path.match() for proper glob pattern matching including ** support
+            matches = [f for f in all_files if Path(f).match(pattern)]
             duration = time.time() - start
             content_search_required = pattern in content_search_patterns
             # Special handling for pyproject.toml: uv should only activate if [tool.pixi] is NOT present
