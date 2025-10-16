@@ -288,6 +288,20 @@ class TestAutoExtension(unittest.TestCase):
 
         self._test_in_dir(setup, assertion)
 
+    def test_detect_ros_in_subdirectory(self):
+        """Test detection of package.xml for ros_jazzy in subdirectories"""
+
+        def setup():
+            # Create nested ROS package structure
+            pkg_dir = Path("my_ros_pkg")
+            pkg_dir.mkdir(exist_ok=True)
+            (pkg_dir / "package.xml").touch()
+
+        def assertion(deps):
+            self.assertIn("ros_jazzy", deps)
+
+        self._test_in_dir(setup, assertion)
+
     def test_detect_ccache_cpp(self):
         """Test detection of .cpp files for ccache"""
 
