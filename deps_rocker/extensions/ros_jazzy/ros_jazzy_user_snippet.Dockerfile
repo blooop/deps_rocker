@@ -3,7 +3,7 @@ RUN --mount=type=cache,target=$HOME/.cache/vcs-repos,id=vcs-repos-cache \
     rm -rf $HOME/.cache/vcs-repos/underlay && \
     mkdir -p $HOME/.cache/vcs-repos/underlay && \
     vcs import --recursive $HOME/.cache/vcs-repos/underlay < /ros_ws/consolidated.repos && \
-    cp -r $HOME/.cache/vcs-repos/underlay/. /ros_ws/underlay/
+    cp -r $HOME/.cache/vcs-repos/underlay/. $ROS_UNDERLAY_PATH/
 
 # Install dependencies and build the underlay workspace
 RUN --mount=type=cache,target=$HOME/.ros/rosdep,id=rosdep-cache \
