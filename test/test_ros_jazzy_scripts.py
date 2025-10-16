@@ -6,8 +6,6 @@ import subprocess
 from pathlib import Path
 import unittest
 
-import yaml
-
 
 COLCON_DEFAULTS_PATH = (
     Path(__file__).resolve().parents[1]
@@ -126,11 +124,7 @@ class TestRosJazzyScripts(unittest.TestCase):
         tmp_path = self._prepare_fake_colcon()
         sentinel = Path(os.environ["COLCON_SENTINEL"])
 
-        subprocess.run(
-            ["colcon", "clean", "workspace"],
-            check=True,
-            cwd=tmp_path
-        )
+        subprocess.run(["colcon", "clean", "workspace"], check=True, cwd=tmp_path)
 
         self.assertTrue(sentinel.exists(), "colcon invocation was not captured")
         contents = sentinel.read_text(encoding="utf-8")
@@ -181,11 +175,7 @@ class TestRosJazzyScripts(unittest.TestCase):
         os.environ["ROS_DISTRO"] = "jazzy"
         os.environ["ROS_SETUP_SCRIPT"] = str(setup_script)
 
-        subprocess.run(
-            ["bash", str(UNDERLAY_BUILD_SCRIPT)],
-            check=True,
-            cwd=workspace_root
-        )
+        subprocess.run(["bash", str(UNDERLAY_BUILD_SCRIPT)], check=True, cwd=workspace_root)
 
         self.assertFalse((underlay_build / "stale.txt").exists())
         self.assertFalse((underlay_install / "stale.txt").exists())

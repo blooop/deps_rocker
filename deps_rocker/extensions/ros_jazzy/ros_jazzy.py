@@ -61,8 +61,8 @@ class RosJazzy(SimpleRockerExtension):
                 if repos_data and "repositories" in repos_data:
                     merged_repos["repositories"].update(repos_data["repositories"])
 
-        # Search for files named "depends.repos" in workspace
-        for repos_file in workspace.rglob("depends.repos*"):
+        # Search for all *.repos files in workspace (not just depends.repos)
+        for repos_file in workspace.rglob("*.repos"):
             if repos_file.is_file():
                 print("ROS Jazzy: found repos file:", repos_file)
                 with repos_file.open(encoding="utf-8") as f:
@@ -71,7 +71,12 @@ class RosJazzy(SimpleRockerExtension):
                         # Merge repositories from this file into the consolidated manifest
                         merged_repos["repositories"].update(repos_data["repositories"])
 
-        print("ROS Jazzy: merged repos:", merged_repos)
+        # Improved printing of merged repos
+        print("ROS Jazzy: merged repos:")
+        for name, info in merged_repos["repositories"].items():
+            url = info.get("url", "")
+            version = info.get("version", "")
+            print(f"  - {name}: {url} [{version}]")
 
         # Include test files for the test script
         test_package_xml = (script_dir / "test_package.xml").read_text()
