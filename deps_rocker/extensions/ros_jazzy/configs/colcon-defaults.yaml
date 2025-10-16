@@ -17,7 +17,7 @@ test-result:
   test-result-base: /ros_ws/build
 
 clean.workspace:
-  yes: true
+  'yes': true
   base-select:
     - build
     - install
