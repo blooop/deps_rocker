@@ -1,6 +1,6 @@
 #!/bin/bash
 # Build the underlay workspace
-# Can be called during Docker build or from inside the container
+# Runs in user context to avoid ownership issues
 
 set -e
 
@@ -32,56 +32,11 @@ fi
 # Create build and install directories if they don't exist
 mkdir -p "${UNDERLAY_BUILD}" "${UNDERLAY_INSTALL}"
 
-CURRENT_UID="$(id -u)"
-CURRENT_GID="$(id -g)"
-
-ensure_owner_for_paths() {
-    local path current_owner target_owner
-    target_owner="${CURRENT_UID}:${CURRENT_GID}"
-    for path in "$@"; do
-        [ ! -e "${path}" ] && continue
-        current_owner="$(stat -c '%u:%g' "${path}")"
-        if [ "${current_owner}" = "${target_owner}" ]; then
-            continue
-        fi
-
-        if [ "${CURRENT_UID}" -eq 0 ]; then
-            chown -R "${target_owner}" "${path}"
-        elif command -v sudo >/dev/null 2>&1; then
-            sudo chown -R "${target_owner}" "${path}"
-        else
-            echo "ERROR: Unable to adjust ownership for ${path}; run as root or install sudo." >&2
-            exit 1
-        fi
-    done
-}
-
-ensure_world_accessible() {
-    local path
-    for path in "$@"; do
-        [ ! -e "${path}" ] && continue
-        if chmod -R a+rwX "${path}" 2>/dev/null; then
-            continue
-        fi
-
-        if [ "${CURRENT_UID}" -eq 0 ]; then
-            chmod -R a+rwX "${path}"
-        elif command -v sudo >/dev/null 2>&1; then
-            sudo chmod -R a+rwX "${path}"
-        else
-            echo "WARNING: Unable to adjust permissions for ${path}; some users may lack access." >&2
-        fi
-    done
-}
-
-# Ensure the active user owns the build/install directories before building so CMake can modify timestamps
-ensure_owner_for_paths "${UNDERLAY_BUILD}" "${UNDERLAY_INSTALL}"
-
-# Clean out any stale artifacts left by previous builds (especially ones created by a different user)
-if [ -n "$(ls -A "${UNDERLAY_BUILD}")" ]; then
+# Clean out any stale artifacts from previous builds
+if [ -n "$(ls -A "${UNDERLAY_BUILD}" 2>/dev/null)" ]; then
     rm -rf "${UNDERLAY_BUILD:?}/"*
 fi
-if [ -n "$(ls -A "${UNDERLAY_INSTALL}")" ]; then
+if [ -n "$(ls -A "${UNDERLAY_INSTALL}" 2>/dev/null)" ]; then
     rm -rf "${UNDERLAY_INSTALL:?}/"*
 fi
 
@@ -94,10 +49,6 @@ colcon build \
     --install-base "${UNDERLAY_INSTALL}" \
     --merge-install \
     --cmake-args -DCMAKE_BUILD_TYPE=Release
-
-# Ensure built artifacts are accessible/writeable by all users. CMake expects to be able to update timestamps,
-# so we need both ownership (handled above) and world-readable/executable bits for follow-up consumers.
-ensure_world_accessible "${UNDERLAY_BUILD}" "${UNDERLAY_INSTALL}"
 
 echo "Underlay built successfully"
 echo "Source with: source ${UNDERLAY_INSTALL}/setup.bash"

@@ -62,9 +62,9 @@ RUN chmod +x /usr/local/bin/underlay_deps.sh /usr/local/bin/underlay_build.sh
 # Copy test files for the test script
 COPY test_package.xml test_setup.py /tmp/
 
-# Build the underlay workspace if it contains packages
+# Prepare underlay dependencies during build (but don't build yet)
 RUN --mount=type=cache,target=/var/cache/apt,id=apt-cache \
     --mount=type=cache,target=/root/.ros/rosdep,id=rosdep-cache \
-    underlay_deps.sh && underlay_build.sh
+    underlay_deps.sh
 
 ENV COLCON_DEFAULTS_FILE=/ros_ws/colcon-defaults.yaml

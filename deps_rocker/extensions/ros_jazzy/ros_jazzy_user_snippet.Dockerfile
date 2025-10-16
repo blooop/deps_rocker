@@ -1,6 +1,9 @@
 # Change ownership of ROS workspace directories to the user
 # This runs after the user is created, ensuring they can write to build directories
 RUN chown -R ${USER_NAME}:${USER_NAME} /ros_ws
+
+# Build the underlay workspace now that we're in the user context
+RUN underlay_build.sh
   
 #ROS user snippet
 RUN DEPS_ROOT="${ROS_DEPENDENCIES_ROOT}" && \
