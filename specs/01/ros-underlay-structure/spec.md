@@ -14,3 +14,6 @@ Update ROS workspace structure to use a cleaner layout: `/ros_ws/underlay/{src,b
 - Build scripts (underlay_build.sh, underlay_deps.sh)
 - User layer VCS import
 - Unit tests
+
+## Performance Optimization
+Replace slow `chmod -R 777` operations with `install -d -m 777` to set permissions at directory creation time, avoiding recursive permission changes.

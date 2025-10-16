@@ -44,9 +44,8 @@ ENV ROS_BUILD_BASE=/ros_ws/build
 ENV ROS_INSTALL_BASE=/ros_ws/install
 ENV ROS_LOG_BASE=/ros_ws/logs
 
-RUN mkdir -p "$ROS_UNDERLAY_PATH" "$ROS_UNDERLAY_BUILD" "$ROS_UNDERLAY_INSTALL" "$ROS_UNDERLAY_LOG" \
-  "$ROS_BUILD_BASE" "$ROS_INSTALL_BASE" "$ROS_LOG_BASE" \
-  && chmod -R 777 /ros_ws
+RUN install -d -m 777 "$ROS_UNDERLAY_PATH" "$ROS_UNDERLAY_BUILD" "$ROS_UNDERLAY_INSTALL" "$ROS_UNDERLAY_LOG" \
+  "$ROS_BUILD_BASE" "$ROS_INSTALL_BASE" "$ROS_LOG_BASE"
 
 # Copy the consolidated depends.repos manifest for user layer import
 COPY consolidated.repos /ros_ws/consolidated.repos

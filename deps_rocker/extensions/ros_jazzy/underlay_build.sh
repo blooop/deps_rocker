@@ -29,19 +29,16 @@ else
     exit 1
 fi
 
-# Create build and install directories if they don't exist
-mkdir -p "${UNDERLAY_BUILD}" "${UNDERLAY_INSTALL}"
-
-# Clean out any stale artifacts from previous builds
-if [ -n "$(ls -A "${UNDERLAY_BUILD}" 2>/dev/null)" ]; then
+# Clean out any stale artifacts from previous builds and recreate with correct permissions
+if [ -d "${UNDERLAY_BUILD}" ]; then
     rm -rf "${UNDERLAY_BUILD:?}/"*
 fi
-if [ -n "$(ls -A "${UNDERLAY_INSTALL}" 2>/dev/null)" ]; then
+if [ -d "${UNDERLAY_INSTALL}" ]; then
     rm -rf "${UNDERLAY_INSTALL:?}/"*
 fi
 
-# Set world-accessible permissions so container users can access
-chmod 777 "${UNDERLAY_BUILD}" "${UNDERLAY_INSTALL}"
+# Create directories with world-accessible permissions in one step
+install -d -m 777 "${UNDERLAY_BUILD}" "${UNDERLAY_INSTALL}"
 
 # Build underlay
 cd "${WORKSPACE_ROOT}"
