@@ -40,6 +40,9 @@ if [ -n "$(ls -A "${UNDERLAY_INSTALL}" 2>/dev/null)" ]; then
     rm -rf "${UNDERLAY_INSTALL:?}/"*
 fi
 
+# Set world-accessible permissions so container users can access
+chmod 777 "${UNDERLAY_BUILD}" "${UNDERLAY_INSTALL}"
+
 # Build underlay
 cd "${WORKSPACE_ROOT}"
 echo "Building packages from ${UNDERLAY_PATH}..."
