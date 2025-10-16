@@ -41,7 +41,7 @@ ENV ROS_UNDERLAY_BUILD=/ros_ws/underlay_build
 ENV ROS_UNDERLAY_INSTALL=/ros_ws/underlay_install
 ENV ROS_BUILD_BASE=/ros_ws/build
 ENV ROS_INSTALL_BASE=/ros_ws/install
-ENV ROS_LOG_BASE=/ros_ws/log
+ENV ROS_LOG_BASE=/ros_ws/logs
 
 RUN mkdir -p "$ROS_UNDERLAY_PATH" "$ROS_UNDERLAY_BUILD" "$ROS_UNDERLAY_INSTALL" \
   "$ROS_BUILD_BASE" "$ROS_INSTALL_BASE" "$ROS_LOG_BASE" \
