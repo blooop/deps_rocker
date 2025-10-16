@@ -302,6 +302,52 @@ class TestAutoExtension(unittest.TestCase):
 
         self._test_in_dir(setup, assertion)
 
+    def test_ros_detection_missing_package_xml(self):
+        """Test that no ROS package is detected when package.xml is missing"""
+
+        def setup():
+            # No package.xml created
+            pkg_dir = Path("my_ros_pkg")
+            pkg_dir.mkdir(exist_ok=True)
+
+        def assertion(deps):
+            self.assertNotIn("ros_jazzy", deps)
+
+        self._test_in_dir(setup, assertion)
+
+    def test_ros_detection_multiple_package_xml(self):
+        """Test detection when multiple package.xml files exist"""
+
+        def setup():
+            # Create two ROS package directories
+            pkg_dir1 = Path("ros_pkg1")
+            pkg_dir1.mkdir(exist_ok=True)
+            (pkg_dir1 / "package.xml").touch()
+            pkg_dir2 = Path("ros_pkg2")
+            pkg_dir2.mkdir(exist_ok=True)
+            (pkg_dir2 / "package.xml").touch()
+
+        def assertion(deps):
+            self.assertIn("ros_jazzy", deps)
+
+        self._test_in_dir(setup, assertion)
+
+    def test_ros_detection_malformed_package_xml(self):
+        """Test detection with a malformed package.xml file"""
+
+        def setup():
+            pkg_dir = Path("my_ros_pkg")
+            pkg_dir.mkdir(exist_ok=True)
+            # Write invalid content to package.xml
+            with open(pkg_dir / "package.xml", "w", encoding="utf-8") as f:
+                f.write("not an xml file")
+
+        def assertion(deps):
+            # Detection is based on file presence only, not content validation
+            self.assertIn("ros_jazzy", deps)
+
+        self._test_in_dir(setup, assertion)
+
     def test_detect_ccache_cpp(self):
         """Test detection of .cpp files for ccache"""
 
