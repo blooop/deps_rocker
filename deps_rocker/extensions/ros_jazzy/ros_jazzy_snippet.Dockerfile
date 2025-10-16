@@ -47,13 +47,8 @@ RUN mkdir -p "$ROS_UNDERLAY_PATH" "$ROS_UNDERLAY_BUILD" "$ROS_UNDERLAY_INSTALL" 
   "$ROS_BUILD_BASE" "$ROS_INSTALL_BASE" "$ROS_LOG_BASE" \
   && chmod -R 777 /ros_ws
 
-# Import the consolidated depends.repos manifest to underlay
+# Copy the consolidated depends.repos manifest for user layer import
 COPY consolidated.repos /ros_ws/consolidated.repos
-RUN --mount=type=cache,target=/root/.cache/vcs-repos,id=vcs-repos-cache \
-    rm -rf /root/.cache/vcs-repos/underlay && \
-    mkdir -p /root/.cache/vcs-repos/underlay && \
-    vcs import --recursive /root/.cache/vcs-repos/underlay < /ros_ws/consolidated.repos && \
-    cp -r /root/.cache/vcs-repos/underlay/. /ros_ws/underlay/
 
 # Install underlay build scripts
 COPY underlay_deps.sh underlay_build.sh /usr/local/bin/
@@ -62,9 +57,6 @@ RUN chmod +x /usr/local/bin/underlay_deps.sh /usr/local/bin/underlay_build.sh
 # Copy test files for the test script
 COPY test_package.xml test_setup.py /tmp/
 
-# Prepare underlay dependencies during build (but don't build yet)
-RUN --mount=type=cache,target=/var/cache/apt,id=apt-cache \
-    --mount=type=cache,target=/root/.ros/rosdep,id=rosdep-cache \
-    underlay_deps.sh
+# Dependencies will be installed in user layer after VCS import
 
 ENV COLCON_DEFAULTS_FILE=/ros_ws/colcon-defaults.yaml
