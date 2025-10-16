@@ -1,12 +1,18 @@
-# Change ownership of ROS workspace directories to the user
-# This runs after the user is created, ensuring they can write to build directories
-RUN chown -R ${USER_NAME}:${USER_NAME} /ros_ws
+# Import the consolidated depends.repos manifest to underlay with user cache
+RUN --mount=type=cache,target=$HOME/.cache/vcs-repos,id=vcs-repos-cache \
+    rm -rf $HOME/.cache/vcs-repos/underlay && \
+    mkdir -p $HOME/.cache/vcs-repos/underlay && \
+    vcs import --recursive $HOME/.cache/vcs-repos/underlay < /ros_ws/consolidated.repos && \
+    cp -r $HOME/.cache/vcs-repos/underlay/. $ROS_UNDERLAY_PATH/
+
+# Install dependencies and build the underlay workspace
+RUN --mount=type=cache,target=$HOME/.ros/rosdep,id=rosdep-cache \
+    underlay_deps.sh && underlay_build.sh
   
-#ROS user snippet
-RUN DEPS_ROOT="${ROS_DEPENDENCIES_ROOT}" && \
-    if [ -d "$DEPS_ROOT" ]; then \
+# Install additional dependencies if ROS_DEPENDENCIES_ROOT is defined
+RUN if [ -n "${ROS_DEPENDENCIES_ROOT:-}" ] && [ -d "${ROS_DEPENDENCIES_ROOT}" ]; then \
         rosdep update && \
-        rosdep install --from-paths "$DEPS_ROOT" --ignore-src -r -y; \
+        rosdep install --from-paths "${ROS_DEPENDENCIES_ROOT}" --ignore-src -r -y; \
     fi
 
 

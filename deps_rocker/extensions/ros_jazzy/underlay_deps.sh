@@ -5,7 +5,7 @@
 set -e
 
 # Use workspace layout from environment
-UNDERLAY_PATH="${ROS_UNDERLAY_PATH:-/ros_ws/underlay}"
+UNDERLAY_PATH="${ROS_UNDERLAY_PATH:-/ros_ws/underlay/src}"
 
 echo "Installing underlay dependencies"
 
