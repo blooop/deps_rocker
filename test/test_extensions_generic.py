@@ -21,7 +21,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         "pixi",
         # "urdf_viz",
         "fzf",
-        # "gitui",
+        "gitui",
         "lazygit",
         "cwd",
         "ccache",
