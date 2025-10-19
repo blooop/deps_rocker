@@ -36,19 +36,24 @@ RUN if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then \
 
 # Define the canonical ROS workspace layout
 ENV ROS_WORKSPACE_ROOT=/ros_ws
-ENV ROS_UNDERLAY_PATH=/ros_ws/underlay/src
-ENV ROS_UNDERLAY_BUILD=/ros_ws/underlay/build
-ENV ROS_UNDERLAY_INSTALL=/ros_ws/underlay/install
-ENV ROS_UNDERLAY_LOG=/ros_ws/underlay/log
+ENV ROS_UNDERLAY_PATH=/ros_ws/underlay
+ENV ROS_UNDERLAY_BUILD=/ros_ws/underlay_build
+ENV ROS_UNDERLAY_INSTALL=/ros_ws/underlay_install
 ENV ROS_BUILD_BASE=/ros_ws/build
 ENV ROS_INSTALL_BASE=/ros_ws/install
-ENV ROS_LOG_BASE=/ros_ws/logs
+ENV ROS_LOG_BASE=/ros_ws/log
 
-RUN install -d -m 777 "$ROS_UNDERLAY_PATH" "$ROS_UNDERLAY_BUILD" "$ROS_UNDERLAY_INSTALL" "$ROS_UNDERLAY_LOG" \
-  "$ROS_BUILD_BASE" "$ROS_INSTALL_BASE" "$ROS_LOG_BASE"
+RUN mkdir -p "$ROS_UNDERLAY_PATH" "$ROS_UNDERLAY_BUILD" "$ROS_UNDERLAY_INSTALL" \
+  "$ROS_BUILD_BASE" "$ROS_INSTALL_BASE" "$ROS_LOG_BASE" \
+  && chmod -R 777 /ros_ws
 
-# Copy the consolidated depends.repos manifest for user layer import
+# Import the consolidated depends.repos manifest to underlay
 COPY consolidated.repos /ros_ws/consolidated.repos
+RUN --mount=type=cache,target=/root/.cache/vcs-repos,id=vcs-repos-cache \
+    rm -rf /root/.cache/vcs-repos/underlay && \
+    mkdir -p /root/.cache/vcs-repos/underlay && \
+    vcs import --recursive /root/.cache/vcs-repos/underlay < /ros_ws/consolidated.repos && \
+    cp -r /root/.cache/vcs-repos/underlay/. /ros_ws/underlay/
 
 # Install underlay build scripts
 COPY underlay_deps.sh underlay_build.sh /usr/local/bin/
@@ -57,6 +62,9 @@ RUN chmod +x /usr/local/bin/underlay_deps.sh /usr/local/bin/underlay_build.sh
 # Copy test files for the test script
 COPY test_package.xml test_setup.py /tmp/
 
-# Dependencies will be installed in user layer after VCS import
+# Build the underlay workspace if it contains packages
+RUN --mount=type=cache,target=/var/cache/apt,id=apt-cache \
+    --mount=type=cache,target=/root/.ros/rosdep,id=rosdep-cache \
+    underlay_deps.sh && underlay_build.sh
 
 ENV COLCON_DEFAULTS_FILE=/ros_ws/colcon-defaults.yaml

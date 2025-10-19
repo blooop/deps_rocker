@@ -155,14 +155,14 @@ class TestRosJazzyScripts(unittest.TestCase):
         self.addCleanup(tmp_workspace.cleanup)
         workspace_root = Path(tmp_workspace.name) / "ros_ws"
         workspace_root.mkdir()
-        underlay_path = workspace_root / "underlay" / "src"
-        underlay_build = workspace_root / "underlay" / "build"
-        underlay_install = workspace_root / "underlay" / "install"
+        underlay_path = workspace_root / "underlay"
+        underlay_build = workspace_root / "underlay_build"
+        underlay_install = workspace_root / "underlay_install"
 
         # Create all required directories
-        underlay_path.mkdir(parents=True)
-        underlay_build.mkdir(parents=True)
-        underlay_install.mkdir(parents=True)
+        underlay_path.mkdir()
+        underlay_build.mkdir()
+        underlay_install.mkdir()
 
         pkg_dir = underlay_path / "dummy_pkg"
         pkg_dir.mkdir()
