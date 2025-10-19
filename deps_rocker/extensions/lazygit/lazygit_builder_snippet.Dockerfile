@@ -3,6 +3,7 @@
 @(f"FROM {base_image} AS {builder_stage}")
 
 ARG LAZYGIT_VERSION=@LAZYGIT_VERSION@
+
 RUN --mount=type=cache,target=/tmp/lazygit-cache,id=lazygit-release-cache \
     bash -c "set -euxo pipefail && \
     OUTPUT_DIR='@(f"{builder_output_dir}")' && \
