@@ -82,6 +82,7 @@ detach = "deps_rocker.extensions.detach.detach:Detach"
 
 #dev tools
 ccache = "deps_rocker.extensions.ccache.ccache:Ccache"
+chrome = "deps_rocker.extensions.chrome.chrome:Chrome"
 fzf = "deps_rocker.extensions.fzf.fzf:Fzf"
 gitui = "deps_rocker.extensions.gitui.gitui:GitUI"
 lazygit = "deps_rocker.extensions.lazygit.lazygit:Lazygit"

@@ -16,5 +16,6 @@ args:
   - cwd
   - pixi
   - uv
+  # - chrome
   # - gitui
   # - isaacsim

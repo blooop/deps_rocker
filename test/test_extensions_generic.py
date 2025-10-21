@@ -25,6 +25,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         "lazygit",
         "cwd",
         "ccache",
+        "chrome",
         "claude",
         "codex",
         "npm",
@@ -166,6 +167,9 @@ CMD [\"echo\", \"Extension test complete\"]
 
     def test_ccache_extension(self):
         self.run_extension_build_and_test("ccache")
+
+    def test_chrome_extension(self):
+        self.run_extension_build_and_test("chrome")
 
     def test_claude_extension(self):
         self.run_extension_build_and_test("claude")
