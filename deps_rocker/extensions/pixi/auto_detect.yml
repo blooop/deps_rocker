@@ -1,6 +1,6 @@
 # Auto detection rules for pixi extension
 
 files:
-  - pixi.toml
+  - "pixi.toml"
   - pyproject.toml:
       content_search: "[tool.pixi]"
