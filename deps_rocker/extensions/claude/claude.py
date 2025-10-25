@@ -8,8 +8,9 @@ class Claude(SimpleRockerExtension):
     """Install Claude Code via install script and mount host ~/.claude into the container"""
 
     name = "claude"
-    # Ensure curl is available for the install script, and user exists for mounting into home
-    depends_on_extension: tuple[str, ...] = ("curl", "user")
+    # Ensure curl is available for the install script, user exists for mounting into home,
+    # and x11 is available for browser-based authentication
+    depends_on_extension: tuple[str, ...] = ("curl", "user", "x11")
     builder_apt_packages = ["curl", "ca-certificates"]
 
     def get_files(self, cliargs) -> dict[str, str]:
@@ -87,7 +88,10 @@ exec "$HOME/.local/bin/claude" "$@"
             if os.path.exists(host_extra):
                 mounts.append(f' -v "{os.path.realpath(host_extra)}:{container_extra}"')
 
-        if not mounts:
-            return ""
+        # Add host network for simplified authentication callbacks (claude login)
+        network_args = [" --network host"]
 
-        return "".join(mounts + envs)
+        if not (mounts or envs):
+            return "".join(network_args)
+
+        return "".join(mounts + envs + network_args)
