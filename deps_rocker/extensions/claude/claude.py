@@ -10,7 +10,7 @@ class Claude(SimpleRockerExtension):
     name = "claude"
     # Ensure curl is available for the install script, user exists for mounting into home,
     # and x11 is available for browser-based authentication
-    depends_on_extension: tuple[str, ...] = ("curl", "user", "x11")
+    depends_on_extension: tuple[str, ...] = ("curl", "user")
     builder_apt_packages = ["curl", "ca-certificates"]
 
     def get_files(self, cliargs) -> dict[str, str]:
