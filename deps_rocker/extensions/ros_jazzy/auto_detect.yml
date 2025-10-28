@@ -1,0 +1,3 @@
+# Auto detection rules for ros_jazzy extension
+files:
+  - "package.xml"

@@ -6,3 +6,10 @@ class Conda(SimpleRockerExtension):
 
     name = "conda"
     depends_on_extension: tuple[str, ...] = ("curl", "user")
+    builder_apt_packages = ["curl", "ca-certificates", "bzip2"]
+
+    # Template arguments for both snippets
+    empy_args = {
+        "MINIFORGE_VERSION": "latest",
+        "CONDA_VERSION": "24.3.0-0",
+    }

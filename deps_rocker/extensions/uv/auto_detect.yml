@@ -1,0 +1,8 @@
+# Auto detection rules for uv extension
+files:
+  - "pyproject.toml"
+  - ".python-version"
+  - "poetry.lock"
+  - "requirements.txt"
+  - "*.py"
+  

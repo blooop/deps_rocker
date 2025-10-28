@@ -8,8 +8,18 @@ class Claude(SimpleRockerExtension):
     """Install Claude Code via install script and mount host ~/.claude into the container"""
 
     name = "claude"
-    # Ensure curl is available for the install script, and user exists for mounting into home
-    depends_on_extension: tuple[str, ...] = ("curl", "user", "uv")
+    # Ensure curl is available for the install script, user exists for mounting into home,
+    # and x11 is available for browser-based authentication
+    depends_on_extension: tuple[str, ...] = ("curl", "user")
+    builder_apt_packages = ["curl", "ca-certificates"]
+
+    def get_files(self, cliargs) -> dict[str, str]:
+        """Provide the claude wrapper script as part of the build context"""
+        wrapper_content = """#!/usr/bin/env sh
+export PATH="$HOME/.local/bin:$PATH"
+exec "$HOME/.local/bin/claude" "$@"
+"""
+        return {"claude-wrapper.sh": wrapper_content}
 
     def get_docker_args(self, cliargs) -> str:
         """
@@ -72,13 +82,16 @@ class Claude(SimpleRockerExtension):
         # Supplemental mounts
         extra_paths = [
             (os.path.expanduser("~/.cache/claude"), f"{container_home}/.cache/claude"),
-            (os.path.expanduser("~/.local/share/claude"), f"{container_home}/.local/share/claude"),
+            # Note: Do not mount ~/.local/share/claude as it would overwrite the installed binary
         ]
         for host_extra, container_extra in extra_paths:
             if os.path.exists(host_extra):
                 mounts.append(f' -v "{os.path.realpath(host_extra)}:{container_extra}"')
 
-        if not mounts:
-            return ""
+        # Add host network for simplified authentication callbacks (claude login)
+        network_args = [" --network host"]
 
-        return "".join(mounts + envs)
+        if not (mounts or envs):
+            return "".join(network_args)
+
+        return "".join(mounts + envs + network_args)

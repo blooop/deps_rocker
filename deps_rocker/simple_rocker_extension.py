@@ -1,10 +1,25 @@
 import pkgutil
 import logging
 import em
+from pathlib import Path
 from rocker.extensions import RockerExtension
 from typing import Type
 from argparse import ArgumentParser
 from typing import Dict, Optional
+from deps_rocker.buildkit import is_buildkit_enabled
+
+
+def get_workspace_path() -> Path:
+    """
+    Get the workspace directory path.
+
+    Returns the current working directory where rocker is invoked.
+    This is typically where the user's project files are located.
+
+    Returns:
+        Path: The workspace directory path
+    """
+    return Path.cwd()
 
 
 class SimpleRockerExtensionMeta(type):
@@ -29,11 +44,46 @@ class SimpleRockerExtensionMeta(type):
 class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta):
     """A class to take care of most of the boilerplace required for a rocker extension"""
 
+    @property
+    def builder_output_dir(self):
+        return f"/opt/deps_rocker/{self.name}"
+
+    @property
+    def builder_stage(self):
+        return f"{self.name}_builder"
+
+    def _with_builder_defaults(self, raw: dict) -> dict:
+        out = dict(raw)
+        out.setdefault("builder_output_dir", self.builder_output_dir)
+        out.setdefault("builder_stage", self.builder_stage)
+        return out
+
+    @property
+    def empy_args_with_builder(self):
+        return self._with_builder_defaults(self.empy_args)
+
+    @property
+    def empy_builder_args_with_builder(self):
+        return self._with_builder_defaults(self.empy_builder_args)
+
     name = "simple_rocker_extension"
     empy_args = {}
     empy_user_args = {}
+
+    @property
+    def empy_builder_args(self):
+        # If someone overwrote empy_builder_args on the instance, use it; otherwise fall back to empy_args
+        return getattr(self, "__empy_builder_args", self.empy_args)
+
+    @empy_builder_args.setter
+    def empy_builder_args(self, value: dict):
+        # store directly on instance, avoids separate _empy_builder_args attr
+        object.__setattr__(self, "__empy_builder_args", value)
+
     depends_on_extension: tuple[str, ...] = ()  # Tuple of dependencies required by the extension
     apt_packages: list[str] = []  # List of apt packages required by the extension
+    builder_apt_packages: list[str] = []  # List of apt packages required in the builder stage
+    builder_output_root = "/opt/deps_rocker"
 
     @classmethod
     def get_name(cls) -> str:
@@ -49,19 +99,70 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         return module
 
     def get_snippet(self, cliargs) -> str:
-        snippet = self.get_and_expand_empy_template(self.empy_args)
+        snippet = self.get_and_expand_empy_template(cliargs, self.empy_args)
 
         # If apt_packages is defined, generate apt install command
         if self.apt_packages:
-            apt_snippet = self.get_apt_command(self.apt_packages, use_cache_mount=None)
+            # Enable cache mounts when BuildKit is active
+            apt_snippet = self.get_apt_command(
+                self.apt_packages, use_cache_mount=is_buildkit_enabled()
+            )
             # If there's an existing snippet, append the apt command
             snippet = f"{apt_snippet}\n\n{snippet}" if snippet else apt_snippet
         return snippet
 
     def get_user_snippet(self, cliargs) -> str:
-        return self.get_and_expand_empy_template(self.empy_user_args, snippet_prefix="user_")
+        return self.get_and_expand_empy_template(
+            cliargs, self.empy_user_args, snippet_prefix="user_"
+        )
 
-    def get_and_expand_empy_template(self, empy_args, snippet_prefix=""):
+    def get_preamble(self, cliargs):
+        fragments: list[str] = []
+
+        if builder_snippet := self.get_builder_snippet(cliargs):
+            fragments.append(builder_snippet)
+
+        return "\n\n".join(fragments)
+
+    def get_builder_snippet(self, cliargs) -> str:
+        snippet = self.get_and_expand_empy_template(
+            cliargs, getattr(self, "empy_builder_args", None), snippet_prefix="builder_"
+        )
+
+        # If builder_apt_packages is defined, generate apt install command and insert after FROM
+        if self.builder_apt_packages and snippet:
+            # Enable cache mounts when BuildKit is active
+            apt_snippet = self.get_apt_command(
+                self.builder_apt_packages, use_cache_mount=is_buildkit_enabled()
+            )
+
+            # Insert apt command after the FROM line
+            lines = snippet.split("\n")
+            insert_index = 0
+
+            # Find the last line that starts with FROM, ARG, or is empty/comment after FROM
+            for i, line in enumerate(lines):
+                stripped = line.strip()
+                if stripped.startswith("FROM ") or stripped.startswith('@(f"FROM'):
+                    insert_index = i + 1
+                elif insert_index > 0 and (
+                    stripped.startswith("ARG ")
+                    or stripped.startswith("ENV ")
+                    or stripped.startswith("#")
+                    or not stripped
+                ):
+                    insert_index = i + 1
+                elif insert_index > 0:
+                    # Found first non-FROM/ARG/ENV/comment/empty line, stop here
+                    break
+
+            # Insert the apt snippet at the determined position
+            lines.insert(insert_index, "\n" + apt_snippet)
+            snippet = "\n".join(lines)
+
+        return snippet
+
+    def get_and_expand_empy_template(self, cliargs, empy_args=None, snippet_prefix=""):
         """
         Loads and expands an empy template snippet for Dockerfile generation.
         Args:
@@ -78,48 +179,70 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
                 snippet = dat.decode("utf-8")
                 logging.warning(self.name)
                 logging.info(f"empy_{snippet_prefix}snippet: {snippet}")
-                logging.info(f"empy_{snippet_prefix}args: {empy_args}")
-                expanded = em.expand(snippet, empy_args)
+                template_args = self._build_template_args(cliargs, empy_args)
+                logging.info(f"empy_{snippet_prefix}args: {template_args}")
+                expanded = em.expand(snippet, template_args)
                 logging.info(f"expanded\n{expanded}")
                 return expanded
         except FileNotFoundError as _:
             logging.info(f"no user snippet found {snippet_name}")
         except Exception as e:
-            error_msg = (
-                f"Error processing empy template '{snippet_name}' in extension '{self.name}': {e}"
+            self._log_empy_template_error(snippet_name, e)
+        return ""
+
+    def _log_empy_template_error(self, snippet_name, e):
+        error_msg = (
+            f"Error processing empy template '{snippet_name}' in extension '{self.name}': {e}"
+        )
+
+        # Provide specific guidance for common empy template errors
+        if "unterminated string literal" in str(e).lower():
+            error_msg += (
+                "\n"
+                + " " * 4
+                + "HINT: This often occurs when using '@' or '$' characters in Dockerfile commands."
+            )
+            error_msg += (
+                "\n"
+                + " " * 4
+                + "      In empy templates, escape '@' as '@@' and '$' as '$$' when they should be literal characters."
+            )
+            error_msg += (
+                "\n"
+                + " " * 4
+                + "      Example: 'npm install -g package@version' should be 'npm install -g package@@version'"
+            )
+        elif "syntax error" in str(e).lower():
+            error_msg += (
+                "\n"
+                + " " * 4
+                + "HINT: Check for unescaped special characters in your Dockerfile snippet."
+            )
+            error_msg += (
+                "\n"
+                + " " * 4
+                + "      Common issues: unescaped '@' or '$' characters, missing quotes, or malformed template syntax."
             )
 
-            # Provide specific guidance for common empy template errors
-            if "unterminated string literal" in str(e).lower():
-                error_msg += (
-                    "\n"
-                    + " " * 4
-                    + "HINT: This often occurs when using '@' or '$' characters in Dockerfile commands."
-                )
-                error_msg += (
-                    "\n"
-                    + " " * 4
-                    + "      In empy templates, escape '@' as '@@' and '$' as '$$' when they should be literal characters."
-                )
-                error_msg += (
-                    "\n"
-                    + " " * 4
-                    + "      Example: 'npm install -g package@version' should be 'npm install -g package@@version'"
-                )
-            elif "syntax error" in str(e).lower():
-                error_msg += (
-                    "\n"
-                    + " " * 4
-                    + "HINT: Check for unescaped special characters in your Dockerfile snippet."
-                )
-                error_msg += (
-                    "\n"
-                    + " " * 4
-                    + "      Common issues: unescaped '@' or '$' characters, missing quotes, or malformed template syntax."
-                )
+        logging.error(error_msg)
 
-            logging.error(error_msg)
-        return ""
+    def _build_template_args(self, cliargs, empy_args=None) -> dict:
+        args = empy_args.copy() if empy_args else {}
+        base_image = cliargs.get("base_image", "") if cliargs else ""
+        args |= {
+            "base_image": base_image,
+            "builder_stage": self.get_builder_stage_name(),
+            "builder_output_dir": self.get_builder_output_dir(),
+            "builder_output_path": f"{self.get_builder_output_dir()}/",
+            "extension_name": self.name,
+        }
+        return args
+
+    def get_builder_stage_name(self) -> str:
+        return f"{self.name}_builder"
+
+    def get_builder_output_dir(self) -> str:
+        return f"{self.builder_output_root}/{self.name}"
 
     @staticmethod
     def register_arguments(parser: ArgumentParser, defaults: dict = None):
@@ -171,8 +294,8 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
 
     def invoke_after(self, cliargs: dict) -> set[str]:
         """
-        Returns a set of dependencies that should be invoked after this extension.
-        If deps is defined, returns it as a set.
+        Returns a set of extensions that this extension should be invoked after.
+        For SimpleRockerExtension, this returns the dependencies.
         """
         return set(self.depends_on_extension) if self.depends_on_extension else set()
 
@@ -182,6 +305,9 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         If deps is defined, returns it as a set.
         """
         return set(self.depends_on_extension) if self.depends_on_extension else set()
+
+    # alias the module-level function to avoid duplication
+    get_workspace_path = staticmethod(get_workspace_path)
 
     @staticmethod
     def get_apt_command(packages: list[str], use_cache_mount: bool = None) -> str:
@@ -200,14 +326,13 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
 
         packages_str = " \\\n    ".join(packages)
 
-        # Auto-detect if we should use cache mounts based on environment
+        # Default to automatic detection when not explicitly provided
         if use_cache_mount is None:
-            # Default to False for tests to maintain compatibility
-            use_cache_mount = False
+            use_cache_mount = is_buildkit_enabled()
 
         if use_cache_mount:
-            return f"""RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \\
-    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \\
+            return f"""RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \\
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \\
     apt-get update && apt-get install -y --no-install-recommends \\
     {packages_str}"""
         return f"""RUN apt-get update && apt-get install -y --no-install-recommends \\

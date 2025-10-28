@@ -8,12 +8,13 @@
 image: ubuntu:22.04
 args:
   # - nvidia
-  - x11 
-  - user 
-  - pull 
-  - deps
-  - git 
+  - jquery
+  - x11
+  - user
+  - pull
+  - git
   - cwd
   - pixi
   - uv
+  # - gitui
   # - isaacsim

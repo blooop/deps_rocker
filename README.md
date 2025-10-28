@@ -19,8 +19,29 @@
 pip install deps-rocker
 ```
 
-development
+## Development
+
+### Quick Development Setup
+
+Use the provided development script to set up a development environment with both rockerc and deps_rocker:
+
+```bash
+./scripts/develop.sh
 ```
+
+This script will:
+- Create a fresh UV virtual environment at `~/.venvs/dev-tools-uv`
+- Install both rockerc and deps_rocker projects in editable mode
+- Add the virtual environment to your PATH in `~/.bashrc`
+- Make console scripts from both projects available system-wide
+
+After running the script, restart your shell or run `source ~/.bashrc` to activate the environment.
+
+### Manual Development Setup
+
+Alternatively, you can manually inject deps_rocker into an existing rockerc installation:
+
+```bash
 pipx inject rockerc -e .
 ```
 
@@ -36,9 +57,61 @@ rocker --deps ubuntu:22.04
 
 Docker enables easy isolation of dependencies from the host system, but it is not easy to dynamically combine docker files from separate projects into a single unified environment.
 
+## Available Extensions
+
+deps-rocker provides a comprehensive set of rocker extensions for development tools and environments:
+
+### Dependency Managers
+- **odeps_dependencies** - Recursively search for *.deps.yaml files and install packages
+- **vcstool** - Install and configure vcstool for multi-repository management
+
+### Package Managers
+- **uv** - Fast Python package installer and resolver
+- **npm** - Node.js package manager with nvm
+- **pixi** - Cross-platform package manager built on conda
+- **cargo** - Rust package manager and build tool
+
+### Host System Integration
+- **cwd** - Mount current working directory
+- **cwd_name** - Set container name based on directory
+
+### Development Tools
+- **auto** - Automatically detect and enable relevant extensions
+- **ccache** - C/C++ compiler cache for faster builds
+- **fzf** - Fuzzy finder for command line
+- **gitui** - Terminal git client via pixi global
+- **lazygit** - Simple terminal UI for git commands
+- **nvim** - Neovim text editor
+- **palanteer** - Performance profiling and debugging tool
+
+### Search Tools
+- **deps-devtools** - Collection of development search and analysis tools
+
+### Robotics
+- **ros_jazzy** - ROS 2 Jazzy Jalopy distribution
+- **ros_underlay** - ROS workspace overlay management
+- **isaac_sim** - NVIDIA Isaac Sim robotics simulator
+- **urdf_viz** - URDF visualization tools
+
+### AI Tools
+- **claude** - Claude AI assistant CLI
+- **codex** - OpenAI Codex code generation tool
+- **gemini** - Google Gemini AI CLI
+- **spec_kit** - AI-powered specification toolkit
+
+### Environment & Utilities
+- **conda** - Conda package manager and environment manager
+- **jquery** - JavaScript library for web development
+- **curl** - Command line HTTP client
+- **locales** - System locale configuration
+- **tzdata** - Timezone data configuration
+- **ssh_client** - SSH client tools
+- **git_clone** - Git repository cloning utilities
+- **detach** - Run containers in detached mode
+
 ## Documentation
 
-Find documentation for all the rocker extensions this module provides [here](https://deps-rocker.readthedocs.io/en/latest/intro.html)
+Find detailed documentation for all the rocker extensions this module provides [here](https://deps-rocker.readthedocs.io/en/latest/intro.html)
 
 ## Intro
 

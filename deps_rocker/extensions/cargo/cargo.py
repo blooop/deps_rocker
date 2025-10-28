@@ -6,3 +6,4 @@ class Cargo(SimpleRockerExtension):
 
     name = "cargo"
     depends_on_extension = ("curl",)
+    builder_apt_packages = ["curl", "ca-certificates"]

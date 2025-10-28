@@ -10,18 +10,16 @@ class Gemini(SimpleRockerExtension):
     name = "gemini"
     depends_on_extension = ("npm", "user")
 
-    def get_docker_args(self, cliargs) -> str:
-        """
-        Mount host Gemini configuration into the container so the CLI
-        can reuse existing authentication and configuration.
+    def get_template_args(self, _cliargs=None):
+        return {}
 
-        Strategy:
-          - Mount ~/.gemini directory if it exists on host
-          - Mount current directory .gemini if it exists
-          - Preserve environment variables for authentication
-        """
+    def get_docker_args(self, cliargs) -> str:
         # Determine container home directory (provided by user extension) or fallback
-        container_home = cliargs.get("user_home_dir") or pwd.getpwuid(os.getuid()).pw_dir
+        container_home = (
+            cliargs.get("user_home_dir")
+            if cliargs and "user_home_dir" in cliargs
+            else pwd.getpwuid(os.getuid()).pw_dir
+        )
         if not container_home:
             logging.warning(
                 "Could not determine container home directory. Skipping Gemini config mounts."
@@ -29,7 +27,6 @@ class Gemini(SimpleRockerExtension):
             return ""
 
         mounts: list[str] = []
-        envs: list[str] = []
 
         # Mount user-wide gemini config directory
         host_gemini_config = os.path.expanduser("~/.gemini")
@@ -51,9 +48,11 @@ class Gemini(SimpleRockerExtension):
             "GOOGLE_APPLICATION_CREDENTIALS",
         ]
 
-        for env_var in env_vars:
-            if env_var in os.environ:
-                envs.append(f' -e "{env_var}={os.environ[env_var]}"')
+        envs = [
+            f' -e "{env_var}={os.environ[env_var]}"'
+            for env_var in env_vars
+            if env_var in os.environ
+        ]
 
         # Mount Google Application Credentials file if specified and exists
         if "GOOGLE_APPLICATION_CREDENTIALS" in os.environ:

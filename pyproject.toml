@@ -1,6 +1,6 @@
 [project]
 name = "deps_rocker"
-version = "0.16.0"
+version = "0.23.1"
 authors = [{ name = "Austin Gregg-Smith", email = "blooop@gmail.com" }]
 description = "A rocker plugin to help installing apt and pip dependencies"
 readme = "README.md"
@@ -37,17 +37,15 @@ python = "3.13.*"
 
 [tool.pixi.pypi-dependencies]
 deps_rocker = { path = ".", editable = true }
+# Test & lint tooling so pixi tasks succeed (mirrors project.optional-dependencies[test])
+[tool.pixi.feature.test.pypi-dependencies]
+ruff = ">=0.5.0,<0.14"
+pylint = ">=3.2.5,<3.4.0"
+pytest = ">=7.4,<8.5"
+pytest-cov = ">=4.1,<7.1"
+hypothesis = ">=6.104.2,<6.141"
+coverage = ">=7.5.4,<7.11"
 
-[project.optional-dependencies]
-test = [
-  "pylint>=3.2.5,<=3.3.8",
-  "pytest-cov>=4.1,<=7.0.0",
-  "pytest>=7.4,<=8.4.2",
-  "hypothesis>=6.104.2,<=6.140.2",
-  "ruff>=0.5.0,<=0.13.2",
-  "coverage>=7.5.4,<=7.10.7",
-  "pre-commit<=4.3.0",
-]
 
 [build-system]
 requires = ["hatchling"]
@@ -62,7 +60,6 @@ deps-rocker = "deps_rocker.dep_rocker_cli:gen_dockerfile"
 [project.entry-points."rocker.extensions"]
 #dependency managers
 odeps_dependencies = "deps_rocker.dependencies:Dependencies"
-vcstool = "deps_rocker.extensions.vcstool.vcstool:VcsTool"
 
 #package managers
 uv = "deps_rocker.extensions.uv.uv:UV"
@@ -75,6 +72,7 @@ cwd = "deps_rocker.extensions.cwd.cwd:CWD"
 cwd_name = "deps_rocker.extensions.cwd.cwd:CWDName"
 
 #utils
+auto = "deps_rocker.extensions.auto.auto:Auto"
 curl = "deps_rocker.extensions.curl.curl:Curl"
 locales = "deps_rocker.extensions.locales.locales:Locales"
 tzdata = "deps_rocker.extensions.tzdata.tzdata:TzData"
@@ -84,13 +82,18 @@ detach = "deps_rocker.extensions.detach.detach:Detach"
 snap = "deps_rocker.extensions.snap.snap:Snap"
 
 #dev tools
+ccache = "deps_rocker.extensions.ccache.ccache:Ccache"
 fzf = "deps_rocker.extensions.fzf.fzf:Fzf"
+gitui = "deps_rocker.extensions.gitui.gitui:GitUI"
 lazygit = "deps_rocker.extensions.lazygit.lazygit:Lazygit"
-neovim = "deps_rocker.extensions.neovim.neovim:NeoVim"
+nvim = "deps_rocker.extensions.nvim.nvim:Nvim"
 palanteer = "deps_rocker.extensions.palanteer.palanteer:Palanteer"
 
+# developer search tools
+deps-devtools = "deps_rocker.extensions.deps_devtools.deps_devtools:DepsDevtools"
+
 #robotics
-ros_humble = "deps_rocker.extensions.ros_humble.ros_humble:RosHumble"
+ros_jazzy = "deps_rocker.extensions.ros_jazzy.ros_jazzy:RosJazzy"
 isaac_sim = "deps_rocker.extensions.isaac_sim.isaac_sim:IsaacSim"
 urdf_viz = "deps_rocker.extensions.urdf_viz.urdf_viz:UrdfViz"
 foxglove = "deps_rocker.extensions.foxglove.foxglove:Foxglove"
@@ -101,6 +104,7 @@ codex = "deps_rocker.extensions.codex.codex:Codex"
 gemini = "deps_rocker.extensions.gemini.gemini:Gemini"
 spec_kit = "deps_rocker.extensions.spec_kit.spec_kit:SpecKit"
 conda = "deps_rocker.extensions.conda.conda:Conda"
+jquery = "deps_rocker.extensions.jquery.jquery:Jquery"
 
 # Environments
 [tool.pixi.environments]
@@ -118,13 +122,13 @@ pre-commit-update = "pre-commit autoupdate"
 format = "ruff format ."
 check-clean-workspace = "git diff --exit-code"
 ruff-lint = "ruff check . --fix"
-pylint = "pylint --version && echo 'running pylint...' && pylint $(git ls-files '*.py')"
+pylint = "python -m pylint --version && echo 'running pylint...' && python -m pylint $(git ls-files '*.py')"
 lint = { depends-on = ["ruff-lint", "pylint"] }
 style = { depends-on = ["format", "lint"] }
 commit-format = "git commit -a -m'autoformat code' || true"
-test = "pytest -v -s"
-test-claude = "pytest -v -s -m claude"
-coverage = "coverage run -m pytest -v -s && coverage xml -o coverage.xml"
+test = "python -m pytest -v -s"
+test-claude = "python -m pytest -v -s -m claude"
+coverage = "coverage run -m pytest --durations=0 -v -s && coverage xml -o coverage.xml"
 coverage-report = "coverage report -m"
 update-lock = "pixi update && git commit -a -m'update pixi.lock' || true"
 push = "git push"
@@ -144,12 +148,17 @@ clear-pixi = "rm -rf .pixi pixi.lock"
 setup-git-merge-driver = "git config merge.ourslock.driver true"
 update-from-template-repo = "./scripts/update_from_template.sh"
 
+# Run tests for a specific extension: pixi run test-extension <extension_name>
+[tool.pixi.tasks.test-extension]
+args = ["extension_name"]
+cmd = ["pytest", "-v", "-s", "test/test_extensions_generic.py", "-k", "test_{{extension_name}}_extension"]
+
 [tool.pylint]
 extension-pkg-whitelist = ["numpy"]
 jobs = 16                           #detect number of cores
 
 [tool.pylint.'MESSAGES CONTROL']
-disable = "C,logging-fstring-interpolation,line-too-long,fixme,broad-exception-caught,missing-module-docstring,too-many-instance-attributes,too-few-public-methods,too-many-arguments,too-many-locals,too-many-branches,too-many-statements,use-dict-literal,cyclic-import,duplicate-code,too-many-public-methods"
+disable = "C,logging-fstring-interpolation,line-too-long,fixme,broad-exception-caught,missing-module-docstring,too-many-instance-attributes,too-few-public-methods,too-many-arguments,too-many-locals,too-many-branches,too-many-statements,use-dict-literal,cyclic-import,duplicate-code,too-many-public-methods,too-many-nested-blocks"
 enable = "no-else-return,consider-using-in"
 
 [tool.coverage.run]

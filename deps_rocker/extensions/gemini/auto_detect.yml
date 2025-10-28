@@ -1,0 +1,3 @@
+# Auto detection rules for gemini extension
+config_dirs:
+  - .gemini
