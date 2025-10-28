@@ -1,7 +1,6 @@
 # Auto detection rules for uv extension
 files:
-  - "pyproject.toml":
-      exclude_content: "[tool.pixi]"
+  - "pyproject.toml"
   - ".python-version"
   - "poetry.lock"
   - "requirements.txt"

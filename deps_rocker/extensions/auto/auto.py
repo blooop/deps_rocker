@@ -64,7 +64,7 @@ class Auto(RockerExtension):
         for ext_dir in extensions_dir.iterdir():
             if not ext_dir.is_dir():
                 continue
-            rule_file = ext_dir / "auto_detect.yml"
+            rule_file = ext_dir / "auto_detect.yaml"
             if rule_file.exists():
                 with rule_file.open() as f:
                     rules = yaml.safe_load(f)

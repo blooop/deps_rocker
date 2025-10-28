@@ -2,7 +2,7 @@
 # pylint: disable=protected-access
 """
 Comprehensive test for auto detection mechanism, specifically testing quoted vs unquoted
-filenames in auto_detect.yml files and various edge cases.
+filenames in auto_detect.yaml files and various edge cases.
 """
 
 import unittest
@@ -14,7 +14,7 @@ from deps_rocker.extensions.auto.auto import Auto
 
 
 class TestAutoDetectYmlQuoting(unittest.TestCase):
-    """Test that quoting in auto_detect.yml files doesn't break detection"""
+    """Test that quoting in auto_detect.yaml files doesn't break detection"""
 
     def setUp(self):
         """Create a temporary directory for testing"""
@@ -67,7 +67,7 @@ class TestAutoDetectYmlQuoting(unittest.TestCase):
             )
 
     def test_package_xml_detection(self):
-        """Test that package.xml (quoted in auto_detect.yml) is detected"""
+        """Test that package.xml (quoted in auto_detect.yaml) is detected"""
         setup_files = {
             "package.xml": """<?xml version="1.0"?>
 <package format="3">
@@ -82,13 +82,13 @@ class TestAutoDetectYmlQuoting(unittest.TestCase):
         self._test_detection_in_dir(setup_files, expected)
 
     def test_package_json_detection(self):
-        """Test that package.json (quoted in auto_detect.yml) is detected"""
+        """Test that package.json (quoted in auto_detect.yaml) is detected"""
         setup_files = {"package.json": """{"name": "test", "version": "1.0.0"}"""}
         expected = {"npm"}
         self._test_detection_in_dir(setup_files, expected)
 
     def test_pyproject_toml_detection(self):
-        """Test that pyproject.toml (quoted in auto_detect.yml) is detected"""
+        """Test that pyproject.toml (quoted in auto_detect.yaml) is detected"""
         setup_files = {
             "pyproject.toml": """[project]
 name = "test"
@@ -100,7 +100,7 @@ version = "1.0.0"
         self._test_detection_in_dir(setup_files, expected)
 
     def test_pixi_toml_detection(self):
-        """Test that pixi.toml (quoted in auto_detect.yml) is detected"""
+        """Test that pixi.toml (quoted in auto_detect.yaml) is detected"""
         setup_files = {
             "pixi.toml": """[project]
 name = "test"
@@ -110,7 +110,7 @@ name = "test"
         self._test_detection_in_dir(setup_files, expected)
 
     def test_cargo_toml_detection(self):
-        """Test that Cargo.toml (quoted in auto_detect.yml) is detected"""
+        """Test that Cargo.toml (quoted in auto_detect.yaml) is detected"""
         setup_files = {
             "Cargo.toml": """[package]
 name = "test"
@@ -121,7 +121,7 @@ version = "0.1.0"
         self._test_detection_in_dir(setup_files, expected)
 
     def test_environment_yml_detection(self):
-        """Test that environment.yml (quoted in auto_detect.yml) is detected"""
+        """Test that environment.yml (quoted in auto_detect.yaml) is detected"""
         setup_files = {
             "environment.yml": """name: test
 dependencies:
@@ -164,10 +164,11 @@ dependencies = ["python"]
 
 [project]
 name = "test"
-"""
+""",
+            "main.py": "print('hello')",  # Need a .py file to trigger uv
         }
-        # Should detect pixi due to [tool.pixi] section
-        expected = {"pixi"}
+        # Should detect both pixi due to [tool.pixi] section and uv due to pyproject.toml + .py file
+        expected = {"pixi", "uv"}
         self._test_detection_in_dir(setup_files, expected)
 
     def test_multiple_extensions_detection(self):
