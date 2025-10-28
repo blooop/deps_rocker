@@ -113,6 +113,14 @@ deps-rocker provides a comprehensive set of rocker extensions for development to
 
 Find detailed documentation for all the rocker extensions this module provides [here](https://deps-rocker.readthedocs.io/en/latest/intro.html)
 
+### For AI Agents
+
+If you're an AI agent helping users set up deps_rocker configurations, refer to the [Agent Configuration Guide](./agent-deps-guide.md) for:
+- Complete extension reference
+- rockerc.yaml templates for common project types
+- .deps.yaml format and examples
+- Decision trees and best practices
+
 ## Intro
 
 This is a [rocker](https://github.com/tfoote/rocker) extension for automating dependency installation.  The aim is to allow a projects to define its development dependencies in a deps.yaml file which are added to the rocker container.  If two projects define their dependencies in separate files, the extension will combine the common commands into the same docker layer to help reduce image size and duplication of work.
