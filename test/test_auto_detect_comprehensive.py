@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=protected-access
 """
 Comprehensive test for auto detection mechanism, specifically testing quoted vs unquoted
 filenames in auto_detect.yml files and various edge cases.

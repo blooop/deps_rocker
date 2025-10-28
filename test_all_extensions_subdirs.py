@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=protected-access,redefined-outer-name
 """Test that the subdirectory fix works for ALL extensions, not just ROS"""
 
 import tempfile
