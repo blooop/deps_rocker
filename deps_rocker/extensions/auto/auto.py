@@ -44,9 +44,13 @@ class Auto(RockerExtension):
 
     name = "auto"
 
-    def _detect_files_in_workspace(self, _cliargs: dict) -> set[str]:
+    def _detect_files_in_workspace(self, _cliargs: dict, check_home: bool = True) -> set[str]:
         """
         Detect files in the workspace and return a set of extension names to enable, in parallel.
+        
+        Args:
+            _cliargs: CLI arguments dict
+            check_home: Whether to check home directory for config directories (default: True)
         """
         import yaml
 
@@ -83,7 +87,7 @@ class Auto(RockerExtension):
         # Prepare detection functions and their arguments
         # Use only patterns from auto_detect.yml files for all extensions
         tasks = [
-            (self._detect_exact_dir, (workspace, dir_patterns)),
+            (self._detect_exact_dir, (workspace, dir_patterns, check_home)),
             (self._detect_glob_patterns, (workspace, file_patterns)),
             (self._detect_content_search, (workspace, content_search_patterns)),
         ]
@@ -185,7 +189,15 @@ class Auto(RockerExtension):
         content_search_patterns = getattr(self, "_content_search_patterns", {})
         for pattern, ext in file_patterns.items():
             start = time.time()
-            matches = [f for f in all_files if fnmatch.fnmatch(f, pattern)]
+            # Support both basename patterns (e.g., "package.xml") and full path patterns (e.g., ".cargo/config.toml")
+            # If pattern contains a path separator, match against full relative path
+            # Otherwise, match against just the filename
+            if "/" in pattern or "\\" in pattern:
+                # Full path pattern
+                matches = [f for f in all_files if fnmatch.fnmatch(f, pattern)]
+            else:
+                # Basename pattern - match against filename only
+                matches = [f for f in all_files if fnmatch.fnmatch(os.path.basename(f), pattern)]
             duration = time.time() - start
             content_search_required = pattern in content_search_patterns
             # Special handling for pyproject.toml: uv should only activate if [tool.pixi] is NOT present
@@ -231,7 +243,7 @@ class Auto(RockerExtension):
         print(f"[auto-detect] Total file walk and match time: {time.time() - start_total:.3f}s")
         return found
 
-    def _detect_exact_dir(self, workspace, patterns):
+    def _detect_exact_dir(self, workspace, patterns, check_home=True):
         found = set()
         # Check in workspace
         for dname, ext in patterns.items():
@@ -241,15 +253,16 @@ class Auto(RockerExtension):
                     f"\033[92m[auto-detect] {ext}: ✓ Detected {dname} directory in workspace -> enabling\033[0m"
                 )
                 found.add(ext)
-        # Check in user's home directory
-        home = Path.home()
-        for dname, ext in patterns.items():
-            dir_path = home / dname
-            if dir_path.is_dir():
-                print(
-                    f"\033[92m[auto-detect] {ext}: ✓ Detected {dname} directory in home -> enabling\033[0m"
-                )
-                found.add(ext)
+        # Check in user's home directory (can be disabled for testing)
+        if check_home:
+            home = Path.home()
+            for dname, ext in patterns.items():
+                dir_path = home / dname
+                if dir_path.is_dir():
+                    print(
+                        f"\033[92m[auto-detect] {ext}: ✓ Detected {dname} directory in home -> enabling\033[0m"
+                    )
+                    found.add(ext)
         return found
 
     def required(self, cliargs: dict) -> set[str]:
