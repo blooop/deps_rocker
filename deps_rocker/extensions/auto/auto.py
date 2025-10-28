@@ -135,8 +135,14 @@ class Auto(RockerExtension):
                             with open(fpath, "r", encoding="utf-8") as f:
                                 content = f.read()
                             # Use plain substring match for '[tool.pixi]' pattern
-                            if search == "[tool.pixi]":
-                                found_section = "[tool.pixi]" in content
+                            if search == "[tool.pixi.project]":
+                                # Special case for pixi, exact match for specific section
+                                found_section = search in content
+                            elif search == "[tool.pixi]":
+                                # Strict pattern match for exact [tool.pixi] using regex word boundaries
+                                found_section = bool(
+                                    re.search(r"^\s*\[tool\.pixi\]\b", content, re.MULTILINE)
+                                )
                             else:
                                 found_section = bool(re.search(search, content, re.MULTILINE))
                             if found_section:
