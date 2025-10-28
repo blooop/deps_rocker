@@ -92,6 +92,6 @@ def test_all_extension_subdirectory_detection():
 if __name__ == "__main__":
     success = test_all_extension_subdirectory_detection()
     if success:
-        print(f"\n🎉 ALL extensions now properly detect files in subdirectories!")
+        print("\n🎉 ALL extensions now properly detect files in subdirectories!")
     else:
-        print(f"\n💥 Some extensions still have subdirectory detection issues!")
+        print("\n💥 Some extensions still have subdirectory detection issues!")
