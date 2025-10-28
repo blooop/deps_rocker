@@ -135,13 +135,13 @@ class Auto(RockerExtension):
                             with open(fpath, "r", encoding="utf-8") as f:
                                 content = f.read()
                             # Use plain substring match for '[tool.pixi]' pattern
-                            if search == "[tool.pixi.project]":
-                                # Special case for pixi, exact match for specific section
-                                found_section = search in content
-                            elif search == "[tool.pixi]":
-                                # Strict pattern match for exact [tool.pixi] using regex word boundaries
+                            # Special case for pixi to handle multiple content search patterns
+                            if search in ["[tool.pixi.project]", "[tool.pixi]"]:
+                                # Match either [tool.pixi] or [tool.pixi.project]
                                 found_section = bool(
-                                    re.search(r"^\s*\[tool\.pixi\]\b", content, re.MULTILINE)
+                                    re.search(
+                                        r"^\s*\[tool\.pixi(\.project)?\]\s*$", content, re.MULTILINE
+                                    )
                                 )
                             else:
                                 found_section = bool(re.search(search, content, re.MULTILINE))
@@ -236,8 +236,10 @@ class Auto(RockerExtension):
                         if "[tool.pixi]" in content:
                             pixi_section = True
                         if ext == "pixi":
-                            # pixi handled by content_search, skip here
-                            continue
+                            # pixi may be handled by content search or filename
+                            if content_search_patterns.get(pattern, {}).get("ext") == "pixi":
+                                # Skip here if pixi will be handled by content search
+                                continue
                         if ext == "uv":
                             if not pixi_section:
                                 print(
