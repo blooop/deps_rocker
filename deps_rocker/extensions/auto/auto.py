@@ -190,14 +190,16 @@ class Auto(RockerExtension):
         for pattern, ext in file_patterns.items():
             start = time.time()
             # Support both basename patterns (e.g., "package.xml") and full path patterns (e.g., ".cargo/config.toml")
-            # If pattern contains a path separator, match against full relative path
-            # Otherwise, match against just the filename
-            if "/" in pattern or "\\" in pattern:
+            # Use pathlib for robust cross-platform path handling
+            # Path is already imported at the top of the file
+            pattern_path = Path(pattern)
+            # If pattern_path has more than one part, treat as full path pattern
+            if len(pattern_path.parts) > 1:
                 # Full path pattern
-                matches = [f for f in all_files if fnmatch.fnmatch(f, pattern)]
+                matches = [str(f) for f in map(Path, all_files) if Path(f).match(pattern)]
             else:
                 # Basename pattern - match against filename only
-                matches = [f for f in all_files if fnmatch.fnmatch(os.path.basename(f), pattern)]
+                matches = [str(f) for f in map(Path, all_files) if fnmatch.fnmatch(f.name, pattern)]
             duration = time.time() - start
             content_search_required = pattern in content_search_patterns
             # Special handling for pyproject.toml: uv should only activate if [tool.pixi] is NOT present
