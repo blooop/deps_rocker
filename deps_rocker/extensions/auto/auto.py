@@ -59,6 +59,7 @@ class Auto(RockerExtension):
         extensions_dir = Path(__file__).parent.parent
         file_patterns = {}
         content_search_patterns = {}
+        exclude_content_patterns = {}
         dir_patterns = {}
         for ext_dir in extensions_dir.iterdir():
             if not ext_dir.is_dir():
@@ -80,6 +81,11 @@ class Auto(RockerExtension):
                                     "ext": ext_name,
                                     "search": opts["content_search"],
                                 }
+                            if "exclude_content" in opts:
+                                exclude_content_patterns[fname] = {
+                                    "ext": ext_name,
+                                    "exclude": opts["exclude_content"],
+                                }
                 # Directory patterns
                 for dname in rules.get("config_dirs", []):
                     dir_patterns[dname] = ext_name
@@ -88,7 +94,7 @@ class Auto(RockerExtension):
         # Use only patterns from auto_detect.yml files for all extensions
         tasks = [
             (self._detect_exact_dir, (workspace, dir_patterns, check_home)),
-            (self._detect_glob_patterns, (workspace, file_patterns)),
+            (self._detect_glob_patterns, (workspace, file_patterns, exclude_content_patterns)),
             (self._detect_content_search, (workspace, content_search_patterns)),
         ]
 
@@ -162,7 +168,7 @@ class Auto(RockerExtension):
                 )
         return found
 
-    def _detect_glob_patterns(self, workspace, file_patterns):
+    def _detect_glob_patterns(self, workspace, file_patterns, exclude_content_patterns):
         import time
         import os
         import fnmatch
@@ -209,8 +215,12 @@ class Auto(RockerExtension):
                         matches.append(str(f))
                         match_count += 1
                         # For performance, we only need to know if matches exist for most patterns
-                        # Only collect all matches for patterns that need content search
-                        if pattern not in content_search_patterns and match_count >= 1:
+                        # Only collect all matches for patterns that need content search or exclude_content
+                        if (
+                            pattern not in content_search_patterns
+                            and pattern not in exclude_content_patterns
+                            and match_count >= 1
+                        ):
                             break
             else:
                 # Basename pattern - match against filename only with early termination
@@ -221,62 +231,47 @@ class Auto(RockerExtension):
                         matches.append(str(f))
                         match_count += 1
                         # For performance, we only need to know if matches exist for most patterns
-                        if pattern not in content_search_patterns and match_count >= 1:
+                        if (
+                            pattern not in content_search_patterns
+                            and pattern not in exclude_content_patterns
+                            and match_count >= 1
+                        ):
                             break
             duration = time.time() - start
             content_search_required = pattern in content_search_patterns
-            # Special handling for pyproject.toml: uv should only activate if [tool.pixi] is NOT present
-            if pattern == "pyproject.toml":
+            exclude_content_required = (
+                pattern in exclude_content_patterns
+                and exclude_content_patterns[pattern]["ext"] == ext
+            )
+
+            # Handle exclude_content patterns generically
+            if exclude_content_required:
+                exclude_pattern = exclude_content_patterns[pattern]["exclude"]
                 for f in matches:
                     fpath = os.path.join(workspace_path, f)
                     try:
                         with open(fpath, "r", encoding="utf-8") as file:
                             content = file.read()
-                        pixi_section = False
-                        if "[tool.pixi]" in content:
-                            pixi_section = True
-                        if ext == "pixi":
-                            # pixi may be handled by content search or filename
-                            if content_search_patterns.get(pattern, {}).get("ext") == "pixi":
-                                # Skip here if pixi will be handled by content search
-                                continue
-                        if ext == "uv":
-                            if not pixi_section:
-                                print(
-                                    f"{GREEN}[auto-detect] {ext}: ✓ Detected {pattern} ({f}) without [tool.pixi] -> enabling [search took {duration:.3f}s]{RESET}"
-                                )
-                                found.add(ext)
-                            else:
-                                print(
-                                    f"{CYAN}[auto-detect] {ext}: Detected {pattern} ({f}) but [tool.pixi] present, NOT enabling [search took {duration:.3f}s]{RESET}"
-                                )
+                        if exclude_pattern not in content:
+                            print(
+                                f"{GREEN}[auto-detect] {ext}: ✓ Detected {pattern} without '{exclude_pattern}' -> enabling [search took {duration:.3f}s]{RESET}"
+                            )
+                            found.add(ext)
+                        else:
+                            print(
+                                f"{CYAN}[auto-detect] {ext}: Detected {pattern} but '{exclude_pattern}' present, NOT enabling [search took {duration:.3f}s]{RESET}"
+                            )
                     except Exception as e:
                         print(f"{CYAN}[auto-detect] {ext}: Error reading {fpath}: {e}{RESET}")
                 continue
             if matches:
                 if content_search_required:
-                    # For content search, we need the actual count
-                    actual_count = (
-                        len(matches)
-                        if pattern in content_search_patterns
-                        else f"{match_count}+"
-                        if match_count > 0
-                        else len(matches)
-                    )
                     print(
-                        f"{CYAN}[auto-detect] {ext}: Detected {pattern} ({actual_count} matches), but content search required. Will check contents next. [search took {duration:.3f}s]{RESET}"
+                        f"{CYAN}[auto-detect] {ext}: Detected {pattern}, but content search required. Will check contents next. [search took {duration:.3f}s]{RESET}"
                     )
                 else:
-                    # For non-content search, show actual count or "X+" if we used early termination
-                    display_count = (
-                        len(matches)
-                        if pattern in content_search_patterns
-                        else f"{match_count}+"
-                        if match_count > 1
-                        else match_count
-                    )
                     print(
-                        f"{GREEN}[auto-detect] {ext}: ✓ Detected {pattern} ({display_count} matches) -> enabling [search took {duration:.3f}s]{RESET}"
+                        f"{GREEN}[auto-detect] {ext}: ✓ Detected {pattern} -> enabling [search took {duration:.3f}s]{RESET}"
                     )
                     found.add(ext)
             else:
