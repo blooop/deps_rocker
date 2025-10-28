@@ -195,11 +195,28 @@ class Auto(RockerExtension):
             pattern_path = Path(pattern)
             # If pattern_path has more than one part, treat as full path pattern
             if len(pattern_path.parts) > 1:
-                # Full path pattern
-                matches = [str(f) for f in map(Path, all_files) if Path(f).match(pattern)]
+                # Full path pattern - use early termination for performance
+                matches = []
+                match_count = 0
+                for f in all_files:
+                    if Path(f).match(pattern):
+                        matches.append(str(f))
+                        match_count += 1
+                        # For performance, we only need to know if matches exist for most patterns
+                        # Only collect all matches for patterns that need content search
+                        if pattern not in content_search_patterns and match_count >= 1:
+                            break
             else:
-                # Basename pattern - match against filename only
-                matches = [str(f) for f in map(Path, all_files) if fnmatch.fnmatch(f.name, pattern)]
+                # Basename pattern - match against filename only with early termination
+                matches = []
+                match_count = 0
+                for f in all_files:
+                    if fnmatch.fnmatch(Path(f).name, pattern):
+                        matches.append(str(f))
+                        match_count += 1
+                        # For performance, we only need to know if matches exist for most patterns
+                        if pattern not in content_search_patterns and match_count >= 1:
+                            break
             duration = time.time() - start
             content_search_required = pattern in content_search_patterns
             # Special handling for pyproject.toml: uv should only activate if [tool.pixi] is NOT present
@@ -230,12 +247,28 @@ class Auto(RockerExtension):
                 continue
             if matches:
                 if content_search_required:
+                    # For content search, we need the actual count
+                    actual_count = (
+                        len(matches)
+                        if pattern in content_search_patterns
+                        else f"{match_count}+"
+                        if match_count > 0
+                        else len(matches)
+                    )
                     print(
-                        f"{CYAN}[auto-detect] {ext}: Detected {pattern} ({len(matches)} matches), but content search required. Will check contents next. [search took {duration:.3f}s]{RESET}"
+                        f"{CYAN}[auto-detect] {ext}: Detected {pattern} ({actual_count} matches), but content search required. Will check contents next. [search took {duration:.3f}s]{RESET}"
                     )
                 else:
+                    # For non-content search, show actual count or "X+" if we used early termination
+                    display_count = (
+                        len(matches)
+                        if pattern in content_search_patterns
+                        else f"{match_count}+"
+                        if match_count > 1
+                        else match_count
+                    )
                     print(
-                        f"{GREEN}[auto-detect] {ext}: ✓ Detected {pattern} ({len(matches)} matches) -> enabling [search took {duration:.3f}s]{RESET}"
+                        f"{GREEN}[auto-detect] {ext}: ✓ Detected {pattern} ({display_count} matches) -> enabling [search took {duration:.3f}s]{RESET}"
                     )
                     found.add(ext)
             else:
