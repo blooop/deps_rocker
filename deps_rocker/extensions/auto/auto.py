@@ -47,7 +47,7 @@ class Auto(RockerExtension):
     def _detect_files_in_workspace(self, _cliargs: dict, check_home: bool = True) -> set[str]:
         """
         Detect files in the workspace and return a set of extension names to enable, in parallel.
-        
+
         Args:
             _cliargs: CLI arguments dict
             check_home: Whether to check home directory for config directories (default: True)
