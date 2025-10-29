@@ -44,9 +44,13 @@ class Auto(RockerExtension):
 
     name = "auto"
 
-    def _detect_files_in_workspace(self, _cliargs: dict) -> set[str]:
+    def _detect_files_in_workspace(self, _cliargs: dict, check_home: bool = True) -> set[str]:
         """
         Detect files in the workspace and return a set of extension names to enable, in parallel.
+
+        Args:
+            _cliargs: CLI arguments dict
+            check_home: Whether to check home directory for config directories (default: True)
         """
         import yaml
 
@@ -55,11 +59,12 @@ class Auto(RockerExtension):
         extensions_dir = Path(__file__).parent.parent
         file_patterns = {}
         content_search_patterns = {}
+        exclude_content_patterns = {}
         dir_patterns = {}
         for ext_dir in extensions_dir.iterdir():
             if not ext_dir.is_dir():
                 continue
-            rule_file = ext_dir / "auto_detect.yml"
+            rule_file = ext_dir / "auto_detect.yaml"
             if rule_file.exists():
                 with rule_file.open() as f:
                     rules = yaml.safe_load(f)
@@ -76,6 +81,11 @@ class Auto(RockerExtension):
                                     "ext": ext_name,
                                     "search": opts["content_search"],
                                 }
+                            if "exclude_content" in opts:
+                                exclude_content_patterns[fname] = {
+                                    "ext": ext_name,
+                                    "exclude": opts["exclude_content"],
+                                }
                 # Directory patterns
                 for dname in rules.get("config_dirs", []):
                     dir_patterns[dname] = ext_name
@@ -83,8 +93,8 @@ class Auto(RockerExtension):
         # Prepare detection functions and their arguments
         # Use only patterns from auto_detect.yml files for all extensions
         tasks = [
-            (self._detect_exact_dir, (workspace, dir_patterns)),
-            (self._detect_glob_patterns, (workspace, file_patterns)),
+            (self._detect_exact_dir, (workspace, dir_patterns, check_home)),
+            (self._detect_glob_patterns, (workspace, file_patterns, exclude_content_patterns)),
             (self._detect_content_search, (workspace, content_search_patterns)),
         ]
 
@@ -131,8 +141,14 @@ class Auto(RockerExtension):
                             with open(fpath, "r", encoding="utf-8") as f:
                                 content = f.read()
                             # Use plain substring match for '[tool.pixi]' pattern
-                            if search == "[tool.pixi]":
-                                found_section = "[tool.pixi]" in content
+                            # Special case for pixi to handle multiple content search patterns
+                            if search in ["[tool.pixi.project]", "[tool.pixi]"]:
+                                # Match either [tool.pixi] or [tool.pixi.project]
+                                found_section = bool(
+                                    re.search(
+                                        r"^\s*\[tool\.pixi(\.project)?\]\s*$", content, re.MULTILINE
+                                    )
+                                )
                             else:
                                 found_section = bool(re.search(search, content, re.MULTILINE))
                             if found_section:
@@ -152,7 +168,7 @@ class Auto(RockerExtension):
                 )
         return found
 
-    def _detect_glob_patterns(self, workspace, file_patterns):
+    def _detect_glob_patterns(self, workspace, file_patterns, exclude_content_patterns):
         import time
         import os
         import fnmatch
@@ -185,43 +201,77 @@ class Auto(RockerExtension):
         content_search_patterns = getattr(self, "_content_search_patterns", {})
         for pattern, ext in file_patterns.items():
             start = time.time()
-            matches = [f for f in all_files if fnmatch.fnmatch(f, pattern)]
+            # Support both basename patterns (e.g., "package.xml") and full path patterns (e.g., ".cargo/config.toml")
+            # Use pathlib for robust cross-platform path handling
+            # Path is already imported at the top of the file
+            pattern_path = Path(pattern)
+            # If pattern_path has more than one part, treat as full path pattern
+            if len(pattern_path.parts) > 1:
+                # Full path pattern - use early termination for performance
+                matches = []
+                match_count = 0
+                for f in all_files:
+                    if Path(f).match(pattern):
+                        matches.append(str(f))
+                        match_count += 1
+                        # For performance, we only need to know if matches exist for most patterns
+                        # Only collect all matches for patterns that need content search or exclude_content
+                        if (
+                            pattern not in content_search_patterns
+                            and pattern not in exclude_content_patterns
+                            and match_count >= 1
+                        ):
+                            break
+            else:
+                # Basename pattern - match against filename only with early termination
+                matches = []
+                match_count = 0
+                for f in all_files:
+                    if fnmatch.fnmatch(Path(f).name, pattern):
+                        matches.append(str(f))
+                        match_count += 1
+                        # For performance, we only need to know if matches exist for most patterns
+                        if (
+                            pattern not in content_search_patterns
+                            and pattern not in exclude_content_patterns
+                            and match_count >= 1
+                        ):
+                            break
             duration = time.time() - start
             content_search_required = pattern in content_search_patterns
-            # Special handling for pyproject.toml: uv should only activate if [tool.pixi] is NOT present
-            if pattern == "pyproject.toml":
+            exclude_content_required = (
+                pattern in exclude_content_patterns
+                and exclude_content_patterns[pattern]["ext"] == ext
+            )
+
+            # Handle exclude_content patterns generically
+            if exclude_content_required:
+                exclude_pattern = exclude_content_patterns[pattern]["exclude"]
                 for f in matches:
                     fpath = os.path.join(workspace_path, f)
                     try:
                         with open(fpath, "r", encoding="utf-8") as file:
                             content = file.read()
-                        pixi_section = False
-                        if "[tool.pixi]" in content:
-                            pixi_section = True
-                        if ext == "pixi":
-                            # pixi handled by content_search, skip here
-                            continue
-                        if ext == "uv":
-                            if not pixi_section:
-                                print(
-                                    f"{GREEN}[auto-detect] {ext}: ✓ Detected {pattern} ({f}) without [tool.pixi] -> enabling [search took {duration:.3f}s]{RESET}"
-                                )
-                                found.add(ext)
-                            else:
-                                print(
-                                    f"{CYAN}[auto-detect] {ext}: Detected {pattern} ({f}) but [tool.pixi] present, NOT enabling [search took {duration:.3f}s]{RESET}"
-                                )
+                        if exclude_pattern not in content:
+                            print(
+                                f"{GREEN}[auto-detect] {ext}: ✓ Detected {pattern} without '{exclude_pattern}' -> enabling [search took {duration:.3f}s]{RESET}"
+                            )
+                            found.add(ext)
+                        else:
+                            print(
+                                f"{CYAN}[auto-detect] {ext}: Detected {pattern} but '{exclude_pattern}' present, NOT enabling [search took {duration:.3f}s]{RESET}"
+                            )
                     except Exception as e:
                         print(f"{CYAN}[auto-detect] {ext}: Error reading {fpath}: {e}{RESET}")
                 continue
             if matches:
                 if content_search_required:
                     print(
-                        f"{CYAN}[auto-detect] {ext}: Detected {pattern} ({len(matches)} matches), but content search required. Will check contents next. [search took {duration:.3f}s]{RESET}"
+                        f"{CYAN}[auto-detect] {ext}: Detected {pattern}, but content search required. Will check contents next. [search took {duration:.3f}s]{RESET}"
                     )
                 else:
                     print(
-                        f"{GREEN}[auto-detect] {ext}: ✓ Detected {pattern} ({len(matches)} matches) -> enabling [search took {duration:.3f}s]{RESET}"
+                        f"{GREEN}[auto-detect] {ext}: ✓ Detected {pattern} -> enabling [search took {duration:.3f}s]{RESET}"
                     )
                     found.add(ext)
             else:
@@ -231,7 +281,7 @@ class Auto(RockerExtension):
         print(f"[auto-detect] Total file walk and match time: {time.time() - start_total:.3f}s")
         return found
 
-    def _detect_exact_dir(self, workspace, patterns):
+    def _detect_exact_dir(self, workspace, patterns, check_home=True):
         found = set()
         # Check in workspace
         for dname, ext in patterns.items():
@@ -241,15 +291,16 @@ class Auto(RockerExtension):
                     f"\033[92m[auto-detect] {ext}: ✓ Detected {dname} directory in workspace -> enabling\033[0m"
                 )
                 found.add(ext)
-        # Check in user's home directory
-        home = Path.home()
-        for dname, ext in patterns.items():
-            dir_path = home / dname
-            if dir_path.is_dir():
-                print(
-                    f"\033[92m[auto-detect] {ext}: ✓ Detected {dname} directory in home -> enabling\033[0m"
-                )
-                found.add(ext)
+        # Check in user's home directory (can be disabled for testing)
+        if check_home:
+            home = Path.home()
+            for dname, ext in patterns.items():
+                dir_path = home / dname
+                if dir_path.is_dir():
+                    print(
+                        f"\033[92m[auto-detect] {ext}: ✓ Detected {dname} directory in home -> enabling\033[0m"
+                    )
+                    found.add(ext)
         return found
 
     def required(self, cliargs: dict) -> set[str]:
