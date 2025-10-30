@@ -3,4 +3,6 @@
 files:
   - "pixi.toml"
   - "pyproject.toml":
-      content_search: "[tool.pixi.project]"
+      content_search:
+        - "[tool.pixi.workspace]"
+        - "[tool.pixi.project]"
