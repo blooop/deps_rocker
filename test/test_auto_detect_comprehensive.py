@@ -159,7 +159,7 @@ replace-with = "vendored-sources"
     def test_content_search_detection(self):
         """Test that content search works with quoted filenames"""
         setup_files = {
-            "pyproject.toml": """[tool.pixi]
+            "pyproject.toml": """[tool.pixi.project]
 dependencies = ["python"]
 
 [project]
@@ -167,7 +167,7 @@ name = "test"
 """,
             "main.py": "print('hello')",  # Need a .py file to trigger uv
         }
-        # Should detect both pixi due to [tool.pixi] section and uv due to pyproject.toml + .py file
+        # Should detect both pixi due to [tool.pixi.project] section and uv due to pyproject.toml + .py file
         expected = {"pixi", "uv"}
         self._test_detection_in_dir(setup_files, expected)
 

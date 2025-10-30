@@ -7,11 +7,11 @@ from deps_rocker.extensions.auto.auto import Auto
 
 class TestAutoExtension(unittest.TestCase):
     def test_content_search_debug(self):
-        """Test that content search for '[tool.pixi]' only enables pixi when present, and prints debug info."""
+        """Test that content search for '[tool.pixi.project]' only enables pixi when present, and prints debug info."""
 
         def setup_with_section():
             with open("pyproject.toml", "w", encoding="utf-8") as f:
-                f.write("[tool.pixi]\nfoo = 'bar'\n")
+                f.write("[tool.pixi.project]\nfoo = 'bar'\n")
 
         def setup_without_section():
             with open("pyproject.toml", "w", encoding="utf-8") as f:
@@ -199,11 +199,11 @@ class TestAutoExtension(unittest.TestCase):
             os.chdir(original_dir)
 
     def test_detect_pixi_pyproject_with_section(self):
-        """Test detection of pyproject.toml with [tool.pixi] section for pixi"""
+        """Test detection of pyproject.toml with [tool.pixi.project] section for pixi"""
 
         def setup():
             with open("pyproject.toml", "w", encoding="utf-8") as f:
-                f.write("[tool.pixi]\nfoo = 'bar'\n")
+                f.write("[tool.pixi.project]\nfoo = 'bar'\n")
 
         def assertion(deps):
             self.assertIn("pixi", deps)
@@ -211,7 +211,7 @@ class TestAutoExtension(unittest.TestCase):
         self._test_in_dir(setup, assertion)
 
     def test_detect_pixi_pyproject_without_section(self):
-        """Test detection of pyproject.toml without [tool.pixi] section for pixi (should not activate)"""
+        """Test detection of pyproject.toml without [tool.pixi.project] section for pixi (should not activate)"""
 
         def setup():
             with open("pyproject.toml", "w", encoding="utf-8") as f:
