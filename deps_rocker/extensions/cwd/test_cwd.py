@@ -19,7 +19,7 @@ class TestCWD(unittest.TestCase):
         expected_path = f"{container_home}/{project_name}"
         uid = os.getuid()
         gid = os.getgid()
-        expected = f' -u {uid}:{gid} -v "{host_cwd}:{expected_path}" -w "{expected_path}"'
+        expected = f' -u {uid}:{gid} -v "{host_cwd}:{expected_path}:Z" -w "{expected_path}"'
         self.assertEqual(docker_args, expected)
 
     def test_get_docker_args_no_home(self):
@@ -30,6 +30,7 @@ class TestCWD(unittest.TestCase):
         self.assertIn(str(Path.cwd()), docker_args)
         self.assertIn("-u", docker_args)
         self.assertIn("-v", docker_args)
+        self.assertIn(":Z", docker_args)  # Check for SELinux flag
         self.assertIn("-w", docker_args)
 
     def test_invoke_after(self):

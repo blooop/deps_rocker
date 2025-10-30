@@ -36,10 +36,27 @@ class CWD(SimpleRockerExtension):
 
         # Mount CWD inside container home (e.g., ~/projectA), set working directory, and run as user
         container_project_path = f"{container_home}/{project_name}"
-        return f' -u {uid}:{gid} -v "{host_cwd}:{container_project_path}" -w "{container_project_path}"'
+        return f' -u {uid}:{gid} -v "{host_cwd}:{container_project_path}:Z" -w "{container_project_path}"'
 
     def invoke_after(self, cliargs) -> set:
         return {"user"}
+
+    def get_snippet(self, cliargs) -> str:
+        """
+        Add a Dockerfile snippet to create the mount point directory with proper ownership.
+        This ensures the mounted volume is accessible to the user.
+        """
+        container_home = cliargs.get("user_home_dir") or pwd.getpwuid(os.getuid()).pw_dir
+        host_cwd = Path.cwd()
+        project_name = host_cwd.name
+        container_project_path = f"{container_home}/{project_name}"
+        username = cliargs.get("user_name", pwd.getpwuid(os.getuid()).pw_name)
+
+        return f"""
+# Create mount point directory with correct ownership for CWD mount
+RUN mkdir -p "{container_project_path}" && \\
+    chown {username}:{username} "{container_project_path}"
+"""
 
 
 class CWDName(SimpleRockerExtension):
