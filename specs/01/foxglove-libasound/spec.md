@@ -4,3 +4,4 @@
 - Ensure the snippet stays BuildKit-friendly so cached mounts and CI builds keep working.
 - Validate the fix with `pixi r test-extension foxglove` and the full `pixi run ci`.
 - Ensure `test_foxglove_extension` executes (remove or prevent skip) so regressions surface.
+- Adopt the shared builder-cache pattern so Foxglove assets download once and are copied into the final image.
