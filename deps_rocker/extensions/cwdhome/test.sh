@@ -3,26 +3,37 @@ set -e
 
 echo "Testing cwdhome extension..."
 
-# Test that the current directory is the home directory
-if [ "$(pwd)" != "$HOME" ]; then
-    echo "ERROR: Current directory is not home directory"
+# Get the expected directory name (should be the last component of PWD)
+EXPECTED_DIR=$(basename "$(pwd)")
+echo "Current directory: $(pwd)"
+echo "Expected to be in: $HOME/$EXPECTED_DIR"
+
+# Test that the current directory is inside the home directory
+# PWD should be $HOME/<project_name>
+if [[ "$(pwd)" != "$HOME"/* ]]; then
+    echo "ERROR: Current directory is not inside home directory"
     echo "PWD: $(pwd)"
     echo "HOME: $HOME"
     exit 1
 fi
 
+# Test that we're in a subdirectory of home (not home itself)
+if [ "$(pwd)" = "$HOME" ]; then
+    echo "ERROR: Current directory should be $HOME/<project_name>, not $HOME itself"
+    echo "PWD: $(pwd)"
+    exit 1
+fi
+
 # Test that we can see files from the host CWD
-# The test framework should mount the host CWD to the container home
-# We should be able to see at least some standard directories
 echo "Current directory contents:"
 ls -la
 
 # Create a test file to verify write access
-TEST_FILE="$HOME/cwdhome_test_file.txt"
+TEST_FILE="cwdhome_test_file.txt"
 echo "test content" > "$TEST_FILE"
 
 if [ ! -f "$TEST_FILE" ]; then
-    echo "ERROR: Could not create test file in home directory"
+    echo "ERROR: Could not create test file in current directory"
     exit 1
 fi
 
@@ -30,3 +41,4 @@ fi
 rm "$TEST_FILE"
 
 echo "cwdhome extension test completed successfully!"
+echo "Working directory $(pwd) is correctly inside home at $HOME"
