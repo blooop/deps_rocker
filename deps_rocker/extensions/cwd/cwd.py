@@ -39,18 +39,17 @@ class CWD(SimpleRockerExtension):
     def get_snippet(self, cliargs) -> str:
         """
         Add a Dockerfile snippet to create mount point with proper permissions.
-        The mounted volume will be made accessible by the user.
+        The mounted volume will be made accessible to all users.
         """
         container_home = cliargs.get("user_home_dir") or pwd.getpwuid(os.getuid()).pw_dir
         host_cwd = Path.cwd()
         project_name = host_cwd.name
         container_project_path = f"{container_home}/{project_name}"
-        username = cliargs.get("user_name", pwd.getpwuid(os.getuid()).pw_name)
 
         return f"""
 # Set up mount point for CWD with proper permissions
-# Create the directory structure with world-writable temp permissions
-# These will be fixed when the container runs via sudo in the entrypoint
+# Create the directory structure with world-writable permissions
+# This ensures the mounted volume is accessible regardless of which user runs the container
 RUN mkdir -p "{container_project_path}" && \\
     chmod 777 "{container_project_path}"
 """
