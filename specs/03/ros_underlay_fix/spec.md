@@ -1,25 +1,24 @@
 # Fix ROS Underlay Dependencies and Build Order
 
 ## Problem
-When using the ros_jazzy extension with a dynamically loaded ROS 2 demo repository (via `auto=/path/to/demos`), the colcon build fails with CMake errors about missing package configuration files like `example_interfacesConfig.cmake`. The underlay dependencies are not being properly installed or the underlay is not being built before the main workspace build attempts to find those packages.
+When using the ros_jazzy extension with a dynamically loaded ROS 2 demo repository (via `renv ros2/demos`), the colcon build fails with CMake errors about missing package configuration files like `example_interfacesConfig.cmake`. The issue is that the underlay build logic is building the wrong underlay workspace.
 
 ## Root Cause
-The user-side Docker initialization (ros_jazzy_user_snippet.Dockerfile) only sources the underlay if it already exists from the build stage, but when the underlay is provided at runtime (via auto parameter), the `underlay_deps.sh` and `underlay_build.sh` scripts are never executed in the user container environment. This causes:
+The user-side Docker initialization (ros_jazzy_user_snippet.Dockerfile) has logic to build underlay dependencies, but it's checking for packages in the static `/ros_ws/underlay` directory (populated from `consolidated.repos` during Docker build) instead of the dynamically mounted workspace that contains the actual packages being built. When using `renv ros2/demos`, the demos repository gets mounted to `/home/ags/demos`, but the underlay fix incorrectly builds dependencies for unrelated packages in `/ros_ws/underlay`. This causes:
 
-1. System dependencies for underlay packages are never installed via rosdep
-2. Underlay packages are never compiled, so CMake config files don't exist
-3. Main workspace colcon build fails trying to find transitive dependencies from the underlay
+1. Wrong underlay packages are built (from consolidated.repos instead of current workspace)
+2. The actual workspace packages don't have their dependencies installed via rosdep
+3. Main workspace colcon build fails because it lacks the correct dependencies
 
 ## Solution
-Update the bashrc initialization in ros_jazzy_user_snippet.Dockerfile to explicitly call the underlay helper scripts before the main colcon build:
+Update the bashrc initialization in ros_jazzy_user_snippet.Dockerfile to check for packages in the current workspace directory instead of the static underlay path:
 
-1. Check if the underlay directory contains packages (package.xml files)
-2. If it does, run `underlay_deps.sh` to install system dependencies via rosdep
-3. Run `underlay_build.sh` to compile the underlay packages
-4. Source the underlay install setup.bash
-5. Then proceed with the main colcon build
+1. Check if the current workspace (`$ROS_WORKSPACE_ROOT`, typically `/ros_ws`) contains packages
+2. If it does, run rosdep to install system dependencies for the current workspace
+3. Skip the underlay build steps since we're building the main workspace, not an underlay
+4. Then proceed with the main colcon build with proper dependencies installed
 
-This ensures proper dependency resolution and package availability before the main build starts.
+This ensures that dependencies are installed for the actual packages being built, not unrelated underlay packages.
 
 ## Changes
-- Modified `ros_jazzy_user_snippet.Dockerfile:20` to add pre-build checks and underlay building
+- Modified `ros_jazzy_user_snippet.Dockerfile` to install dependencies for the current workspace instead of building a separate underlay
