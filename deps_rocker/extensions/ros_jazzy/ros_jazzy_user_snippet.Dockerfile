@@ -39,7 +39,7 @@ ENV COLCON_DEFAULTS_FILE=@(user_home_dir)/colcon-defaults.yaml
 RUN echo "source /opt/ros/jazzy/setup.bash" >> @(user_home_dir)/.bashrc
 RUN printf '%s\n' 'if [ -n "${ROS_UNDERLAY_INSTALL:-}" ] && [ -f "${ROS_UNDERLAY_INSTALL}/setup.bash" ]; then source "${ROS_UNDERLAY_INSTALL}/setup.bash"; fi' >> @(user_home_dir)/.bashrc
 
-RUN printf '%s\n' '' '# Run colcon build on first container start' 'if [ ! -f "@(user_home_dir)/.colcon_built" ]; then' '  echo "Running colcon build for first time setup..."' '  source /opt/ros/jazzy/setup.bash' '  if [ -n "${ROS_UNDERLAY_INSTALL:-}" ] && [ -f "${ROS_UNDERLAY_INSTALL}/setup.bash" ]; then' '    source "${ROS_UNDERLAY_INSTALL}/setup.bash"' '  fi' '  cd $ROS_WORKSPACE_ROOT && colcon build' '  touch @(user_home_dir)/.colcon_built' 'fi' >> @(user_home_dir)/.bashrc
+RUN printf '%s\n' '' '# Run colcon build on first container start' 'if [ ! -f "@(user_home_dir)/.colcon_built" ]; then' '  echo "Running colcon build for first time setup..."' '  source /opt/ros/jazzy/setup.bash' '  if [ -n "${ROS_UNDERLAY_INSTALL:-}" ] && [ -f "${ROS_UNDERLAY_INSTALL}/setup.bash" ]; then' '    source "${ROS_UNDERLAY_INSTALL}/setup.bash"' '  fi' '  # Try to build in current directory if it has a src folder, otherwise build in ros_ws' '  if [ -d "src" ]; then' '    colcon build' '  else' '    cd $ROS_WORKSPACE_ROOT && colcon build' '  fi' '  touch @(user_home_dir)/.colcon_built' 'fi' >> @(user_home_dir)/.bashrc
 
 RUN printf '%s\n' 'if [ -f "/usr/local/share/vcstool-completion/vcs.bash" ]; then source "/usr/local/share/vcstool-completion/vcs.bash"; fi' >> @(user_home_dir)/.bashrc
 
