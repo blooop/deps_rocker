@@ -73,6 +73,7 @@ cwd_name = "deps_rocker.extensions.cwd.cwd:CWDName"
 
 #utils
 auto = "deps_rocker.extensions.auto.auto:Auto"
+cache_perms = "deps_rocker.extensions.cache_perms.cache_perms:CachePerms"
 curl = "deps_rocker.extensions.curl.curl:Curl"
 locales = "deps_rocker.extensions.locales.locales:Locales"
 tzdata = "deps_rocker.extensions.tzdata.tzdata:TzData"
