@@ -343,6 +343,18 @@ class TestAutoExtension(unittest.TestCase):
         finally:
             os.chdir(original_dir)
 
+    def _test_in_dir_with_transitive(self, setup_func, assertion_func):
+        """Helper to run a test in the test directory with transitive dependencies"""
+        original_dir = os.getcwd()
+        try:
+            os.chdir(self.test_dir)
+            setup_func()
+            # Use required() to get both direct and transitive dependencies
+            deps = self.auto.required({"auto": self.test_dir})
+            assertion_func(deps)
+        finally:
+            os.chdir(original_dir)
+
     def test_transitive_dependencies_collected(self):
         """Test that transitive dependencies are properly collected"""
 
@@ -356,7 +368,8 @@ class TestAutoExtension(unittest.TestCase):
             # curl should be included as npm's transitive dependency
             self.assertIn("curl", deps)
 
-        self._test_in_dir(setup, assertion)
+        # This test needs to use required() to get transitive dependencies
+        self._test_in_dir_with_transitive(setup, assertion)
 
 
 if __name__ == "__main__":
