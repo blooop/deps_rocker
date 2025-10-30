@@ -27,10 +27,11 @@ class Foxglove(SimpleRockerExtension):
 
     def get_docker_args(self, cliargs) -> str:
         """
-        Mount Foxglove Agent persistent storage and enable browser integration:
+        Mount Foxglove Agent persistent storage:
         - Named volume for agent index: foxglove-agent-index:/index
         - Host directory for recordings: ${HOME}/foxglove_recordings:/storage
-        - Host network for browser link integration
+
+        Note: Browser integration is provided via x11 dependency for GUI forwarding.
         """
         home_dir = os.path.expanduser("~")
         recordings_dir = os.path.join(home_dir, "foxglove_recordings")
@@ -38,10 +39,7 @@ class Foxglove(SimpleRockerExtension):
         # Create recordings directory if it doesn't exist
         os.makedirs(recordings_dir, exist_ok=True)
 
-        volume_args = f' -v foxglove-agent-index:/index -v "{recordings_dir}:/storage"'
-        network_args = " --network host"  # Enable browser integration
-
-        return volume_args + network_args
+        return f' -v foxglove-agent-index:/index -v "{recordings_dir}:/storage"'
 
     def get_files(self, cliargs) -> dict[str, str]:
         files = super().get_files(cliargs) or {}
