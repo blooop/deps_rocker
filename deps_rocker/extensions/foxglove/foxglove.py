@@ -17,7 +17,7 @@ class Foxglove(SimpleRockerExtension):
         "libdrm2",
         "libgbm1",
         "libxcb-dri3-0",
-        "libasound2",
+        "libasound2t64",
         "desktop-file-utils",
         "gnupg",
     ]

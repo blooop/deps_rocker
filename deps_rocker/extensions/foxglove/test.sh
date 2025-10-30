@@ -18,6 +18,6 @@ fi
 
 # Check version (this should work even without display)
 echo "Testing foxglove-studio version..."
-foxglove-studio --version
+dpkg-query -W -f='${Version}\n' foxglove-studio
 
 echo "Foxglove Studio extension test completed successfully!"

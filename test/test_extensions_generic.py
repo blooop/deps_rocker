@@ -2,6 +2,10 @@ import unittest
 import pytest
 import io
 import tempfile
+import importlib
+import importlib.util
+import sys
+from pathlib import Path
 from rocker.core import DockerImageGenerator, list_plugins, get_docker_client
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
@@ -65,20 +69,68 @@ CMD [\"echo\", \"Extension test complete\"]
             pass
 
     def setUp(self):
-        self.all_plugins = list_plugins()
+        self.all_plugins = self._discover_plugins()
         self.working_extension_names = self.get_working_extensions()
 
     def get_working_extensions(self):
-        all_plugins = list_plugins()
         working_extensions = []
         for name in self.EXTENSIONS_TO_TEST:
-            if name in all_plugins:
-                plugin_class = all_plugins[name]
+            if name in self.all_plugins:
+                plugin_class = self.all_plugins[name]
                 if hasattr(plugin_class, "__module__") and plugin_class.__module__.startswith(
                     "deps_rocker"
                 ):
                     working_extensions.append(name)
         return working_extensions
+
+    def _discover_plugins(self):
+        """Merge installed rocker entry points with extensions available in-source."""
+        plugins = list_plugins()
+        for name in self.EXTENSIONS_TO_TEST:
+            if name in plugins:
+                continue
+            plugin_class = self._load_local_extension(name)
+            if plugin_class is not None:
+                plugins[name] = plugin_class
+        return plugins
+
+    def _load_local_extension(self, extension_name):
+        """Attempt to import a deps_rocker extension directly from the source tree."""
+        module = None
+        module_path = (
+            Path(__file__).resolve().parent.parent
+            / "deps_rocker"
+            / "extensions"
+            / extension_name
+            / f"{extension_name}.py"
+        )
+
+        if module_path.exists():
+            spec = importlib.util.spec_from_file_location(
+                f"deps_rocker.extensions.{extension_name}.{extension_name}_local", module_path
+            )
+            if spec and spec.loader:
+                module = importlib.util.module_from_spec(spec)
+                sys.modules[spec.name] = module
+                spec.loader.exec_module(module)
+
+        if module is None:
+            module_name = f"deps_rocker.extensions.{extension_name}.{extension_name}"
+            try:
+                module = importlib.import_module(module_name)
+            except ModuleNotFoundError:
+                return None
+
+        for attr_name in dir(module):
+            attr = getattr(module, attr_name)
+            if (
+                isinstance(attr, type)
+                and issubclass(attr, SimpleRockerExtension)
+                and attr is not SimpleRockerExtension
+                and getattr(attr, "name", None) == extension_name
+            ):
+                return attr
+        return None
 
     def _build_base_cliargs(self, **additional_args):
         """Helper to build base cliargs with common settings"""
@@ -100,6 +152,7 @@ CMD [\"echo\", \"Extension test complete\"]
 
         # Use rocker's extension manager to properly resolve and sort dependencies
         manager = RockerExtensionManager()
+        manager.available_plugins.update(self.all_plugins)
 
         cliargs = self._build_base_cliargs(**{extension_name: True})
         if extension_name == "odeps_dependencies":
