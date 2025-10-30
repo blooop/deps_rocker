@@ -79,7 +79,6 @@ tzdata = "deps_rocker.extensions.tzdata.tzdata:TzData"
 ssh_client = "deps_rocker.extensions.ssh_client.ssh_client:SshClient"
 git_clone = "deps_rocker.extensions.git_clone.git_clone:GitClone"
 detach = "deps_rocker.extensions.detach.detach:Detach"
-snap = "deps_rocker.extensions.snap.snap:Snap"
 
 #dev tools
 ccache = "deps_rocker.extensions.ccache.ccache:Ccache"
