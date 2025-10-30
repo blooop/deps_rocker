@@ -73,15 +73,12 @@ def test_all_extension_subdirectory_detection():
             "uv": "requirements.txt files",
         }
 
-        success = True
         for ext, description in expected_detections.items():
             if ext in detected:
                 print(f"✅ SUCCESS: {ext} detected from {description} in subdirectories")
             else:
                 print(f"❌ FAILED: {ext} NOT detected from {description} in subdirectories")
-                success = False
-
-        return success
+                assert False, f"{ext} NOT detected from {description} in subdirectories"
 
     finally:
         os.chdir(original_dir)
@@ -91,8 +88,8 @@ def test_all_extension_subdirectory_detection():
 
 
 if __name__ == "__main__":
-    success = test_all_extension_subdirectory_detection()
-    if success:
+    try:
+        test_all_extension_subdirectory_detection()
         print("\n🎉 ALL extensions now properly detect files in subdirectories!")
-    else:
-        print("\n💥 Some extensions still have subdirectory detection issues!")
+    except AssertionError as e:
+        print(f"\n💥 Some extensions still have subdirectory detection issues: {e}")
