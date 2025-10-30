@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "Testing cwdhome extension..."
+echo "Testing cwd extension..."
 
 # Get the expected directory name (should be the last component of PWD)
 EXPECTED_DIR=$(basename "$(pwd)")
@@ -29,7 +29,7 @@ echo "Current directory contents:"
 ls -la
 
 # Create a test file to verify write access
-TEST_FILE="cwdhome_test_file.txt"
+TEST_FILE="cwd_test_file.txt"
 echo "test content" > "$TEST_FILE"
 
 if [ ! -f "$TEST_FILE" ]; then
@@ -40,5 +40,5 @@ fi
 # Clean up
 rm "$TEST_FILE"
 
-echo "cwdhome extension test completed successfully!"
+echo "cwd extension test completed successfully!"
 echo "Working directory $(pwd) is correctly inside home at $HOME"
