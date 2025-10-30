@@ -16,6 +16,7 @@ class CWD(SimpleRockerExtension):
         """
         Mount the current working directory inside the container's home directory
         at ~/project_name and set the working directory to that location.
+        Also runs the container as the user (not root).
         """
         # Get the container home directory from user extension
         container_home = cliargs.get("user_home_dir") or pwd.getpwuid(os.getuid()).pw_dir
@@ -29,9 +30,13 @@ class CWD(SimpleRockerExtension):
         host_cwd = Path.cwd()
         project_name = host_cwd.name
 
-        # Mount CWD inside container home (e.g., ~/projectA) and set working directory to it
+        # Get user ID and group ID to run container as the user
+        uid = os.getuid()
+        gid = os.getgid()
+
+        # Mount CWD inside container home (e.g., ~/projectA), set working directory, and run as user
         container_project_path = f"{container_home}/{project_name}"
-        return f' -v "{host_cwd}:{container_project_path}" -w "{container_project_path}"'
+        return f' -u {uid}:{gid} -v "{host_cwd}:{container_project_path}" -w "{container_project_path}"'
 
     def invoke_after(self, cliargs) -> set:
         return {"user"}

@@ -6,20 +6,25 @@ echo "Testing cwd extension..."
 # Get the expected directory name (should be the last component of PWD)
 EXPECTED_DIR=$(basename "$(pwd)")
 echo "Current directory: $(pwd)"
-echo "Expected to be in: $HOME/$EXPECTED_DIR"
 
-# Test that the current directory is inside the home directory
-# PWD should be $HOME/<project_name>
-if [[ "$(pwd)" != "$HOME"/* ]]; then
-    echo "ERROR: Current directory is not inside home directory"
+# Get the actual home directory for the current user (not $HOME env var)
+ACTUAL_HOME=$(getent passwd "$(whoami)" | cut -d: -f6)
+echo "Actual user home: $ACTUAL_HOME"
+echo "HOME env var: $HOME"
+echo "Expected to be in: $ACTUAL_HOME/$EXPECTED_DIR"
+
+# Test that the current directory is inside the actual user's home directory
+# PWD should be $ACTUAL_HOME/<project_name>
+if [[ "$(pwd)" != "$ACTUAL_HOME"/* ]]; then
+    echo "ERROR: Current directory is not inside user's home directory"
     echo "PWD: $(pwd)"
-    echo "HOME: $HOME"
+    echo "Actual user home: $ACTUAL_HOME"
     exit 1
 fi
 
 # Test that we're in a subdirectory of home (not home itself)
-if [ "$(pwd)" = "$HOME" ]; then
-    echo "ERROR: Current directory should be $HOME/<project_name>, not $HOME itself"
+if [ "$(pwd)" = "$ACTUAL_HOME" ]; then
+    echo "ERROR: Current directory should be $ACTUAL_HOME/<project_name>, not $ACTUAL_HOME itself"
     echo "PWD: $(pwd)"
     exit 1
 fi
@@ -41,4 +46,4 @@ fi
 rm "$TEST_FILE"
 
 echo "cwd extension test completed successfully!"
-echo "Working directory $(pwd) is correctly inside home at $HOME"
+echo "Working directory $(pwd) is correctly inside user home at $ACTUAL_HOME"

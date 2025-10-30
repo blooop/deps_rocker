@@ -17,7 +17,9 @@ class TestCWD(unittest.TestCase):
         host_cwd = Path.cwd()
         project_name = host_cwd.name
         expected_path = f"{container_home}/{project_name}"
-        expected = f' -v "{host_cwd}:{expected_path}" -w "{expected_path}"'
+        uid = os.getuid()
+        gid = os.getgid()
+        expected = f' -u {uid}:{gid} -v "{host_cwd}:{expected_path}" -w "{expected_path}"'
         self.assertEqual(docker_args, expected)
 
     def test_get_docker_args_no_home(self):
@@ -26,6 +28,7 @@ class TestCWD(unittest.TestCase):
         docker_args = cwd_ext.get_docker_args(cliargs)
         # Should still work with fallback
         self.assertIn(str(Path.cwd()), docker_args)
+        self.assertIn("-u", docker_args)
         self.assertIn("-v", docker_args)
         self.assertIn("-w", docker_args)
 
