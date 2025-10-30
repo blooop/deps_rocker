@@ -71,7 +71,7 @@ class RosJazzy(SimpleRockerExtension):
                     except Exception as e:
                         print(f"ROS Jazzy: failed to parse {repos_file}: {e}")
                         continue
-                    if repos_data and "repositories" in repos_data:
+                    if repos_data and "repositories" in repos_data and repos_data["repositories"]:
                         # Check for duplicate repository entries
                         for repo_name, repo_info in repos_data["repositories"].items():
                             if repo_name in merged_repos["repositories"]:
