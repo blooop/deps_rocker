@@ -1,4 +1,5 @@
 import os
+import pwd
 import hashlib
 import yaml
 from pathlib import Path
@@ -11,6 +12,20 @@ class RosJazzy(SimpleRockerExtension):
     name = "ros_jazzy"
 
     depends_on_extension = ("curl", "git_clone")
+
+    @property
+    def empy_user_args(self):
+        """Provide user_home_dir for template expansion"""
+        # Get the user home directory from the current user
+        user_home = pwd.getpwuid(os.getuid()).pw_dir
+        return {"user_home_dir": user_home}
+
+    @property
+    def empy_args(self):
+        """Provide user_home_dir for template expansion in main snippet too"""
+        user_home = pwd.getpwuid(os.getuid()).pw_dir
+        return {"user_home_dir": user_home}
+
     # Use apt_packages feature for ROS dependencies
     apt_packages = [
         "locales",
@@ -33,7 +48,17 @@ class RosJazzy(SimpleRockerExtension):
         return super().invoke_after({"gemini", "claude", "codex"})
 
     def get_files(self, cliargs) -> dict[str, str]:
-        dat = self.get_config_file("configs/colcon-defaults.yaml")
+        # Expand colcon-defaults template with user home directory
+        import em
+
+        user_home = pwd.getpwuid(os.getuid()).pw_dir
+        colcon_template_bytes = self.get_config_file("configs/colcon-defaults.yaml.em")
+        # Convert bytes to string if needed
+        if isinstance(colcon_template_bytes, bytes):
+            colcon_template = colcon_template_bytes.decode("utf-8")
+        else:
+            colcon_template = colcon_template_bytes
+        dat = em.expand(colcon_template, {"user_home_dir": user_home})
 
         # Get underlay build scripts
         script_dir = Path(__file__).parent

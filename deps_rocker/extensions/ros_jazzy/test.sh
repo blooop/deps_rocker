@@ -174,12 +174,12 @@ test_workspace_chaining() {
     echo "✓ Successfully built package depending on underlay"
 
     # Test that we can source the built workspace
-    if [ ! -f install/setup.bash ]; then
-        echo "ERROR: Built workspace setup.bash not found"
+    if [ ! -f "$ROS_INSTALL_BASE/setup.bash" ]; then
+        echo "ERROR: Built workspace setup.bash not found at $ROS_INSTALL_BASE/setup.bash"
         exit 1
     fi
 
-    source install/setup.bash
+    source "$ROS_INSTALL_BASE/setup.bash"
     echo "✓ Successfully sourced built workspace"
 
     # Verify the test package is now in the package list
