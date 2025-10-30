@@ -143,25 +143,31 @@ class Auto(RockerExtension):
                         try:
                             with open(fpath, "r", encoding="utf-8") as f:
                                 content = f.read()
-                            # Use plain substring match for '[tool.pixi]' pattern
-                            # Special case for pixi to handle multiple content search patterns
-                            if search in ["[tool.pixi.project]", "[tool.pixi]"]:
-                                # Match either [tool.pixi] or [tool.pixi.project]
-                                found_section = bool(
-                                    re.search(
-                                        r"^\s*\[tool\.pixi(\.project)?\]\s*$", content, re.MULTILINE
+                            # Handle both single patterns and lists of patterns
+                            if isinstance(search, list):
+                                # Multiple patterns - match any of them
+                                found_section = False
+                                for pattern in search:
+                                    if re.search(pattern, content, re.MULTILINE):
+                                        found_section = True
+                                        search_display = pattern  # For logging
+                                        break
+                                if not found_section:
+                                    search_display = (
+                                        f"any of {search}"  # For logging when none match
                                     )
-                                )
                             else:
+                                # Single pattern
                                 found_section = bool(re.search(search, content, re.MULTILINE))
+                                search_display = search
                             if found_section:
                                 print(
-                                    f"{GREEN}[auto-detect] {ext}: Found content '{search}' in {fpath} -> enabling{RESET}"
+                                    f"{GREEN}[auto-detect] {ext}: Found content '{search_display}' in {fpath} -> enabling{RESET}"
                                 )
                                 found.add(ext)
                             else:
                                 print(
-                                    f"{CYAN}[auto-detect] {ext}: Found {fname} but content '{search}' NOT found in {fpath} -> NOT enabling{RESET}"
+                                    f"{CYAN}[auto-detect] {ext}: Found {fname} but content '{search_display}' NOT found in {fpath} -> NOT enabling{RESET}"
                                 )
                         except Exception as e:
                             print(f"{CYAN}[auto-detect] {ext}: Error reading {fpath}: {e}{RESET}")
