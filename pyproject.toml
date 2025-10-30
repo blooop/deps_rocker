@@ -70,6 +70,7 @@ cargo = "deps_rocker.extensions.cargo.cargo:Cargo"
 #host file system access
 cwd = "deps_rocker.extensions.cwd.cwd:CWD"
 cwd_name = "deps_rocker.extensions.cwd.cwd:CWDName"
+cwdhome = "deps_rocker.extensions.cwdhome.cwdhome:CWDHome"
 
 #utils
 auto = "deps_rocker.extensions.auto.auto:Auto"

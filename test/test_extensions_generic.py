@@ -24,6 +24,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         # "gitui",
         "lazygit",
         "cwd",
+        "cwdhome",
         "ccache",
         "claude",
         "codex",
@@ -163,6 +164,9 @@ CMD [\"echo\", \"Extension test complete\"]
 
     def test_cwd_extension(self):
         self.run_extension_build_and_test("cwd")
+
+    def test_cwdhome_extension(self):
+        self.run_extension_build_and_test("cwdhome")
 
     def test_ccache_extension(self):
         self.run_extension_build_and_test("ccache")
