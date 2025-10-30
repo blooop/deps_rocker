@@ -44,6 +44,3 @@ RUN printf '%s\n' '' '# Run colcon build on first container start' 'if [ ! -f "@
 RUN printf '%s\n' 'if [ -f "/usr/local/share/vcstool-completion/vcs.bash" ]; then source "/usr/local/share/vcstool-completion/vcs.bash"; fi' >> @(user_home_dir)/.bashrc
 
 RUN printf '%s\n' 'if [ -f "$ROS_INSTALL_BASE/setup.bash" ]; then source "$ROS_INSTALL_BASE/setup.bash"; fi' >> @(user_home_dir)/.bashrc
-
-# Set working directory to ros_ws by default (will be overridden by cwd extension if used)
-WORKDIR @(user_home_dir)/ros_ws
