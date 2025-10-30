@@ -7,6 +7,8 @@ class Foxglove(SimpleRockerExtension):
 
     name = "foxglove"
     depends_on_extension = ("curl",)
+    builder_apt_packages = ["curl", "ca-certificates"]
+    empy_args = {"FOXGLOVE_VERSION": "2.34.0"}
     apt_packages = [
         "libgtk-3-0",
         "libnotify4",
