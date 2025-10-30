@@ -1,4 +1,5 @@
 import os
+import pkgutil
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
@@ -37,3 +38,11 @@ class Foxglove(SimpleRockerExtension):
         os.makedirs(recordings_dir, exist_ok=True)
 
         return f' -v foxglove-agent-index:/index -v "{recordings_dir}:/storage"'
+
+    def get_files(self, cliargs) -> dict[str, str]:
+        files = super().get_files(cliargs) or {}
+        wrapper_data = pkgutil.get_data(__name__, "foxglove_wrapper.sh")
+        if wrapper_data is None:
+            raise FileNotFoundError("foxglove_wrapper.sh not found in package data")
+        files["foxglove_wrapper.sh"] = wrapper_data.decode("utf-8")
+        return files

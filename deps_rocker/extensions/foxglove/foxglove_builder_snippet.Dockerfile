@@ -18,3 +18,5 @@ RUN --mount=type=cache,target=/tmp/foxglove-cache,sharing=locked,id=foxglove-deb
     dpkg-deb --info \"\$CACHE_DEB\" > /dev/null 2>&1 && \
     install -Dm644 \"\$CACHE_DEB\" \"\$OUTPUT_DIR/foxglove-studio.deb\" && \
     printf '%s' \"\${FOXGLOVE_VERSION}\" > \"\$OUTPUT_DIR/version.txt\""
+
+COPY foxglove_wrapper.sh @(f"{builder_output_dir}/foxglove_wrapper.sh")

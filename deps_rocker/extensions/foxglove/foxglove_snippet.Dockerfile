@@ -3,6 +3,7 @@ ARG FOXGLOVE_VERSION=@FOXGLOVE_VERSION@
 
 @(f"COPY --from={builder_stage} {builder_output_dir}/foxglove-studio.deb /tmp/foxglove-studio.deb")
 @(f"COPY --from={builder_stage} {builder_output_dir}/version.txt /tmp/foxglove-version.txt")
+@(f"COPY --from={builder_stage} {builder_output_dir}/foxglove_wrapper.sh /usr/local/bin/foxglove-studio")
 
 RUN bash -c "set -euxo pipefail && \
     printf '%s' \"${FOXGLOVE_VERSION}\" > /tmp/expected-foxglove-version && \
@@ -11,3 +12,5 @@ RUN bash -c "set -euxo pipefail && \
     dpkg -i /tmp/foxglove-studio.deb && \
     rm /tmp/foxglove-studio.deb /tmp/foxglove-version.txt /tmp/expected-foxglove-version && \
     rm -f /etc/apt/sources.list.d/foxglove-studio.list"
+
+RUN chmod +x /usr/local/bin/foxglove-studio
