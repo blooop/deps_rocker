@@ -54,7 +54,7 @@ class TestAutoExtension(unittest.TestCase):
         def setup():
             subdir = Path("subdir")
             subdir.mkdir(exist_ok=True)
-            # Create pyproject.toml WITHOUT [tool.pixi] and WITH a .py file to trigger uv
+            # Create pyproject.toml WITHOUT [tool.pixi.project] and WITH a .py file to trigger uv
             with open(subdir / "pyproject.toml", "w", encoding="utf-8") as f:
                 f.write("[project]\nname = 'test'\n")
             with open(subdir / "main.py", "w", encoding="utf-8") as f:
