@@ -7,11 +7,11 @@ from deps_rocker.extensions.auto.auto import Auto
 
 class TestAutoExtension(unittest.TestCase):
     def test_content_search_debug(self):
-        """Test that content search for '[tool.pixi]' only enables pixi when present, and prints debug info."""
+        """Test that content search for '[tool.pixi.project]' only enables pixi when present, and prints debug info."""
 
         def setup_with_section():
             with open("pyproject.toml", "w", encoding="utf-8") as f:
-                f.write("[tool.pixi]\nfoo = 'bar'\n")
+                f.write("[tool.pixi.project]\nfoo = 'bar'\n")
 
         def setup_without_section():
             with open("pyproject.toml", "w", encoding="utf-8") as f:
@@ -54,7 +54,7 @@ class TestAutoExtension(unittest.TestCase):
         def setup():
             subdir = Path("subdir")
             subdir.mkdir(exist_ok=True)
-            # Create pyproject.toml WITHOUT [tool.pixi] and WITH a .py file to trigger uv
+            # Create pyproject.toml WITHOUT [tool.pixi.project] and WITH a .py file to trigger uv
             with open(subdir / "pyproject.toml", "w", encoding="utf-8") as f:
                 f.write("[project]\nname = 'test'\n")
             with open(subdir / "main.py", "w", encoding="utf-8") as f:
@@ -193,17 +193,18 @@ class TestAutoExtension(unittest.TestCase):
         try:
             os.chdir(self.test_dir)
             setup_func()
-            deps = self.auto.required({})
+            # Use required() method to detect dependencies
+            deps = self.auto.required({"auto": self.test_dir})
             assertion_func(deps)
         finally:
             os.chdir(original_dir)
 
     def test_detect_pixi_pyproject_with_section(self):
-        """Test detection of pyproject.toml with [tool.pixi] section for pixi"""
+        """Test detection of pyproject.toml with [tool.pixi.project] section for pixi"""
 
         def setup():
             with open("pyproject.toml", "w", encoding="utf-8") as f:
-                f.write("[tool.pixi]\nfoo = 'bar'\n")
+                f.write("[tool.pixi.project]\nfoo = 'bar'\n")
 
         def assertion(deps):
             self.assertIn("pixi", deps)
@@ -211,7 +212,7 @@ class TestAutoExtension(unittest.TestCase):
         self._test_in_dir(setup, assertion)
 
     def test_detect_pixi_pyproject_without_section(self):
-        """Test detection of pyproject.toml without [tool.pixi] section for pixi (should not activate)"""
+        """Test detection of pyproject.toml without [tool.pixi.project] section for pixi (should not activate)"""
 
         def setup():
             with open("pyproject.toml", "w", encoding="utf-8") as f:
@@ -340,6 +341,18 @@ class TestAutoExtension(unittest.TestCase):
         finally:
             os.chdir(original_dir)
 
+    def _test_in_dir_with_transitive(self, setup_func, assertion_func):
+        """Helper to run a test in the test directory with transitive dependencies"""
+        original_dir = os.getcwd()
+        try:
+            os.chdir(self.test_dir)
+            setup_func()
+            # Use required() to get both direct and transitive dependencies
+            deps = self.auto.required({"auto": self.test_dir})
+            assertion_func(deps)
+        finally:
+            os.chdir(original_dir)
+
     def test_transitive_dependencies_collected(self):
         """Test that transitive dependencies are properly collected"""
 
@@ -353,7 +366,8 @@ class TestAutoExtension(unittest.TestCase):
             # curl should be included as npm's transitive dependency
             self.assertIn("curl", deps)
 
-        self._test_in_dir(setup, assertion)
+        # This test needs to use required() to get transitive dependencies
+        self._test_in_dir_with_transitive(setup, assertion)
 
 
 if __name__ == "__main__":
