@@ -94,7 +94,10 @@ class Auto(RockerExtension):
         # Use only patterns from auto_detect.yml files for all extensions
         tasks = [
             (self._detect_exact_dir, (workspace, dir_patterns, check_home)),
-            (self._detect_glob_patterns, (workspace, file_patterns, exclude_content_patterns)),
+            (
+                self._detect_glob_patterns,
+                (workspace, file_patterns, exclude_content_patterns, content_search_patterns),
+            ),
             (self._detect_content_search, (workspace, content_search_patterns)),
         ]
 
@@ -168,7 +171,9 @@ class Auto(RockerExtension):
                 )
         return found
 
-    def _detect_glob_patterns(self, workspace, file_patterns, exclude_content_patterns):
+    def _detect_glob_patterns(
+        self, workspace, file_patterns, exclude_content_patterns, content_search_patterns
+    ):
         import time
         import os
         import fnmatch
@@ -198,7 +203,6 @@ class Auto(RockerExtension):
                 except Exception as e:
                     walk_errors.append(e)
         # Match patterns in memory
-        content_search_patterns = getattr(self, "_content_search_patterns", {})
         for pattern, ext in file_patterns.items():
             start = time.time()
             # Support both basename patterns (e.g., "package.xml") and full path patterns (e.g., ".cargo/config.toml")

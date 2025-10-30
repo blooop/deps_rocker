@@ -44,7 +44,7 @@ class TestAutoDetectYmlQuoting(unittest.TestCase):
         # Use the auto path argument and disable home checking for test isolation
         # Test detection - use the internal method to get only directly detected extensions
         direct_detected = self.auto._detect_files_in_workspace(
-            {"auto": self.test_dir}, check_home=False
+            _cliargs={"auto": self.test_dir}, check_home=False
         )
 
         # Now all detected extensions should be from workspace only

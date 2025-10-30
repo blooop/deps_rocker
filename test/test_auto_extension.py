@@ -193,7 +193,10 @@ class TestAutoExtension(unittest.TestCase):
         try:
             os.chdir(self.test_dir)
             setup_func()
-            deps = self.auto.required({})
+            # Use _detect_files_in_workspace to avoid home directory detection
+            deps = self.auto._detect_files_in_workspace(
+                _cliargs={"auto": self.test_dir}, check_home=False
+            )
             assertion_func(deps)
         finally:
             os.chdir(original_dir)
