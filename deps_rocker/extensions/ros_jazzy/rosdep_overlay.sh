@@ -39,6 +39,6 @@ rosdep update || echo "Warning: rosdep update failed, continuing..."
 # Install dependencies
 echo "Installing rosdep dependencies for overlay..."
 export DEBIAN_FRONTEND=noninteractive
-rosdep install --from-paths . --ignore-src -y -r --rosdistro "$ROS_DISTRO"
+rosdep install --from-paths . --ignore-src -y -r --verbose --rosdistro "$ROS_DISTRO"
 
 echo "Overlay rosdep dependencies installed successfully"
