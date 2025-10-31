@@ -73,7 +73,9 @@ CMD [\"echo\", \"ROS Jazzy comprehensive test complete\"]
         active_extensions = manager.get_active_extensions(cliargs)
 
         # Add the comprehensive test script as the last extension
-        test_script_path = os.path.join(os.path.dirname(__file__), "test_ros_jazzy_comprehensive.sh")
+        test_script_path = os.path.join(
+            os.path.dirname(__file__), "test_ros_jazzy_comprehensive.sh"
+        )
         if os.path.isfile(test_script_path):
             active_extensions.append(ScriptInjectionExtension(test_script_path))
             cliargs["command"] = "/tmp/test.sh"
@@ -126,7 +128,9 @@ repositories:
             active_extensions = manager.get_active_extensions(cliargs)
 
             # Add the comprehensive test script
-            test_script_path = os.path.join(os.path.dirname(__file__), "test_ros_jazzy_comprehensive.sh")
+            test_script_path = os.path.join(
+                os.path.dirname(__file__), "test_ros_jazzy_comprehensive.sh"
+            )
             if os.path.isfile(test_script_path):
                 active_extensions.append(ScriptInjectionExtension(test_script_path))
                 cliargs["command"] = "/tmp/test.sh"
