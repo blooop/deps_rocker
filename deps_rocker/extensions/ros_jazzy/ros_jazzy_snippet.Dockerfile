@@ -32,9 +32,9 @@ RUN if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then \
     echo "rosdep already initialized, skipping init"; \
   fi
 
-# Install underlay build scripts
-COPY underlay_deps.sh underlay_build.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/underlay_deps.sh /usr/local/bin/underlay_build.sh
+# Install underlay build scripts and rosdeps installer
+COPY underlay_deps.sh underlay_build.sh install_rosdeps.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/underlay_deps.sh /usr/local/bin/underlay_build.sh /usr/local/bin/install_rosdeps.sh
 
 # Copy consolidated repos file and test files for later use in user snippet
 COPY consolidated.repos /tmp/consolidated.repos

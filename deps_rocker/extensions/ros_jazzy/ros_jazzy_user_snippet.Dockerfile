@@ -29,12 +29,10 @@ RUN export ROS_UNDERLAY_PATH="$HOME/ros_ws/underlay" && \
 # Build the underlay workspace as user if it contains packages
 RUN underlay_deps.sh && underlay_build.sh
 
-#ROS user snippet
-RUN DEPS_ROOT="${ROS_DEPENDENCIES_ROOT}" && \
-    if [ -d "$DEPS_ROOT" ]; then \
-        rosdep update && \
-        rosdep install --from-paths "$DEPS_ROOT" --ignore-src -r -y; \
-    fi
+# Install rosdeps for the main workspace at container startup when workspace is mounted
+RUN echo 'if [ ! -f "$HOME/.rosdeps_installed" ] && [ -d "$HOME/demos" ]; then' >> ~/.bashrc && \
+    echo '  install_rosdeps.sh' >> ~/.bashrc && \
+    echo 'fi' >> ~/.bashrc
 
 
 # Update COLCON_DEFAULTS_FILE to use home directory
@@ -53,5 +51,6 @@ RUN printf '%s\n' 'if [ -f "/usr/local/share/vcstool-completion/vcs.bash" ]; the
 
 RUN printf '%s\n' 'if [ -f "$ROS_INSTALL_BASE/setup.bash" ]; then source "$ROS_INSTALL_BASE/setup.bash"; fi' >> $HOME/.bashrc
 
+# Set WORKDIR to the expanded path using a RUN command
 RUN export ROS_WORKSPACE_ROOT="$HOME/ros_ws" && echo "WORKDIR will be: $ROS_WORKSPACE_ROOT"
-WORKDIR $HOME/ros_ws
+WORKDIR /home/ags/ros_ws

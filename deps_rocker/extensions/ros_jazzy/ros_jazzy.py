@@ -35,10 +35,11 @@ class RosJazzy(SimpleRockerExtension):
     def get_files(self, cliargs) -> dict[str, str]:
         dat = self.get_config_file("configs/colcon-defaults.yaml")
 
-        # Get underlay build scripts
+        # Get underlay build scripts and rosdeps installer
         script_dir = Path(__file__).parent
         underlay_deps = (script_dir / "underlay_deps.sh").read_text()
         underlay_build = (script_dir / "underlay_build.sh").read_text()
+        install_rosdeps = (script_dir / "install_rosdeps.sh").read_text()
 
         # Discover and merge all depends.repos files
         workspace = self.get_workspace_path()
@@ -102,6 +103,7 @@ class RosJazzy(SimpleRockerExtension):
             "colcon-defaults.yaml": dat,
             "underlay_deps.sh": underlay_deps,
             "underlay_build.sh": underlay_build,
+            "install_rosdeps.sh": install_rosdeps,
             "consolidated.repos": yaml.dump(merged_repos, default_flow_style=False),
             "test_package.xml": test_package_xml,
             "test_setup.py": test_setup_py,
