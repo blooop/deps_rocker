@@ -28,7 +28,7 @@ Both workspaces use identical `src/build/install/log` structure and are managed 
 Installs ROS 2 Jazzy foundation during Docker build:
 
 - Adds official ROS 2 apt repository
-- Installs `ros-jazzy-ros-core`, `python3-rosdep`, `python3-vcstool`
+- Installs `ros-jazzy-ros-core`, `python3-rosdep`, `python3-vcs2l`
 - Installs colcon via pip for build system
 - Initializes rosdep database
 - Sets base environment variables (`ROS_DISTRO=jazzy`)
@@ -159,7 +159,7 @@ colcon build     # Build everything
 
 ### Complete ROS 2 Environment
 - ROS 2 Jazzy from official apt repositories
-- Essential tools: colcon, rosdep, vcstool
+- Essential tools: colcon, rosdep, vcs2l
 - Automatic rosdep initialization
 - Proper environment configuration
 
@@ -218,7 +218,7 @@ $HOME/overlay/
 - **`user`**: For proper user environment setup
 
 ### Related Extensions
-- **`vcstool`**: Automatically included, provides `vcs import` functionality
+- **`vcstool`**: Automatically included, provides `vcs import` functionality via vcs2l
 - **`ros_underlay`**: Can build on top of ros_jazzy foundation
 - **`cwd`**: Mounts user packages directly into `$HOME/overlay/src/`
 
@@ -294,7 +294,7 @@ Unified helper scripts work with any workspace following the consistent `src/bui
 
 **`update_repos.sh`**
 - Scans workspace for `*.repos` files
-- Consolidates and imports to `$HOME/underlay/src` using `vcs import`  
+- Consolidates and imports to `$HOME/underlay/src` using `vcs import` (via vcs2l)
 - Installs dependencies and builds underlay workspace
 - Single command for complete dependency management
 
