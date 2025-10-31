@@ -3,8 +3,8 @@ RUN mkdir -p /home/@(name)/underlay/src /home/@(name)/underlay/build /home/@(nam
     mkdir -p /home/@(name)/overlay/src /home/@(name)/overlay/build /home/@(name)/overlay/install /home/@(name)/overlay/log && \
     chown -R @(name):@(name) /home/@(name)/underlay /home/@(name)/overlay
 
-# Set up unified workspace environment variables both as ENV commands and in bashrc
-# ENV commands ensure availability in all shell contexts, bashrc for interactive shells
+# Set up unified workspace environment variables
+# Docker ENV is sufficient for most use cases - ROS tools and build systems inherit container environment
 ENV ROS_UNDERLAY_ROOT="/home/@(name)/underlay" \
     ROS_UNDERLAY_PATH="/home/@(name)/underlay/src" \
     ROS_UNDERLAY_BUILD="/home/@(name)/underlay/build" \
@@ -14,17 +14,6 @@ ENV ROS_UNDERLAY_ROOT="/home/@(name)/underlay" \
     ROS_BUILD_BASE="/home/@(name)/overlay/build" \
     ROS_INSTALL_BASE="/home/@(name)/overlay/install" \
     ROS_LOG_BASE="/home/@(name)/overlay/log"
-
-RUN echo "# ROS Unified Workspace Architecture Environment Variables" >> /home/@(name)/.bashrc && \
-    echo "export ROS_UNDERLAY_ROOT=\$HOME/underlay" >> /home/@(name)/.bashrc && \
-    echo "export ROS_UNDERLAY_PATH=\$HOME/underlay/src" >> /home/@(name)/.bashrc && \
-    echo "export ROS_UNDERLAY_BUILD=\$HOME/underlay/build" >> /home/@(name)/.bashrc && \
-    echo "export ROS_UNDERLAY_INSTALL=\$HOME/underlay/install" >> /home/@(name)/.bashrc && \
-    echo "export ROS_OVERLAY_ROOT=\$HOME/overlay" >> /home/@(name)/.bashrc && \
-    echo "export ROS_WORKSPACE_ROOT=\$HOME/overlay" >> /home/@(name)/.bashrc && \
-    echo "export ROS_BUILD_BASE=\$HOME/overlay/build" >> /home/@(name)/.bashrc && \
-    echo "export ROS_INSTALL_BASE=\$HOME/overlay/install" >> /home/@(name)/.bashrc && \
-    echo "export ROS_LOG_BASE=\$HOME/overlay/log" >> /home/@(name)/.bashrc
 # Clone underlay dependencies from consolidated.repos using vcstool
 RUN if [ -f /tmp/consolidated.repos ] && [ -s /tmp/consolidated.repos ]; then \
         vcs import --recursive /home/@(name)/underlay/src < /tmp/consolidated.repos && \
