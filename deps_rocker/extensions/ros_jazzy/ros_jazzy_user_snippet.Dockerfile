@@ -20,7 +20,7 @@ ENV ROS_UNDERLAY_ROOT="/home/@(name)/underlay" \
 # Copy consolidated repos file if it exists
 COPY consolidated.repos /tmp/consolidated.repos
 
-# Clone underlay dependencies from consolidated.repos using vcstool
+# Clon underlay dependencies from consolidated.repos using vcstool
 RUN if [ -f /tmp/consolidated.repos ] && [ -s /tmp/consolidated.repos ]; then \
         mkdir -p /home/@(name)/underlay/src && \
         vcs import --recursive /home/@(name)/underlay/src < /tmp/consolidated.repos && \
@@ -41,6 +41,28 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
 
 
 COPY --chown=@(name):@(name) colcon-defaults.yaml /home/@(name)/colcon-defaults.yaml
+
+# Copy unified overlay package.xml with all workspace dependencies
+COPY unified_overlay_package.xml /tmp/unified_overlay_package.xml
+
+# Install rosdep dependencies for overlay workspace using unified package.xml
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
+    --mount=type=cache,target=/home/@(name)/.cache/pip,id=pip-cache \
+    if [ -f /tmp/unified_overlay_package.xml ] && grep -q "<depend>" /tmp/unified_overlay_package.xml 2>/dev/null; then \
+        echo "Installing rosdep dependencies from unified overlay package.xml..." && \
+        TEMP_WS=$(mktemp -d) && \
+        mkdir -p "$TEMP_WS/unified_deps" && \
+        cp /tmp/unified_overlay_package.xml "$TEMP_WS/unified_deps/package.xml" && \
+        cd "$TEMP_WS" && \
+        rosdep update || echo "Warning: rosdep update failed, continuing..." && \
+        export DEBIAN_FRONTEND=noninteractive && \
+        rosdep install --from-paths . --ignore-src -y -r --rosdistro "${ROS_DISTRO:-jazzy}" && \
+        echo "Overlay rosdep dependencies installed successfully" && \
+        rm -rf "$TEMP_WS"; \
+    else \
+        echo "No dependencies found in unified overlay package.xml, skipping rosdep installation"; \
+    fi
 
 # Set up proper environment sourcing in bashrc - unified workspace architecture
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /home/@(name)/.bashrc && \
