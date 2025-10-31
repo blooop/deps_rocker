@@ -21,7 +21,13 @@ fi
 
 # Source ROS environment
 ROS_SETUP="/opt/ros/$ROS_DISTRO/setup.bash"
-if [ -f "$ROS_SETUP" ]; then
+
+# Check if we have a custom ROS_SETUP_SCRIPT for testing
+if [ -n "$ROS_SETUP_SCRIPT" ] && [ -f "$ROS_SETUP_SCRIPT" ]; then
+    # shellcheck disable=SC1090
+    source "$ROS_SETUP_SCRIPT"
+    echo "Sourced custom ROS environment: $ROS_SETUP_SCRIPT"
+elif [ -f "$ROS_SETUP" ]; then
     # shellcheck disable=SC1090
     source "$ROS_SETUP"
     echo "Sourced ROS environment: $ROS_SETUP"

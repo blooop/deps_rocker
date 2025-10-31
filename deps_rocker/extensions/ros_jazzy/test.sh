@@ -246,9 +246,62 @@ test_workspace_chaining() {
 
     # Create a test package in the main workspace that depends on underlay
     cd "$ROS_WORKSPACE_ROOT"
+    
+    # Ensure we have write permissions to the workspace
+    if [ ! -w "$ROS_WORKSPACE_ROOT" ]; then
+        echo "ERROR: No write permission to workspace root $ROS_WORKSPACE_ROOT"
+        exit 1
+    fi
+    
+    # Create the directory with proper permissions
     mkdir -p src/test_package
-    cp /tmp/test_package.xml src/test_package/package.xml
-    cp /tmp/test_setup.py src/test_package/setup.py
+    
+    # Create test package files instead of copying them
+    cat > src/test_package/package.xml << 'EOF'
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>test_package</name>
+  <version>0.1.0</version>
+  <description>Test package for ROS Jazzy extension testing</description>
+  <maintainer email="test@example.com">Test User</maintainer>
+  <license>MIT</license>
+  
+  <depend>unique_identifier_msgs</depend>
+  
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
+EOF
+    
+    cat > src/test_package/setup.py << 'EOF'
+from setuptools import setup
+
+package_name = 'test_package'
+
+setup(
+    name=package_name,
+    version='0.1.0',
+    packages=[package_name],
+    data_files=[
+        ('share/ament_index/resource_index/packages',
+         ['resource/' + package_name]),
+        ('share/' + package_name, ['package.xml']),
+    ],
+    install_requires=['setuptools'],
+    zip_safe=True,
+    maintainer='Test User',
+    maintainer_email='test@example.com',
+    description='Test package for ROS Jazzy extension testing',
+    license='MIT',
+    tests_require=['pytest'],
+    entry_points={
+        'console_scripts': [
+        ],
+    },
+)
+EOF
     mkdir -p src/test_package/resource
     touch src/test_package/resource/test_package
     mkdir -p src/test_package/test_package
