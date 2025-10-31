@@ -37,14 +37,14 @@ class RosJazzy(SimpleRockerExtension):
         import pwd
 
         args = super()._build_template_args(cliargs, empy_args)
-        
+
         # Get the actual username - this is the user that will be created in the container
         # The rocker user extension uses the current host username by default
         try:
             username = pwd.getpwuid(os.getuid()).pw_name
         except (OSError, KeyError):
             # Fallback to environment variable
-            username = os.getenv('USER', 'user')
+            username = os.getenv("USER", "user")
 
         args["name"] = username
         return args
