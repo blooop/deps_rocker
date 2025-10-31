@@ -178,6 +178,7 @@ repositories:
             repos_content_for_extension = test_repos_content.strip()
 
             # Create a custom ROS extension that uses our repos file
+            # We put this test repos file in a different location to avoid conflicts
             class RosJazzyTestExtension(SimpleRockerExtension):
                 name = "ros_jazzy_test"
 
@@ -186,8 +187,9 @@ repositories:
 
                 def get_snippet(self, cliargs):
                     return """
-# Copy test repos file for script testing
-COPY test.repos /tmp/consolidated.repos
+# Copy test repos file for runtime script testing
+# Note: we use a different name to avoid conflicts with build-time repos
+COPY test.repos /tmp/test_runtime.repos
 """
 
                 def get_files(self, cliargs):
@@ -290,36 +292,80 @@ done
 echo ""
 echo "4. Testing update_repos.sh functionality..."
 
-# Change to a directory with repos file
-cd /tmp
-if [ -f "consolidated.repos" ]; then
-    log_info "Found consolidated.repos file"
+# First, clear any existing repos from build time to test runtime functionality
+echo "Clearing existing underlay to test runtime repository import..."
+rm -rf "$ROS_UNDERLAY_PATH"/* 2>/dev/null || true
+mkdir -p "$ROS_UNDERLAY_PATH"
+
+# Create a writable test directory  
+SCRIPT_TEST_DIR="/home/ags/script_test"
+mkdir -p "$SCRIPT_TEST_DIR"
+cd "$SCRIPT_TEST_DIR"
+
+# Test with the runtime test repos file if available
+if [ -f "/tmp/test_runtime.repos" ]; then
+    log_info "Found test_runtime.repos file for testing"
     
-    # Test update_repos.sh with existing repos
+    # Copy it to our test directory as a .repos file
+    cp "/tmp/test_runtime.repos" "./test_script.repos"
+    
+    echo "Contents of test repos file:"
+    cat "./test_script.repos"
+    
+    # Test update_repos.sh with the test repos
     if update_repos.sh; then
         log_info "update_repos.sh executed successfully"
-        
+
         # Check if packages were cloned to underlay
-        if [ -d "$ROS_UNDERLAY_PATH" ] && [ "$(ls -A "$ROS_UNDERLAY_PATH" 2>/dev/null)" ]; then
-            log_info "Repositories cloned to underlay workspace"
+        echo "Debug: Checking underlay directory: $ROS_UNDERLAY_PATH"
+        if [ -d "$ROS_UNDERLAY_PATH" ]; then
+            echo "Debug: Underlay directory exists, contents:"
+            ls -la "$ROS_UNDERLAY_PATH" || echo "Failed to list contents"
             
-            # List what was cloned
-            echo "Cloned packages:"
-            find "$ROS_UNDERLAY_PATH" -maxdepth 2 -name "package.xml" | head -5
+            if [ "$(ls -A "$ROS_UNDERLAY_PATH" 2>/dev/null)" ]; then
+                log_info "Repositories cloned to underlay workspace"
+                
+                # List what was cloned
+                echo "Cloned files and directories:"
+                find "$ROS_UNDERLAY_PATH" -name "*" | head -10
+                echo "Package.xml files:"
+                find "$ROS_UNDERLAY_PATH" -name "package.xml" | head -5
+                
+                # Success if any directory was created (repository was cloned)
+                if find "$ROS_UNDERLAY_PATH" -mindepth 1 -type d | head -1 | grep -q .; then
+                    log_info "Repository directories found in underlay"
+                else
+                    log_error "No repository directories found in underlay"
+                fi
+            else
+                log_error "No files found in underlay after update_repos.sh"
+            fi
         else
-            log_error "No repositories found in underlay after update_repos.sh"
+            log_error "Underlay directory does not exist: $ROS_UNDERLAY_PATH"
         fi
     else
         log_error "update_repos.sh failed"
     fi
+elif [ -f "consolidated.repos" ]; then
+    log_info "Found consolidated.repos file"
+
+    # Test update_repos.sh with existing repos
+    if update_repos.sh; then
+        log_info "update_repos.sh executed successfully (with existing repos)"
+        
+        # For existing repos, just verify the script ran without failing
+        log_info "Script execution completed successfully"
+    else
+        log_error "update_repos.sh failed"
+    fi
 else
-    log_info "No consolidated.repos found, testing with empty scenario"
+    log_info "No repos files found, testing empty scenario"
     if update_repos.sh; then
         log_info "update_repos.sh handled empty scenario correctly"  
     else
         log_error "update_repos.sh failed on empty scenario"
     fi
-fi
+    fi
 
 # 5. TEST UNDERLAY_DEPS.SH FUNCTIONALITY
 echo ""
