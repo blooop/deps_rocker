@@ -160,14 +160,16 @@ repositories:
         env_test_script = """#!/bin/bash
 set -e
 
-echo "Testing ROS Jazzy Environment Variables Specification..."
+# Source the bashrc to load environment variables
+source ~/.bashrc
 
-# Debug information
+echo "Testing ROS Jazzy Environment Variables Specification..."# Debug information
 echo "DEBUG: USERNAME=$USERNAME"
 echo "DEBUG: HOME=$HOME"
 echo "DEBUG: ROS_UNDERLAY_ROOT=$ROS_UNDERLAY_ROOT"
-
-# Test basic ROS variables
+echo "DEBUG: Contents of ~/.bashrc:"
+tail -20 ~/.bashrc
+echo "---"# Test basic ROS variables
 [ "$ROS_DISTRO" = "jazzy" ] || { echo "ERROR: ROS_DISTRO not jazzy"; exit 1; }
 echo "✓ ROS_DISTRO=$ROS_DISTRO"
 
@@ -204,8 +206,8 @@ echo "All environment variables match specification!"
 """
 
         active_extensions.append(ScriptInjectionExtension(env_test_script, is_content=True))
-        cliargs["command"] = "su - ags"
-        cliargs["user"] = "ags"
+        cliargs["command"] = "/tmp/test.sh"
+        cliargs["user"] = "ags"  # Run as ags user to get correct environment
 
         dig = DockerImageGenerator(active_extensions, cliargs, self.base_dockerfile_tag)
         build_result = dig.build()

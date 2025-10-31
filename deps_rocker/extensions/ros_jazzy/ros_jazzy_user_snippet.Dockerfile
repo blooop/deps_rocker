@@ -28,8 +28,7 @@ RUN if [ -d "/home/@(name)/underlay/src" ] && [ "$(ls -A /home/@(name)/underlay/
     fi
 
 # Copy colcon defaults configuration
-COPY colcon-defaults.yaml /home/@(name)/colcon-defaults.yaml
-RUN chown @(name):@(name) /home/@(name)/colcon-defaults.yaml
+COPY --chown=@(name):@(name) colcon-defaults.yaml /home/@(name)/colcon-defaults.yaml
 
 # Set up proper environment sourcing in bashrc - unified workspace architecture
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /home/@(name)/.bashrc && \
