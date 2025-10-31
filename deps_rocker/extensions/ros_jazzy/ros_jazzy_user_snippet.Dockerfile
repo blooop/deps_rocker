@@ -21,12 +21,9 @@ ENV ROS_UNDERLAY_ROOT="/home/@(name)/underlay" \
 COPY consolidated.repos /tmp/consolidated.repos
 
 # Clone underlay dependencies from consolidated.repos using vcstool
-RUN --mount=type=cache,target=/home/@(name)/.cache/vcs-repos,id=vcs-repos-cache \
-    if [ -f /tmp/consolidated.repos ] && [ -s /tmp/consolidated.repos ]; then \
-        mkdir -p /home/@(name)/.cache/vcs-repos/underlay && \
-        vcs import --recursive /home/@(name)/.cache/vcs-repos/underlay < /tmp/consolidated.repos && \
+RUN if [ -f /tmp/consolidated.repos ] && [ -s /tmp/consolidated.repos ]; then \
         mkdir -p /home/@(name)/underlay/src && \
-        cp -r /home/@(name)/.cache/vcs-repos/underlay/. /home/@(name)/underlay/src/ && \
+        vcs import --recursive /home/@(name)/underlay/src < /tmp/consolidated.repos && \
         chown -R @(name):@(name) /home/@(name)/underlay; \
     fi
 

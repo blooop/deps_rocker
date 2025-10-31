@@ -50,7 +50,7 @@ RUN mkdir -p /home/@(name)/underlay/src /home/@(name)/underlay/build /home/@(nam
     chown -R @(name):@(name) /home/@(name)/underlay /home/@(name)/overlay
 
 # Create user-accessible cache directories for BuildKit mounts
-RUN mkdir -p /home/@(name)/.cache/vcs-repos /home/@(name)/.cache/pip && \
+RUN mkdir -p /home/@(name)/.cache/pip && \
     chown -R @(name):@(name) /home/@(name)/.cache
 
 # Copy consolidated repos file (always exists, may be empty)
