@@ -100,7 +100,7 @@ CMD [\"echo\", \"ROS Jazzy comprehensive test complete\"]
         # Create a temporary workspace with a test dependencies file
         with tempfile.TemporaryDirectory() as tmpdir:
             test_workspace = Path(tmpdir)
-            
+
             # Create a sample repos file with known ROS packages
             test_repos_content = """
 repositories:
@@ -119,7 +119,7 @@ repositories:
             from rocker.core import RockerExtensionManager
 
             manager = RockerExtensionManager()
-            
+
             # Set the auto detection to point to our test workspace
             cliargs = self._build_base_cliargs(ros_jazzy=True, auto=str(test_workspace))
 
@@ -156,53 +156,57 @@ repositories:
         cliargs = self._build_base_cliargs(ros_jazzy=True)
         active_extensions = manager.get_active_extensions(cliargs)
 
-        # Create a test script that checks environment variables
+        # Create a test script that checks environment variables using proper bash sourcing
         env_test_script = """#!/bin/bash
 set -e
 
-# Source the bashrc to load environment variables
-source ~/.bashrc
+echo "Testing ROS Jazzy Environment Variables Specification..."
 
-echo "Testing ROS Jazzy Environment Variables Specification..."# Debug information
-echo "DEBUG: USERNAME=$USERNAME"
-echo "DEBUG: HOME=$HOME"
-echo "DEBUG: ROS_UNDERLAY_ROOT=$ROS_UNDERLAY_ROOT"
-echo "DEBUG: Contents of ~/.bashrc:"
-tail -20 ~/.bashrc
-echo "---"# Test basic ROS variables
-[ "$ROS_DISTRO" = "jazzy" ] || { echo "ERROR: ROS_DISTRO not jazzy"; exit 1; }
-echo "✓ ROS_DISTRO=$ROS_DISTRO"
-
-# Test underlay variables per specification
-[ "$ROS_UNDERLAY_ROOT" = "$HOME/underlay" ] || { echo "ERROR: ROS_UNDERLAY_ROOT mismatch - Expected '$HOME/underlay', got '$ROS_UNDERLAY_ROOT'"; exit 1; }
-echo "✓ ROS_UNDERLAY_ROOT=$ROS_UNDERLAY_ROOT"
-
-[ "$ROS_UNDERLAY_PATH" = "$HOME/underlay/src" ] || { echo "ERROR: ROS_UNDERLAY_PATH mismatch"; exit 1; }
-echo "✓ ROS_UNDERLAY_PATH=$ROS_UNDERLAY_PATH"
-
-[ "$ROS_UNDERLAY_BUILD" = "$HOME/underlay/build" ] || { echo "ERROR: ROS_UNDERLAY_BUILD mismatch"; exit 1; }
-echo "✓ ROS_UNDERLAY_BUILD=$ROS_UNDERLAY_BUILD"
-
-[ "$ROS_UNDERLAY_INSTALL" = "$HOME/underlay/install" ] || { echo "ERROR: ROS_UNDERLAY_INSTALL mismatch"; exit 1; }
-echo "✓ ROS_UNDERLAY_INSTALL=$ROS_UNDERLAY_INSTALL"
-
-# Test overlay variables per specification
-[ "$ROS_OVERLAY_ROOT" = "$HOME/overlay" ] || { echo "ERROR: ROS_OVERLAY_ROOT mismatch"; exit 1; }
-echo "✓ ROS_OVERLAY_ROOT=$ROS_OVERLAY_ROOT"
-
-[ "$ROS_WORKSPACE_ROOT" = "$HOME/overlay" ] || { echo "ERROR: ROS_WORKSPACE_ROOT mismatch"; exit 1; }
-echo "✓ ROS_WORKSPACE_ROOT=$ROS_WORKSPACE_ROOT"
-
-[ "$ROS_BUILD_BASE" = "$HOME/overlay/build" ] || { echo "ERROR: ROS_BUILD_BASE mismatch"; exit 1; }
-echo "✓ ROS_BUILD_BASE=$ROS_BUILD_BASE"
-
-[ "$ROS_INSTALL_BASE" = "$HOME/overlay/install" ] || { echo "ERROR: ROS_INSTALL_BASE mismatch"; exit 1; }
-echo "✓ ROS_INSTALL_BASE=$ROS_INSTALL_BASE"
-
-[ "$ROS_LOG_BASE" = "$HOME/overlay/log" ] || { echo "ERROR: ROS_LOG_BASE mismatch"; exit 1; }
-echo "✓ ROS_LOG_BASE=$ROS_LOG_BASE"
-
-echo "All environment variables match specification!"
+# Use bash -c to run in a context where bashrc is properly sourced
+bash -c '
+    # Source the bashrc to load environment variables
+    source "$HOME/.bashrc"
+    
+    echo "DEBUG: USERNAME=$USERNAME"
+    echo "DEBUG: HOME=$HOME"
+    echo "DEBUG: ROS_UNDERLAY_ROOT=$ROS_UNDERLAY_ROOT"
+    echo ""
+    
+    # Test basic ROS variables
+    [ "$ROS_DISTRO" = "jazzy" ] || { echo "ERROR: ROS_DISTRO not jazzy"; exit 1; }
+    echo "✓ ROS_DISTRO=$ROS_DISTRO"
+    
+    # Test underlay variables per specification
+    [ "$ROS_UNDERLAY_ROOT" = "$HOME/underlay" ] || { echo "ERROR: ROS_UNDERLAY_ROOT mismatch - Expected \"$HOME/underlay\", got \"$ROS_UNDERLAY_ROOT\""; exit 1; }
+    echo "✓ ROS_UNDERLAY_ROOT=$ROS_UNDERLAY_ROOT"
+    
+    [ "$ROS_UNDERLAY_PATH" = "$HOME/underlay/src" ] || { echo "ERROR: ROS_UNDERLAY_PATH mismatch"; exit 1; }
+    echo "✓ ROS_UNDERLAY_PATH=$ROS_UNDERLAY_PATH"
+    
+    [ "$ROS_UNDERLAY_BUILD" = "$HOME/underlay/build" ] || { echo "ERROR: ROS_UNDERLAY_BUILD mismatch"; exit 1; }
+    echo "✓ ROS_UNDERLAY_BUILD=$ROS_UNDERLAY_BUILD"
+    
+    [ "$ROS_UNDERLAY_INSTALL" = "$HOME/underlay/install" ] || { echo "ERROR: ROS_UNDERLAY_INSTALL mismatch"; exit 1; }
+    echo "✓ ROS_UNDERLAY_INSTALL=$ROS_UNDERLAY_INSTALL"
+    
+    # Test overlay variables per specification
+    [ "$ROS_OVERLAY_ROOT" = "$HOME/overlay" ] || { echo "ERROR: ROS_OVERLAY_ROOT mismatch"; exit 1; }
+    echo "✓ ROS_OVERLAY_ROOT=$ROS_OVERLAY_ROOT"
+    
+    [ "$ROS_WORKSPACE_ROOT" = "$HOME/overlay" ] || { echo "ERROR: ROS_WORKSPACE_ROOT mismatch"; exit 1; }
+    echo "✓ ROS_WORKSPACE_ROOT=$ROS_WORKSPACE_ROOT"
+    
+    [ "$ROS_BUILD_BASE" = "$HOME/overlay/build" ] || { echo "ERROR: ROS_BUILD_BASE mismatch"; exit 1; }
+    echo "✓ ROS_BUILD_BASE=$ROS_BUILD_BASE"
+    
+    [ "$ROS_INSTALL_BASE" = "$HOME/overlay/install" ] || { echo "ERROR: ROS_INSTALL_BASE mismatch"; exit 1; }
+    echo "✓ ROS_INSTALL_BASE=$ROS_INSTALL_BASE"
+    
+    [ "$ROS_LOG_BASE" = "$HOME/overlay/log" ] || { echo "ERROR: ROS_LOG_BASE mismatch"; exit 1; }
+    echo "✓ ROS_LOG_BASE=$ROS_LOG_BASE"
+    
+    echo "All environment variables match specification!"
+'
 """
 
         active_extensions.append(ScriptInjectionExtension(env_test_script, is_content=True))
@@ -221,13 +225,13 @@ echo "All environment variables match specification!"
             self.assertEqual(
                 run_result, 0, f"ROS Jazzy environment variables test failed. Output: {output}"
             )
-            
+
             # Verify specific output patterns
             self.assertIn("All environment variables match specification!", output)
             self.assertIn("ROS_DISTRO=jazzy", output)
             self.assertIn("ROS_UNDERLAY_ROOT=", output)
             self.assertIn("ROS_OVERLAY_ROOT=", output)
-            
+
         dig.clear_image()
 
     def test_ros_jazzy_workspace_structure_specification(self):
@@ -281,12 +285,12 @@ echo "All workspace structure requirements met!"
             self.assertEqual(
                 run_result, 0, f"ROS Jazzy workspace structure test failed. Output: {output}"
             )
-            
+
             # Verify specific output patterns
             self.assertIn("All workspace structure requirements met!", output)
             self.assertIn("Underlay directory exists:", output)
             self.assertIn("Overlay directory exists:", output)
-            
+
         dig.clear_image()
 
     def test_ros_jazzy_unified_scripts_specification(self):
@@ -333,17 +337,15 @@ echo "All unified scripts available per specification!"
             tmpfile.seek(0)
             output = tmpfile.read()
             print(f"DEBUG: run_result={run_result}\nContainer output:\n{output}")
-            self.assertEqual(
-                run_result, 0, f"ROS Jazzy scripts test failed. Output: {output}"
-            )
-            
+            self.assertEqual(run_result, 0, f"ROS Jazzy scripts test failed. Output: {output}")
+
             # Verify specific output patterns
             self.assertIn("All unified scripts available per specification!", output)
             self.assertIn("Script available: rosdep_underlay.sh", output)
             self.assertIn("Script available: rosdep_overlay.sh", output)
             self.assertIn("Script available: build_underlay.sh", output)
             self.assertIn("Script available: update_repos.sh", output)
-            
+
         dig.clear_image()
 
 
@@ -370,10 +372,10 @@ class ScriptInjectionExtension(SimpleRockerExtension):
         else:
             with open(self.script_path, "r", encoding="utf-8") as f:
                 content = f.read()
-        
+
         if not content.lstrip().startswith("#!/"):
             raise RuntimeError(
-                f"Error: test script is missing a shebang (e.g., #!/bin/bash) at the top."
+                "Error: test script is missing a shebang (e.g., #!/bin/bash) at the top."
             )
         return {self.context_name: content}
 

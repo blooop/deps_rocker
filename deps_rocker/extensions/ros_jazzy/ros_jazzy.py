@@ -35,6 +35,7 @@ class RosJazzy(SimpleRockerExtension):
     def _build_template_args(self, cliargs, empy_args=None) -> dict:
         """Override to add username to template context"""
         import pwd
+
         args = super()._build_template_args(cliargs, empy_args)
         # Get username from user extension or environment
         # Default to current user if available, otherwise 'user'
@@ -43,11 +44,11 @@ class RosJazzy(SimpleRockerExtension):
             username = pwd.getpwuid(os.getuid()).pw_name
         except (OSError, KeyError):
             username = "user"
-        
+
         # Override with cliargs if provided
         if cliargs:
             username = cliargs.get("name", username)
-        
+
         args["name"] = username
         return args
 
