@@ -68,8 +68,8 @@ ROS_LOG_BASE=$HOME/overlay/log
 - Configures shell to source ROS environments in proper order
 
 **Package Collection:**
-- Automatically discovers ROS packages in `$HOME` (from mounted directories)
-- Creates symlinks in `$HOME/overlay/src/` pointing to user packages
+- User packages mounted directly in `$HOME/overlay/src/` via cwd extension
+- No symlink management required - direct mount point access
 - Enables seamless development with mounted source code
 
 ## Unified Script Architecture  
@@ -80,7 +80,6 @@ The extension provides a set of unified scripts that work identically on both un
 
 - **`workspace_deps.sh <workspace_path>`**: Installs rosdep dependencies for any workspace
 - **`workspace_build.sh <workspace_path>`**: Builds any workspace using colcon  
-- **`collect_packages.sh <workspace_path>`**: Collects user packages via symlinks into workspace
 - **`update_repos.sh`**: Dynamically imports `*.repos` dependencies into underlay
 
 ### Legacy Compatibility Scripts
@@ -195,24 +194,19 @@ $HOME/underlay/
 ### Overlay Workspace (User Development)
 ```
 $HOME/overlay/
-├── src/                # Symlinks to user packages from $HOME/package_name/
-│   ├── package_name_1@ -> $HOME/package_name_1/
-│   ├── package_name_2@ -> $HOME/package_name_2/
+├── src/                # User packages mounted directly here via cwd extension
+│   ├── package_name_1/ # Mounted from host: --cwd ~/my_project:~/overlay/src/my_project
+│   ├── package_name_2/ # Multiple packages can be mounted
 │   └── ...
 ├── build/              # Build artifacts
 ├── install/            # Install space
 └── log/                # Build and test logs
-
-$HOME/
-├── package_name_1/     # User packages mounted via cwd extension
-├── package_name_2/     # (e.g., ~/my_robot_pkg/, ~/demos/, etc.)
-└── ...
 ```
 
 ### Workspace Layer Structure
 1. **Base ROS**: `/opt/ros/jazzy/` (system installation)
 2. **Underlay Layer**: `$HOME/underlay/install/` (dependency packages)
-3. **Overlay Layer**: `$HOME/overlay/install/` (development packages from `$HOME/package_*/`)
+3. **Overlay Layer**: `$HOME/overlay/install/` (user packages mounted directly in overlay/src/)
 
 ## Extension Integration
 
@@ -224,25 +218,25 @@ $HOME/
 ### Related Extensions
 - **`vcstool`**: Automatically included, provides `vcs import` functionality
 - **`ros_underlay`**: Can build on top of ros_jazzy foundation
-- **`cwd`**: Mounts user packages that get collected into overlay workspace
+- **`cwd`**: Mounts user packages directly into `$HOME/overlay/src/`
 
 ## Complete Usage Examples
 
 ### Basic Setup
 ```bash
-# Create ROS Jazzy container with mounted project
-deps_rocker --ros-jazzy --cwd ~/my_project ubuntu:24.04
+# Mount project directly into overlay workspace
+deps_rocker --ros-jazzy --cwd ~/my_project:~/overlay/src/my_project ubuntu:24.04
 
 # Inside container:
-cd ~/overlay && colcon build  # User packages automatically available
+cd ~/overlay && colcon build  # Project mounted in src/, ready to build
 ```
 
 ### With Dependencies
 ```bash  
-# Project has *.repos file with dependencies
-deps_rocker --ros-jazzy --cwd ~/my_project ubuntu:24.04
+# Mount project with dependencies into overlay
+deps_rocker --ros-jazzy --cwd ~/my_project:~/overlay/src/my_project ubuntu:24.04
 
-# Inside container:
+# Inside container (if project has *.repos files):
 update_repos.sh              # Import dependencies to underlay
 workspace_build.sh ~/underlay  # Build dependencies
 cd ~/overlay && colcon build   # Build user packages
@@ -294,9 +288,9 @@ Unified helper scripts work with any workspace following the consistent `src/bui
 - Builds workspace using `colcon build` with proper sourcing
 - Works with any workspace following standard structure
 
-**`collect_packages.sh <workspace_path>`**
-- Discovers ROS packages in `$HOME` (excluding underlay/overlay dirs)
-- Creates symlinks in `<workspace>/src/` pointing to user packages
+**`collect_packages.sh <workspace_path>`** (Legacy - not needed with direct mounting)
+- Discovers ROS packages in `$HOME` and creates symlinks
+- ~~Replaced by direct mounting: `--cwd ~/project:~/overlay/src/project`~~
 
 **`update_repos.sh`**
 - Scans workspace for `*.repos` files
@@ -344,7 +338,6 @@ deps_rocker/extensions/ros_jazzy/
 ├── ros_jazzy_user_snippet.Dockerfile # User environment setup
 ├── workspace_deps.sh               # Unified dependency installer
 ├── workspace_build.sh              # Unified workspace builder  
-├── collect_packages.sh             # Package collection script
 ├── update_repos.sh                 # Dynamic repository manager
 ├── auto_detect.yaml                # Auto-detection rules
 └── configs/colcon-defaults.yaml    # Colcon configuration
@@ -359,5 +352,6 @@ deps_rocker/extensions/ros_jazzy/
 ### Implementation Notes
 - Remove build-time repository consolidation from `ros_jazzy.py`
 - Implement unified scripts with identical behavior for both workspaces
+- Use direct mounting instead of symlink collection: `--cwd ~/project:~/overlay/src/project`
 - Ensure proper environment sourcing chain: base → underlay → overlay
 - All workspace operations must work in user home directory with correct permissions
