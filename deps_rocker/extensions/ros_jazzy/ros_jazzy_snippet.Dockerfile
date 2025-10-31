@@ -61,4 +61,3 @@ COPY consolidated.repos /tmp/consolidated.repos
 RUN --mount=type=cache,target=/root/.cache/vcs-repos,id=vcs-repos-cache \
     --mount=type=cache,target=/home/@(name)/.cache/pip,id=pip-cache-@(name) \
     su - @(name) -c 'update_repos.sh' || echo "No repositories to import"
-
