@@ -29,7 +29,7 @@ log "Installing rosdeps for workspace packages in $WORKSPACE_PATH..."
 
 # Update rosdep database
 log "Updating rosdep database..."
-rosdep update --include-eol-distros 2>/dev/null || rosdep update 2>/dev/null || {
+rosdep update 2>/dev/null || rosdep update 2>/dev/null || {
     log "Warning: Failed to update rosdep database, continuing..."
 }
 
