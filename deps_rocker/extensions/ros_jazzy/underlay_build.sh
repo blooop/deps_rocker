@@ -5,10 +5,10 @@
 set -e
 
 # Use environment variables or defaults for unified workspace architecture
-UNDERLAY_SRC="${ROS_UNDERLAY_PATH:-/home/@(name)/underlay/src}"
-UNDERLAY_BUILD="${ROS_UNDERLAY_BUILD:-/home/@(name)/underlay/build}"
-UNDERLAY_INSTALL="${ROS_UNDERLAY_INSTALL:-/home/@(name)/underlay/install}"
-UNDERLAY_ROOT="${ROS_UNDERLAY_ROOT:-/home/@(name)/underlay}"
+UNDERLAY_SRC="${ROS_UNDERLAY_PATH:-$HOME/underlay/src}"
+UNDERLAY_BUILD="${ROS_UNDERLAY_BUILD:-$HOME/underlay/build}"
+UNDERLAY_INSTALL="${ROS_UNDERLAY_INSTALL:-$HOME/underlay/install}"
+UNDERLAY_ROOT="${ROS_UNDERLAY_ROOT:-$HOME/underlay}"
 ROS_DISTRO="${ROS_DISTRO:-jazzy}"
 
 echo "Building underlay workspace from: $UNDERLAY_SRC"
@@ -42,7 +42,12 @@ mkdir -p "$UNDERLAY_BUILD" "$UNDERLAY_INSTALL"
 
 # Build underlay packages
 echo "Building underlay packages..."
-cd "$UNDERLAY_ROOT"
+# Use parent directory of UNDERLAY_SRC if UNDERLAY_ROOT doesn't exist
+if [ -d "$UNDERLAY_ROOT" ]; then
+    cd "$UNDERLAY_ROOT"
+else
+    cd "$(dirname "$UNDERLAY_SRC")"
+fi
 colcon build \
     --base-paths "$UNDERLAY_SRC" \
     --build-base "$UNDERLAY_BUILD" \
