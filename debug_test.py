@@ -13,24 +13,24 @@ class ScriptInjectionExtension:
     def get_name(self):
         return "test_script"
 
-    def get_files(self, cliargs):
+    def get_files(self, cliargs):  # pylint: disable=unused-argument
         return {"test.sh": self.script_content}
 
-    def get_preamble(self, cliargs):
+    def get_preamble(self, cliargs):  # pylint: disable=unused-argument
         return ""
 
-    def get_snippet(self, cliargs):
+    def get_snippet(self, cliargs):  # pylint: disable=unused-argument
         return """COPY test.sh /tmp/test.sh
 RUN chmod +x /tmp/test.sh
 CMD ["/tmp/test.sh"]"""
 
-    def get_user_snippet(self, cliargs):
+    def get_user_snippet(self, cliargs):  # pylint: disable=unused-argument
         return ""
 
 
 def main():
     # Load debug script content
-    with open("/home/ags/projects/deps_rocker/deep_debug_env.sh", "r") as f:
+    with open("/home/ags/projects/deps_rocker/deep_debug_env.sh", "r", encoding="utf-8") as f:
         debug_script = f.read()
 
     all_plugins = list_plugins()

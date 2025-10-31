@@ -16,18 +16,18 @@ class ScriptInjectionExtension:
     def get_name(self):
         return "test_script"
 
-    def get_preamble(self, args):
+    def get_preamble(self, args):  # pylint: disable=unused-argument
         return ""
 
-    def get_snippet(self, args):
+    def get_snippet(self, args):  # pylint: disable=unused-argument
         return """COPY test.sh /tmp/test.sh
 RUN chmod +x /tmp/test.sh
 CMD ["/tmp/test.sh"]"""
 
-    def get_user_snippet(self, args):
+    def get_user_snippet(self, args):  # pylint: disable=unused-argument
         return ""
 
-    def get_files(self, args):
+    def get_files(self, args):  # pylint: disable=unused-argument
         return {"test.sh": self.script_content}
 
 
