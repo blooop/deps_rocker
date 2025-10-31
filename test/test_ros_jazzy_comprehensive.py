@@ -172,30 +172,28 @@ repositories:
             # Use only ros_jazzy extension without auto-detection to avoid BuildKit issues
             cliargs = self._build_base_cliargs(ros_jazzy=True)
             active_extensions = manager.get_active_extensions(cliargs)
-            
+
             # Manually create a consolidated repos file for the ROS extension to use
             # This simulates the repos file that would normally be detected
             repos_content_for_extension = test_repos_content.strip()
-            
+
             # Create a custom ROS extension that uses our repos file
             class RosJazzyTestExtension(SimpleRockerExtension):
                 name = "ros_jazzy_test"
-                
+
                 def get_preamble(self, cliargs):
                     return ""
-                
+
                 def get_snippet(self, cliargs):
                     return """
 # Copy test repos file for script testing
 COPY test.repos /tmp/consolidated.repos
 """
-                    
+
                 def get_files(self, cliargs):
-                    return {
-                        "test.repos": repos_content_for_extension
-                    }
-            
-            # Add our test extension 
+                    return {"test.repos": repos_content_for_extension}
+
+            # Add our test extension
             active_extensions.append(RosJazzyTestExtension())
 
             # Create comprehensive in-container script test
@@ -453,7 +451,7 @@ echo "✓ All in-container script tests completed successfully!"
 echo "=========================================="
 """
 
-            # Write the script test file  
+            # Write the script test file
             script_test_path = test_workspace / "in_container_scripts_test.sh"
             script_test_path.write_text(script_test_content)
             script_test_path.chmod(0o755)
