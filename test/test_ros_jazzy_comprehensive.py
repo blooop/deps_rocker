@@ -145,6 +145,337 @@ repositories:
                 )
             dig.clear_image()
 
+    def test_ros_jazzy_in_container_scripts_functionality(self):
+        """Test ROS Jazzy in-container unified scripts for dependency management"""
+        if "ros_jazzy" not in self.all_plugins:
+            self.skipTest("ros_jazzy extension not available")
+
+        # Create a test workspace with sample dependencies
+        with tempfile.TemporaryDirectory() as tmpdir:
+            test_workspace = Path(tmpdir)
+
+            # Create a sample repos file with a lightweight ROS package
+            test_repos_content = """
+repositories:
+  unique_identifier_msgs:
+    type: git
+    url: https://github.com/ros2/unique_identifier_msgs.git
+    version: jazzy
+"""
+            repos_file = test_workspace / "test.repos"
+            repos_file.write_text(test_repos_content.strip())
+
+            from rocker.core import RockerExtensionManager
+
+            manager = RockerExtensionManager()
+
+            # Use only ros_jazzy extension without auto-detection to avoid BuildKit issues
+            cliargs = self._build_base_cliargs(ros_jazzy=True)
+            active_extensions = manager.get_active_extensions(cliargs)
+            
+            # Manually create a consolidated repos file for the ROS extension to use
+            # This simulates the repos file that would normally be detected
+            repos_content_for_extension = test_repos_content.strip()
+            
+            # Create a custom ROS extension that uses our repos file
+            class RosJazzyTestExtension(SimpleRockerExtension):
+                name = "ros_jazzy_test"
+                
+                def get_preamble(self, cliargs):
+                    return ""
+                
+                def get_snippet(self, cliargs):
+                    return """
+# Copy test repos file for script testing
+COPY test.repos /tmp/consolidated.repos
+"""
+                    
+                def get_files(self, cliargs):
+                    return {
+                        "test.repos": repos_content_for_extension
+                    }
+            
+            # Add our test extension 
+            active_extensions.append(RosJazzyTestExtension())
+
+            # Create comprehensive in-container script test
+            script_test_content = """#!/bin/bash
+set -e
+
+echo "=========================================="
+echo "ROS Jazzy In-Container Scripts Test Suite"
+echo "=========================================="
+
+# Color codes for output
+GREEN='\\033[0;32m'
+RED='\\033[0;31m'
+NC='\\033[0m' # No Color
+
+log_info() {
+    echo -e "${GREEN}✓${NC} $1"
+}
+
+log_error() {
+    echo -e "${RED}✗${NC} $1"
+    exit 1
+}
+
+# Test environment setup
+source /opt/ros/jazzy/setup.bash
+log_info "Sourced ROS environment"
+
+# 1. TEST UNIFIED SCRIPTS AVAILABILITY
+echo ""
+echo "1. Testing Unified Scripts Availability..."
+
+scripts_to_test=(
+    "underlay_deps.sh"
+    "build_underlay.sh" 
+    "update_repos.sh"
+    "rosdep_underlay.sh"
+    "rosdep_overlay.sh"
+)
+
+for script in "${scripts_to_test[@]}"; do
+    if command -v "$script" >/dev/null 2>&1; then
+        log_info "Script available: $script"
+    else
+        log_error "Script not found in PATH: $script"
+    fi
+done
+
+# 2. TEST ENVIRONMENT VARIABLES FOR SCRIPTS
+echo ""
+echo "2. Testing Environment Variables for Scripts..."
+
+required_vars=(
+    "ROS_UNDERLAY_ROOT"
+    "ROS_UNDERLAY_PATH"
+    "ROS_UNDERLAY_BUILD"
+    "ROS_UNDERLAY_INSTALL"
+    "ROS_OVERLAY_ROOT"
+    "ROS_WORKSPACE_ROOT"
+)
+
+for var in "${required_vars[@]}"; do
+    if [ -n "${!var}" ]; then
+        log_info "Environment variable set: $var=${!var}"
+    else
+        log_error "Required environment variable not set: $var"
+    fi
+done
+
+# 3. TEST WORKSPACE STRUCTURE
+echo ""
+echo "3. Testing Workspace Structure..."
+
+workspace_dirs=(
+    "$ROS_UNDERLAY_ROOT"
+    "$ROS_UNDERLAY_PATH"
+    "$ROS_UNDERLAY_BUILD"
+    "$ROS_UNDERLAY_INSTALL"
+    "$ROS_OVERLAY_ROOT"
+    "$ROS_WORKSPACE_ROOT/src"
+    "$ROS_WORKSPACE_ROOT/build"
+    "$ROS_WORKSPACE_ROOT/install"
+)
+
+for dir in "${workspace_dirs[@]}"; do
+    if [ -d "$dir" ]; then
+        log_info "Directory exists: $dir"
+    else
+        log_error "Required directory missing: $dir"
+    fi
+done
+
+# 4. TEST UPDATE_REPOS.SH FUNCTIONALITY
+echo ""
+echo "4. Testing update_repos.sh functionality..."
+
+# Change to a directory with repos file
+cd /tmp
+if [ -f "consolidated.repos" ]; then
+    log_info "Found consolidated.repos file"
+    
+    # Test update_repos.sh with existing repos
+    if update_repos.sh; then
+        log_info "update_repos.sh executed successfully"
+        
+        # Check if packages were cloned to underlay
+        if [ -d "$ROS_UNDERLAY_PATH" ] && [ "$(ls -A "$ROS_UNDERLAY_PATH" 2>/dev/null)" ]; then
+            log_info "Repositories cloned to underlay workspace"
+            
+            # List what was cloned
+            echo "Cloned packages:"
+            find "$ROS_UNDERLAY_PATH" -maxdepth 2 -name "package.xml" | head -5
+        else
+            log_error "No repositories found in underlay after update_repos.sh"
+        fi
+    else
+        log_error "update_repos.sh failed"
+    fi
+else
+    log_info "No consolidated.repos found, testing with empty scenario"
+    if update_repos.sh; then
+        log_info "update_repos.sh handled empty scenario correctly"  
+    else
+        log_error "update_repos.sh failed on empty scenario"
+    fi
+fi
+
+# 5. TEST UNDERLAY_DEPS.SH FUNCTIONALITY
+echo ""
+echo "5. Testing underlay_deps.sh functionality..."
+
+if [ -d "$ROS_UNDERLAY_PATH" ] && [ "$(find "$ROS_UNDERLAY_PATH" -name 'package.xml' -print -quit)" ]; then
+    echo "Found packages in underlay, testing dependency installation..."
+    
+    # Test rosdep installation
+    if underlay_deps.sh; then
+        log_info "underlay_deps.sh executed successfully"
+    else
+        log_error "underlay_deps.sh failed"
+    fi
+else
+    log_info "No packages in underlay, testing empty scenario"
+    if underlay_deps.sh; then
+        log_info "underlay_deps.sh handled empty underlay correctly"
+    else
+        log_error "underlay_deps.sh failed on empty underlay"
+    fi
+fi
+
+# 6. TEST BUILD_UNDERLAY.SH FUNCTIONALITY  
+echo ""
+echo "6. Testing build_underlay.sh functionality..."
+
+if [ -d "$ROS_UNDERLAY_PATH" ] && [ "$(find "$ROS_UNDERLAY_PATH" -name 'package.xml' -print -quit)" ]; then
+    echo "Found packages in underlay, testing build..."
+    
+    # Test underlay build
+    if build_underlay.sh; then
+        log_info "build_underlay.sh executed successfully"
+        
+        # Check if build artifacts were created
+        if [ -d "$ROS_UNDERLAY_INSTALL" ] && [ "$(ls -A "$ROS_UNDERLAY_INSTALL" 2>/dev/null)" ]; then
+            log_info "Build artifacts created in underlay install directory"
+            
+            # Test if setup.bash was created
+            if [ -f "$ROS_UNDERLAY_INSTALL/setup.bash" ]; then
+                log_info "Underlay setup.bash created"
+                
+                # Test sourcing the setup file
+                if source "$ROS_UNDERLAY_INSTALL/setup.bash"; then
+                    log_info "Successfully sourced underlay setup.bash"
+                else
+                    log_error "Failed to source underlay setup.bash"
+                fi
+            else
+                log_info "No setup.bash found (may be expected if no packages built)"
+            fi
+        else
+            log_info "No build artifacts (may be expected for header-only packages)"
+        fi
+    else
+        log_error "build_underlay.sh failed"
+    fi
+else
+    log_info "No packages in underlay, testing empty scenario"
+    if build_underlay.sh; then
+        log_info "build_underlay.sh handled empty underlay correctly"
+    else
+        log_error "build_underlay.sh failed on empty underlay"  
+    fi
+fi
+
+# 7. TEST ROSDEP SCRIPTS
+echo ""
+echo "7. Testing rosdep scripts..."
+
+# Test rosdep_underlay.sh
+if rosdep_underlay.sh; then
+    log_info "rosdep_underlay.sh executed successfully"
+else
+    log_error "rosdep_underlay.sh failed"
+fi
+
+# Test rosdep_overlay.sh (should handle empty overlay)
+if rosdep_overlay.sh; then
+    log_info "rosdep_overlay.sh executed successfully"
+else
+    log_error "rosdep_overlay.sh failed"
+fi
+
+# 8. TEST SCRIPT INTEGRATION
+echo ""
+echo "8. Testing Script Integration..."
+
+# Test that scripts work in sequence (dependency -> build workflow)
+echo "Testing complete workflow: update -> deps -> build"
+
+# Reset underlay to test full workflow
+rm -rf "$ROS_UNDERLAY_PATH"/* 2>/dev/null || true
+mkdir -p "$ROS_UNDERLAY_PATH"
+
+# If we have repos, test the full workflow
+cd /tmp
+if [ -f "consolidated.repos" ]; then
+    log_info "Testing full workflow with repositories"
+    
+    # Step 1: Update repos
+    if update_repos.sh; then
+        log_info "Step 1: Repository update completed"
+        
+        # Step 2: Install deps  
+        if underlay_deps.sh; then
+            log_info "Step 2: Dependency installation completed"
+            
+            # Step 3: Build
+            if build_underlay.sh; then
+                log_info "Step 3: Build completed"
+                log_info "Full workflow test: SUCCESS"
+            else
+                log_error "Step 3: Build failed"
+            fi
+        else
+            log_error "Step 2: Dependency installation failed"
+        fi
+    else
+        log_error "Step 1: Repository update failed"
+    fi
+else
+    log_info "No repos file, workflow test with empty workspace completed"
+fi
+
+echo ""
+echo "=========================================="
+echo "✓ All in-container script tests completed successfully!"
+echo "=========================================="
+"""
+
+            # Write the script test file  
+            script_test_path = test_workspace / "in_container_scripts_test.sh"
+            script_test_path.write_text(script_test_content)
+            script_test_path.chmod(0o755)
+
+            # Add script injection for the test
+            active_extensions.append(ScriptInjectionExtension(str(script_test_path)))
+            cliargs["command"] = f"/tmp/{script_test_path.name}"
+
+            dig = DockerImageGenerator(active_extensions, cliargs, self.base_dockerfile_tag)
+            build_result = dig.build()
+            self.assertEqual(build_result, 0, "ROS Jazzy in-container scripts test failed to build")
+
+            with tempfile.NamedTemporaryFile(mode="r+") as tmpfile:
+                run_result = dig.run(console_output_file=tmpfile.name)
+                tmpfile.seek(0)
+                output = tmpfile.read()
+                print(f"In-container scripts test output:\n{output}")
+                self.assertEqual(
+                    run_result, 0, f"ROS Jazzy in-container scripts test failed. Output: {output}"
+                )
+            dig.clear_image()
+
     def test_ros_jazzy_environment_variables_specification(self):
         """Test that ROS Jazzy sets all environment variables per specification"""
         if "ros_jazzy" not in self.all_plugins:
