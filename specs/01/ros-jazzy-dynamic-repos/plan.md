@@ -43,24 +43,34 @@ echo "    url: https://github.com/example/new_package.git" >> my_deps.repos
 - **Immediate Updates**: Changes to `.repos` files take effect immediately
 - **Developer Friendly**: Natural iterative development workflow
 
-#### Scripts:
+#### Single Script Solution:
 ```bash
-# /usr/local/bin/discover_repos.sh - Dynamic discovery
+# /usr/local/bin/update_repos.sh - All-in-one repository management
 #!/bin/bash
-find "${ROS_WORKSPACE_ROOT:-$HOME/ros_ws}" -name "*.repos" -type f
+# Discovers *.repos files, imports packages, installs deps, and builds
+# Usage: update_repos.sh [workspace_path]
 
-# /usr/local/bin/consolidate_repos.sh - On-demand consolidation  
-#!/bin/bash
-# Creates temporary consolidated.repos from current *.repos files
-# Usage: consolidate_repos.sh > /tmp/consolidated.repos
+WORKSPACE=${1:-"${ROS_WORKSPACE_ROOT:-$HOME/ros_ws}"}
 
-# /usr/local/bin/refresh_workspace.sh - Full refresh workflow
-#!/bin/bash
-# 1. Discover current *.repos files
-# 2. Consolidate temporarily  
-# 3. Import with vcstool
-# 4. Install dependencies
-# 5. Build workspace
+echo "Updating repositories in: $WORKSPACE"
+
+# 1. Discover and consolidate *.repos files
+echo "Discovering *.repos files..."
+find "$WORKSPACE" -name "*.repos" -type f | xargs cat > /tmp/consolidated.repos
+
+# 2. Import with vcstool  
+echo "Importing repositories..."
+vcs import "$WORKSPACE/src" < /tmp/consolidated.repos
+
+# 3. Install dependencies
+echo "Installing dependencies..."
+rosdep install --from-paths "$WORKSPACE/src" --ignore-src -y
+
+# 4. Build workspace
+echo "Building workspace..."
+cd "$WORKSPACE" && colcon build
+
+echo "Repository update complete!"
 ```
 
 ### Option 2: Hybrid with Auto-Refresh
@@ -101,10 +111,9 @@ find "${ROS_WORKSPACE_ROOT:-$HOME/ros_ws}" -name "*.repos" -type f
 
 ### Implementation Plan:
 1. **Remove build-time consolidation** from `ros_jazzy.py`
-2. **Create dynamic discovery scripts** that work at runtime
-3. **Update workspace management scripts** to use dynamic approach  
-4. **Provide refresh commands** for explicit workspace updates
-5. **Add change detection** for performance optimization
+2. **Create single `update_repos.sh` script** that handles entire workflow
+3. **Update workspace management** to use dynamic approach  
+4. **Add change detection** for performance optimization (optional)
 
 ### User Workflow (Improved):
 ```bash
@@ -113,11 +122,12 @@ echo "  new_package:" >> my_deps.repos
 echo "    type: git" >> my_deps.repos
 echo "    url: https://github.com/example/new_package.git" >> my_deps.repos
 
-# Dynamic system: changes are immediately available
-refresh_workspace.sh  # Discovers current repos, imports, builds
+# Single command handles everything:
+update_repos.sh  # Discovers, imports, installs deps, builds
 
-# Or even simpler:
-colcon build  # refresh_workspace.sh runs automatically if needed
+# Or specify workspace:  
+update_repos.sh $HOME/underlay
+update_repos.sh $HOME/overlay
 ```
 
 ### Migration Strategy:
