@@ -61,6 +61,12 @@ class RosJazzy(SimpleRockerExtension):
         underlay_build = (script_dir / "underlay_build.sh").read_text()
         install_rosdeps = (script_dir / "install_rosdeps.sh").read_text()
 
+        # Get unified workspace architecture scripts
+        rosdep_underlay = (script_dir / "rosdep_underlay.sh").read_text()
+        rosdep_overlay = (script_dir / "rosdep_overlay.sh").read_text()
+        build_underlay = (script_dir / "build_underlay.sh").read_text()
+        update_repos = (script_dir / "update_repos.sh").read_text()
+
         # Discover and merge all depends.repos files
         workspace = self.get_workspace_path()
         auto_value = cliargs.get("auto", workspace)
@@ -120,6 +126,10 @@ class RosJazzy(SimpleRockerExtension):
             "underlay_deps.sh": underlay_deps,
             "underlay_build.sh": underlay_build,
             "install_rosdeps.sh": install_rosdeps,
+            "rosdep_underlay.sh": rosdep_underlay,
+            "rosdep_overlay.sh": rosdep_overlay,
+            "build_underlay.sh": build_underlay,
+            "update_repos.sh": update_repos,
             "consolidated.repos": yaml.dump(merged_repos, default_flow_style=False),
         }
 

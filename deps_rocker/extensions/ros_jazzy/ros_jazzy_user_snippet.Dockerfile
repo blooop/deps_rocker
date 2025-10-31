@@ -1,5 +1,5 @@
 # Create unified workspace architecture directory structure
-RUN mkdir -p /home/@(name)/underlay/src /home/@(name)/underlay/build /home/@(name)/underlay/install && \
+RUN mkdir -p /home/@(name)/underlay/src /home/@(name)/underlay/build /home/@(name)/underlay/install /home/@(name)/underlay/log && \
     mkdir -p /home/@(name)/overlay/src /home/@(name)/overlay/build /home/@(name)/overlay/install /home/@(name)/overlay/log && \
     chown -R @(name):@(name) /home/@(name)/underlay /home/@(name)/overlay
 
@@ -57,3 +57,6 @@ RUN echo 'if [ ! -f "/home/@(name)/.rosdeps_installed" ] && [ -d "$(pwd)" ] && f
 
 # Set workspace directory to overlay (user code workspace)
 WORKDIR /home/@(name)/overlay
+
+# Switch to the user context for final container execution
+USER @(name)

@@ -36,7 +36,10 @@ RUN mkdir -p /home/@(name)/underlay/src /home/@(name)/underlay/build /home/@(nam
 
 # Copy scripts and make them executable
 COPY underlay_deps.sh underlay_build.sh install_rosdeps.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/underlay_deps.sh /usr/local/bin/underlay_build.sh /usr/local/bin/install_rosdeps.sh
+COPY rosdep_underlay.sh rosdep_overlay.sh build_underlay.sh update_repos.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/underlay_deps.sh /usr/local/bin/underlay_build.sh /usr/local/bin/install_rosdeps.sh \
+             /usr/local/bin/rosdep_underlay.sh /usr/local/bin/rosdep_overlay.sh \
+             /usr/local/bin/build_underlay.sh /usr/local/bin/update_repos.sh
 
 # Copy consolidated repos file if it exists
 COPY consolidated.repos /tmp/consolidated.repos

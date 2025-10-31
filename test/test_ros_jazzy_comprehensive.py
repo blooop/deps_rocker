@@ -156,62 +156,50 @@ repositories:
         cliargs = self._build_base_cliargs(ros_jazzy=True)
         active_extensions = manager.get_active_extensions(cliargs)
 
-        # Create a test script that checks environment variables using proper bash sourcing
+        # Create a test script that checks environment variables
         env_test_script = """#!/bin/bash
 set -e
 
 echo "Testing ROS Jazzy Environment Variables Specification..."
 
-# Use bash -c to run in a context where bashrc is properly sourced
-bash -c '
-    # Source the bashrc to load environment variables
-    source "$HOME/.bashrc"
-    
-    echo "DEBUG: USERNAME=$USERNAME"
-    echo "DEBUG: HOME=$HOME"
-    echo "DEBUG: ROS_UNDERLAY_ROOT=$ROS_UNDERLAY_ROOT"
-    echo ""
-    
-    # Test basic ROS variables
-    [ "$ROS_DISTRO" = "jazzy" ] || { echo "ERROR: ROS_DISTRO not jazzy"; exit 1; }
-    echo "✓ ROS_DISTRO=$ROS_DISTRO"
-    
-    # Test underlay variables per specification
-    [ "$ROS_UNDERLAY_ROOT" = "$HOME/underlay" ] || { echo "ERROR: ROS_UNDERLAY_ROOT mismatch - Expected \"$HOME/underlay\", got \"$ROS_UNDERLAY_ROOT\""; exit 1; }
-    echo "✓ ROS_UNDERLAY_ROOT=$ROS_UNDERLAY_ROOT"
-    
-    [ "$ROS_UNDERLAY_PATH" = "$HOME/underlay/src" ] || { echo "ERROR: ROS_UNDERLAY_PATH mismatch"; exit 1; }
-    echo "✓ ROS_UNDERLAY_PATH=$ROS_UNDERLAY_PATH"
-    
-    [ "$ROS_UNDERLAY_BUILD" = "$HOME/underlay/build" ] || { echo "ERROR: ROS_UNDERLAY_BUILD mismatch"; exit 1; }
-    echo "✓ ROS_UNDERLAY_BUILD=$ROS_UNDERLAY_BUILD"
-    
-    [ "$ROS_UNDERLAY_INSTALL" = "$HOME/underlay/install" ] || { echo "ERROR: ROS_UNDERLAY_INSTALL mismatch"; exit 1; }
-    echo "✓ ROS_UNDERLAY_INSTALL=$ROS_UNDERLAY_INSTALL"
-    
-    # Test overlay variables per specification
-    [ "$ROS_OVERLAY_ROOT" = "$HOME/overlay" ] || { echo "ERROR: ROS_OVERLAY_ROOT mismatch"; exit 1; }
-    echo "✓ ROS_OVERLAY_ROOT=$ROS_OVERLAY_ROOT"
-    
-    [ "$ROS_WORKSPACE_ROOT" = "$HOME/overlay" ] || { echo "ERROR: ROS_WORKSPACE_ROOT mismatch"; exit 1; }
-    echo "✓ ROS_WORKSPACE_ROOT=$ROS_WORKSPACE_ROOT"
-    
-    [ "$ROS_BUILD_BASE" = "$HOME/overlay/build" ] || { echo "ERROR: ROS_BUILD_BASE mismatch"; exit 1; }
-    echo "✓ ROS_BUILD_BASE=$ROS_BUILD_BASE"
-    
-    [ "$ROS_INSTALL_BASE" = "$HOME/overlay/install" ] || { echo "ERROR: ROS_INSTALL_BASE mismatch"; exit 1; }
-    echo "✓ ROS_INSTALL_BASE=$ROS_INSTALL_BASE"
-    
-    [ "$ROS_LOG_BASE" = "$HOME/overlay/log" ] || { echo "ERROR: ROS_LOG_BASE mismatch"; exit 1; }
-    echo "✓ ROS_LOG_BASE=$ROS_LOG_BASE"
-    
-    echo "All environment variables match specification!"
-'
+# Test basic ROS variables
+[ "$ROS_DISTRO" = "jazzy" ] || { echo "ERROR: ROS_DISTRO not jazzy"; exit 1; }
+echo "✓ ROS_DISTRO=$ROS_DISTRO"
+
+# Test underlay variables per specification
+[ "$ROS_UNDERLAY_ROOT" = "$HOME/underlay" ] || { echo "ERROR: ROS_UNDERLAY_ROOT mismatch"; exit 1; }
+echo "✓ ROS_UNDERLAY_ROOT=$ROS_UNDERLAY_ROOT"
+
+[ "$ROS_UNDERLAY_PATH" = "$HOME/underlay/src" ] || { echo "ERROR: ROS_UNDERLAY_PATH mismatch"; exit 1; }
+echo "✓ ROS_UNDERLAY_PATH=$ROS_UNDERLAY_PATH"
+
+[ "$ROS_UNDERLAY_BUILD" = "$HOME/underlay/build" ] || { echo "ERROR: ROS_UNDERLAY_BUILD mismatch"; exit 1; }
+echo "✓ ROS_UNDERLAY_BUILD=$ROS_UNDERLAY_BUILD"
+
+[ "$ROS_UNDERLAY_INSTALL" = "$HOME/underlay/install" ] || { echo "ERROR: ROS_UNDERLAY_INSTALL mismatch"; exit 1; }
+echo "✓ ROS_UNDERLAY_INSTALL=$ROS_UNDERLAY_INSTALL"
+
+# Test overlay variables per specification
+[ "$ROS_OVERLAY_ROOT" = "$HOME/overlay" ] || { echo "ERROR: ROS_OVERLAY_ROOT mismatch"; exit 1; }
+echo "✓ ROS_OVERLAY_ROOT=$ROS_OVERLAY_ROOT"
+
+[ "$ROS_WORKSPACE_ROOT" = "$HOME/overlay" ] || { echo "ERROR: ROS_WORKSPACE_ROOT mismatch"; exit 1; }
+echo "✓ ROS_WORKSPACE_ROOT=$ROS_WORKSPACE_ROOT"
+
+[ "$ROS_BUILD_BASE" = "$HOME/overlay/build" ] || { echo "ERROR: ROS_BUILD_BASE mismatch"; exit 1; }
+echo "✓ ROS_BUILD_BASE=$ROS_BUILD_BASE"
+
+[ "$ROS_INSTALL_BASE" = "$HOME/overlay/install" ] || { echo "ERROR: ROS_INSTALL_BASE mismatch"; exit 1; }
+echo "✓ ROS_INSTALL_BASE=$ROS_INSTALL_BASE"
+
+[ "$ROS_LOG_BASE" = "$HOME/overlay/log" ] || { echo "ERROR: ROS_LOG_BASE mismatch"; exit 1; }
+echo "✓ ROS_LOG_BASE=$ROS_LOG_BASE"
+
+echo "All environment variables match specification!"
 """
 
         active_extensions.append(ScriptInjectionExtension(env_test_script, is_content=True))
         cliargs["command"] = "/tmp/test.sh"
-        cliargs["user"] = "ags"  # Run as ags user to get correct environment
 
         dig = DockerImageGenerator(active_extensions, cliargs, self.base_dockerfile_tag)
         build_result = dig.build()
