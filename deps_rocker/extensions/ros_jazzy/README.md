@@ -37,17 +37,15 @@ The main Dockerfile snippet handles the base ROS installation during Docker buil
    - Configures rosdep and initializes ROS environment
    - No workspace directories created at system level
 
-4. **Repository Discovery and Consolidation**
-   - Scans the workspace for `*.repos` files during Docker build
-   - Consolidates all found repository manifests into a single file
+4. **Dynamic Repository Management**
+   - Repository discovery happens at **runtime**, not build time
+   - No repository consolidation during Docker build (eliminates staleness)
+   - Provides `update_repos.sh` script for on-demand dependency management
    ```bash
-   # Scan for *.repos files in the build context
-   find . -name "*.repos" -type f | while read repo_file; do
-     echo "# From: $repo_file" >> consolidated.repos
-     cat "$repo_file" >> consolidated.repos
-   done
+   # Runtime discovery and underlay update
+   update_repos.sh  # Scans for *.repos, updates underlay workspace
    ```
-   - This happens at Docker image build time, not at container runtime
+   - Changes to `.repos` files take effect immediately without Docker rebuild
 
 ### Phase 2: User Environment Setup (`ros_jazzy_user_snippet.Dockerfile`)
 
@@ -85,7 +83,7 @@ The user snippet configures the per-user environment with all workspaces in the 
    ```
 
 2. **Unified Workspace Setup**
-   - **Underlay**: Clones dependencies from `consolidated.repos` using vcstool into `$HOME/underlay/src`
+   - **Underlay**: Dependencies from `*.repos` files imported dynamically using `update_repos.sh`
    - **Overlay**: Collects user packages into `$HOME/overlay/src` via symlinks from mounted packages
    - **Unified scripts**: Uses `workspace_deps.sh` and `workspace_build.sh` for both underlay and overlay
    - **Consistent structure**: Both workspaces follow same `src/`, `build/`, `install/`, `log/` layout
@@ -159,15 +157,15 @@ The extension uses multiple BuildKit cache mounts for performance:
 ### Build Timing Architecture
 
 **Docker Build Stage (Image Creation):**
-- Workspace scanning for `*.repos` files
-- Repository consolidation
-- System dependency installation via rosdep
-- Environment setup and configuration
-- **No code compilation** - only preparation
+- Base ROS installation and configuration
+- Environment setup and user workspace directories
+- Installation of `update_repos.sh` script for runtime repository management
+- **No repository scanning or consolidation** - only base setup
 
 **Container Runtime (After Container Creation):**
-- Actual code building with colcon
-- Underlay workspace compilation using unified `workspace_build.sh`
+- Dynamic repository discovery using `update_repos.sh` when needed
+- Underlay dependency import and building on-demand
+- Overlay workspace compilation using unified `workspace_build.sh`
 - User workspace dependency installation using unified `workspace_deps.sh`
 - Main workspace compilation
 - Environment sourcing and activation
@@ -185,19 +183,18 @@ The extension uses multiple BuildKit cache mounts for performance:
 
 ### Common Build Scenarios
 
-**Scenario 1: Static Workspace**
-- repos files included in build context and scanned during Docker build
-- Underlay dependencies installed via `workspace_deps.sh $HOME/underlay` during Docker build
-- Overlay dependencies installed via `workspace_deps.sh $HOME/overlay` during Docker build
-- Both workspaces can be pre-built using unified `workspace_build.sh` during Docker build
+**Scenario 1: Static Workspace**  
+- Base ROS environment installed during Docker build
+- Repositories discovered and imported at runtime using `update_repos.sh`
+- Underlay built on-demand when dependencies are needed
 - User packages automatically collected into overlay structure via symlinks
-- All unified scripts available inside container for manual execution
+- Dynamic approach eliminates repository staleness issues
 
 **Scenario 2: Dynamic Loading (`renv`)**
-- No repos in build context during Docker build
-- Workspaces empty initially with unified structure at `$HOME/underlay/` and `$HOME/overlay/`
-- Dependencies resolved using unified `workspace_deps.sh` script at runtime
-- Both workspaces built using unified `workspace_build.sh` script when loaded
+- Empty workspaces initialized with unified structure at `$HOME/underlay/` and `$HOME/overlay/`
+- `update_repos.sh` discovers mounted repositories and builds underlay on-demand  
+- User packages collected into overlay workspace automatically
+- All repository management happens at runtime, not build time
 
 **Scenario 3: Multi-Extension Build**
 - vcstool extension provides repository management
@@ -227,9 +224,9 @@ The extension uses multiple BuildKit cache mounts for performance:
 - **Unified scripts**: Same workspace management scripts work for both underlay and overlay
 - **Environment variables**: Clear separation between underlay and overlay paths
 
-### Automatic Dependency Management
-- **Repository consolidation**: Scans for `*.repos` files and consolidates them automatically
-- **Underlay workspace creation**: Clones dependencies into `$HOME/underlay/src`
+### Dynamic Dependency Management  
+- **Runtime repository discovery**: `update_repos.sh` scans for `*.repos` files when executed
+- **On-demand underlay updates**: Dependencies imported to underlay only when needed
 - **Multi-layer rosdep resolution**: Installs dependencies for both underlay and overlay workspaces
 - **BuildKit cache optimization**: Uses cache mounts for faster dependency installation
 - **Smart build ordering**: Underlay first (`$HOME/underlay/`), then overlay (`$HOME/overlay/`) using unified scripts
@@ -415,10 +412,52 @@ collect_packages.sh $HOME/overlay  # Symlink packages from $HOME into overlay/sr
 - **Package discovery**: Finds ROS packages in `$HOME` and symlinks them into overlay
 - **Dynamic updates**: Can be run anytime to collect newly mounted packages
 
+### `/usr/local/bin/update_repos.sh`
+Dynamically discovers and imports repository dependencies into underlay workspace.
+```bash
+update_repos.sh
+# Discovers *.repos files, imports to underlay, installs deps, builds underlay
+```
+- **Dynamic discovery**: Scans workspace for current `*.repos` files at runtime
+- **Underlay management**: Updates underlay workspace with dependencies only
+- **Immediate updates**: Changes to `.repos` files take effect without Docker rebuild
+- **All-in-one**: Handles discovery, import, dependency installation, and building
+
 ### Legacy Scripts (for compatibility)
 - `underlay_deps.sh` → calls `workspace_deps.sh $HOME/underlay`
 - `underlay_build.sh` → calls `workspace_build.sh $HOME/underlay`
 - `install_rosdeps.sh` → calls `workspace_deps.sh $HOME/overlay`
+
+## Dynamic Repository Workflow
+
+The ros_jazzy extension now uses **dynamic repository management** to eliminate staleness and improve developer experience:
+
+### Traditional Problem (Old Approach):
+```bash
+# Docker build time: *.repos files consolidated into static file
+# Runtime: User modifies .repos file → stale dependencies!
+echo "navigation2:" >> my_deps.repos  # Change ignored until Docker rebuild
+```
+
+### Improved Solution (Dynamic Approach):
+```bash
+# User modifies repository dependencies
+echo "  navigation2:" >> my_deps.repos
+echo "    type: git" >> my_deps.repos  
+echo "    url: https://github.com/ros-planning/navigation2.git" >> my_deps.repos
+
+# Single command updates underlay with new dependencies
+update_repos.sh  # Discovers, imports, installs deps, builds - no Docker rebuild needed!
+
+# User packages automatically use updated underlay
+cd $HOME/overlay && colcon build
+```
+
+### Key Benefits:
+- **No Staleness**: Repository changes take effect immediately
+- **No Docker Rebuilds**: Modify `.repos` files and run `update_repos.sh`
+- **Clean Separation**: Dependencies (underlay) vs user code (overlay)
+- **Iterative Development**: Natural workflow for dependency changes
 
 ## Troubleshooting
 
