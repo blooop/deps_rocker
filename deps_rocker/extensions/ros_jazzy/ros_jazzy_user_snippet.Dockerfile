@@ -21,26 +21,28 @@ ENV ROS_UNDERLAY_ROOT="/home/@(name)/underlay" \
 COPY consolidated.repos /tmp/consolidated.repos
 
 # Clone underlay dependencies from consolidated.repos using vcstool
-RUN --mount=type=cache,target=/root/.cache/vcs-repos,id=vcs-repos-cache \
+RUN --mount=type=cache,target=/home/@(name)/.cache/vcs-repos,id=vcs-repos-cache \
     if [ -f /tmp/consolidated.repos ] && [ -s /tmp/consolidated.repos ]; then \
-        mkdir -p /root/.cache/vcs-repos/underlay && \
-        vcs import --recursive /root/.cache/vcs-repos/underlay < /tmp/consolidated.repos && \
+        mkdir -p /home/@(name)/.cache/vcs-repos/underlay && \
+        vcs import --recursive /home/@(name)/.cache/vcs-repos/underlay < /tmp/consolidated.repos && \
         mkdir -p /home/@(name)/underlay/src && \
-        cp -r /root/.cache/vcs-repos/underlay/. /home/@(name)/underlay/src/ && \
+        cp -r /home/@(name)/.cache/vcs-repos/underlay/. /home/@(name)/underlay/src/ && \
         chown -R @(name):@(name) /home/@(name)/underlay; \
     fi
 
 # Build underlay workspace if dependencies exist
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
     --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
-    --mount=type=cache,target=/root/.cache/pip,id=pip-cache \
+    --mount=type=cache,target=/home/@(name)/.cache/pip,id=pip-cache \
     if [ -d "/home/@(name)/underlay/src" ] && [ "$(ls -A /home/@(name)/underlay/src)" ]; then \
+        rm -rf /home/@(name)/underlay/build /home/@(name)/underlay/install && \
+        mkdir -p /home/@(name)/underlay/build /home/@(name)/underlay/install && \
         /usr/local/bin/underlay_deps.sh && \
         /usr/local/bin/underlay_build.sh && \
         chown -R @(name):@(name) /home/@(name)/underlay; \
     fi
 
-# Copy colcon defaults configuration
+
 COPY --chown=@(name):@(name) colcon-defaults.yaml /home/@(name)/colcon-defaults.yaml
 
 # Set up proper environment sourcing in bashrc - unified workspace architecture

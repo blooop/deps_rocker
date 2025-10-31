@@ -36,7 +36,8 @@ else
     exit 1
 fi
 
-# Create build and install directories
+# Clean and create build and install directories to avoid conflicts
+rm -rf "$UNDERLAY_BUILD" "$UNDERLAY_INSTALL"
 mkdir -p "$UNDERLAY_BUILD" "$UNDERLAY_INSTALL"
 
 # Build underlay packages
