@@ -150,8 +150,8 @@ cd $HOME/overlay && colcon build
 
 ### Basic Development
 ```bash
-deps_rocker --ros-jazzy --cwd ~/my_project ubuntu:24.04
-# Result: ~/my_project mounted and available in overlay workspace
+cd ~/my_project && deps_rocker --ros-jazzy --cwd ~/overlay/src/my_project ubuntu:24.04
+# Result: ~/my_project mounted directly in overlay workspace
 ```
 
 ### With Dependencies  
@@ -213,8 +213,8 @@ $HOME/underlay/
 ```
 $HOME/overlay/
 ├── src/                # User packages mounted directly here via cwd extension
-│   ├── package_name_1/ # Mounted from host: --cwd ~/my_project:~/overlay/src/my_project
-│   ├── package_name_2/ # Multiple packages can be mounted
+│   ├── my_project/     # Mounted from host: cd ~/my_project && --cwd ~/overlay/src/my_project
+│   ├── another_pkg/    # Multiple packages: cd ~/another && --cwd ~/overlay/src/another_pkg
 │   └── ...
 ├── build/              # Build artifacts
 ├── install/            # Install space
@@ -242,8 +242,8 @@ $HOME/overlay/
 
 ### Standard Usage (Cached Dependencies)
 ```bash
-# Mount project directly into overlay workspace  
-deps_rocker --ros-jazzy --cwd ~/my_project:~/overlay/src/my_project ubuntu:24.04
+# Mount current directory into overlay workspace  
+cd ~/my_project && deps_rocker --ros-jazzy --cwd ~/overlay/src/my_project ubuntu:24.04
 
 # Inside container - underlay pre-built from Docker build:
 cd ~/overlay && colcon build  # Immediate build, dependencies already available
@@ -252,7 +252,7 @@ cd ~/overlay && colcon build  # Immediate build, dependencies already available
 ### Runtime Dependency Updates (Full Capability)
 ```bash  
 # Start with cached baseline
-deps_rocker --ros-jazzy --cwd ~/my_project:~/overlay/src/my_project ubuntu:24.04
+cd ~/my_project && deps_rocker --ros-jazzy --cwd ~/overlay/src/my_project ubuntu:24.04
 
 # Inside container - modify dependencies as needed:
 update_repos.sh                 # Import new *.repos files to underlay
@@ -380,6 +380,6 @@ deps_rocker/extensions/ros_jazzy/
 - Keep build-time repository consolidation in `ros_jazzy.py` for optimal caching
 - Build underlay workspace during Docker build with `colcon build`
 - Implement unified scripts for runtime operations when needed
-- Use direct mounting: `--cwd ~/project:~/overlay/src/project`
+- Use direct mounting: `cd ~/project && --cwd ~/overlay/src/project`
 - Ensure proper environment sourcing chain: base → underlay → overlay
 - All workspace operations must work in user home directory with correct permissions
