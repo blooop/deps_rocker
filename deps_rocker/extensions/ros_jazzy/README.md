@@ -64,7 +64,8 @@ ROS_LOG_BASE=$HOME/overlay/log
 
 **Workspace Creation:**
 - Creates both underlay and overlay with identical `src/build/install/log` structure
-- Installs unified management scripts (`workspace_deps.sh`, `workspace_build.sh`, `collect_packages.sh`, `update_repos.sh`)
+- Installs unified management scripts (`workspace_deps.sh`, `workspace_build.sh`, `update_repos.sh`)
+- Runs `rosdep install` for both underlay and overlay during Docker build (Workflow 1)
 - Configures shell to source ROS environments in proper order
 
 **Package Collection:**
@@ -82,20 +83,21 @@ The extension provides a set of unified scripts that work identically on both un
 - **`workspace_build.sh <workspace_path>`**: Builds any workspace using colcon  
 - **`update_repos.sh`**: Dynamically imports `*.repos` dependencies into underlay
 
-### Legacy Compatibility Scripts
 
-- **`underlay_deps.sh`**: Calls `workspace_deps.sh $HOME/underlay`
-- **`underlay_build.sh`**: Calls `workspace_build.sh $HOME/underlay`  
-- **`install_rosdeps.sh`**: Calls `workspace_deps.sh $HOME/overlay`
 
-## Workspace Management Workflow
+## Workspace Management Workflows
 
-### Typical Development Flow
+### Workflow 1: Pre-Built Dependencies (Recommended)
+1. **Docker Build**: rosdep dependencies installed for both underlay and overlay during image creation
+2. **Container Start**: Workspaces ready, dependencies pre-installed  
+3. **Build Process**: Direct `colcon build` - no dependency installation needed
+4. **Benefits**: Faster container startup, dependencies baked into image
 
-1. **Container Start**: Workspaces created, packages collected into overlay
-2. **Dependency Management**: Run `update_repos.sh` to import dependencies to underlay  
+### Workflow 2: Dynamic Dependencies
+1. **Container Start**: Base workspaces created  
+2. **Dynamic Import**: Run `update_repos.sh` to import dependencies to underlay
 3. **Build Process**: Use unified scripts or standard colcon commands
-4. **Iterative Development**: Modify code, rebuild as needed
+4. **Use Case**: When repository dependencies change frequently
 
 ### Runtime Operations
 
@@ -222,22 +224,22 @@ $HOME/overlay/
 
 ## Complete Usage Examples
 
-### Basic Setup
+### Basic Setup (Workflow 1 - Recommended)
 ```bash
 # Mount project directly into overlay workspace
 deps_rocker --ros-jazzy --cwd ~/my_project:~/overlay/src/my_project ubuntu:24.04
 
-# Inside container:
-cd ~/overlay && colcon build  # Project mounted in src/, ready to build
+# Inside container - dependencies already installed during Docker build:
+cd ~/overlay && colcon build  # Ready to build immediately
 ```
 
-### With Dependencies
+### With Dynamic Dependencies (Workflow 2)
 ```bash  
-# Mount project with dependencies into overlay
+# Mount project with *.repos files
 deps_rocker --ros-jazzy --cwd ~/my_project:~/overlay/src/my_project ubuntu:24.04
 
-# Inside container (if project has *.repos files):
-update_repos.sh              # Import dependencies to underlay
+# Inside container - for changing dependencies:
+update_repos.sh              # Import new dependencies to underlay
 workspace_build.sh ~/underlay  # Build dependencies
 cd ~/overlay && colcon build   # Build user packages
 ```
@@ -288,9 +290,7 @@ Unified helper scripts work with any workspace following the consistent `src/bui
 - Builds workspace using `colcon build` with proper sourcing
 - Works with any workspace following standard structure
 
-**`collect_packages.sh <workspace_path>`** (Legacy - not needed with direct mounting)
-- Discovers ROS packages in `$HOME` and creates symlinks
-- ~~Replaced by direct mounting: `--cwd ~/project:~/overlay/src/project`~~
+
 
 **`update_repos.sh`**
 - Scans workspace for `*.repos` files
