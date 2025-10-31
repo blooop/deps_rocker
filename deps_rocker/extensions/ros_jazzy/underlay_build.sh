@@ -40,6 +40,9 @@ fi
 rm -rf "$UNDERLAY_BUILD" "$UNDERLAY_INSTALL"
 mkdir -p "$UNDERLAY_BUILD" "$UNDERLAY_INSTALL"
 
+# Set world-accessible permissions to ensure containers can access these directories
+chmod 777 "$UNDERLAY_BUILD" "$UNDERLAY_INSTALL"
+
 # Build underlay packages
 echo "Building underlay packages..."
 # Use parent directory of UNDERLAY_SRC if UNDERLAY_ROOT doesn't exist

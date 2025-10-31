@@ -2,7 +2,8 @@
 
 # Create unified workspace architecture directory structure
 RUN mkdir -p /home/@(name)/underlay/src /home/@(name)/underlay/build /home/@(name)/underlay/install /home/@(name)/underlay/log && \
-    mkdir -p /home/@(name)/overlay/src /home/@(name)/overlay/build /home/@(name)/overlay/install /home/@(name)/overlay/log
+    mkdir -p /home/@(name)/overlay/src /home/@(name)/overlay/build /home/@(name)/overlay/install /home/@(name)/overlay/log && \
+    chown -R @(name):@(name) /home/@(name)/underlay /home/@(name)/overlay
 
 
 # Set up unified workspace environment variables
@@ -21,8 +22,10 @@ ENV ROS_UNDERLAY_ROOT="/home/@(name)/underlay" \
 COPY consolidated.repos /tmp/consolidated.repos
 
 # Clon underlay dependencies from consolidated.repos using vcstool
+# Fix git ownership issues by configuring safe directories before cloning
 RUN if [ -f /tmp/consolidated.repos ] && [ -s /tmp/consolidated.repos ]; then \
         mkdir -p /home/@(name)/underlay/src && \
+        git config --global --add safe.directory '*' && \
         vcs import --recursive /home/@(name)/underlay/src < /tmp/consolidated.repos && \
         chown -R @(name):@(name) /home/@(name)/underlay; \
     fi

@@ -10,7 +10,7 @@ class RosJazzy(SimpleRockerExtension):
 
     name = "ros_jazzy"
 
-    depends_on_extension = ("curl", "git_clone", "user", "workdir")
+    depends_on_extension = ("curl", "git_clone", "user")
     # Use apt_packages feature for ROS dependencies
     apt_packages = [
         "locales",
@@ -30,7 +30,7 @@ class RosJazzy(SimpleRockerExtension):
     ]
 
     def invoke_after(self, cliargs):
-        return super().invoke_after({"gemini", "claude", "codex", "user", "workdir"})
+        return super().invoke_after({"gemini", "claude", "codex", "user"})
 
     def _build_template_args(self, cliargs, empy_args=None) -> dict:
         """Override to add username to template context and configure workdir"""
@@ -249,8 +249,8 @@ class RosJazzy(SimpleRockerExtension):
 """
 
         # Add all dependencies as <depend> tags
-        for dep in dependencies:
-            xml_content += f"  <depend>{dep}</depend>\n"
+        depend_tags = [f"  <depend>{dep}</depend>" for dep in dependencies]
+        xml_content += "\n".join(depend_tags) + "\n"
 
         xml_content += "</package>\n"
 

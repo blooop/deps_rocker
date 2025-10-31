@@ -4,6 +4,9 @@
 
 set -e
 
+# Configure git to handle ownership issues in containers
+git config --global --add safe.directory '*' 2>/dev/null || true
+
 # Use environment variables for unified workspace architecture
 UNDERLAY_SRC="${ROS_UNDERLAY_PATH:-$HOME/underlay/src}"
 
