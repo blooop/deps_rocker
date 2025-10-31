@@ -47,14 +47,6 @@ RUN echo "source /opt/ros/jazzy/setup.bash" >> /home/@(name)/.bashrc && \
     echo "if [ -f /home/@(name)/overlay/install/setup.bash ]; then source /home/@(name)/overlay/install/setup.bash; fi" >> /home/@(name)/.bashrc && \
     echo "export COLCON_DEFAULTS_FILE=/home/@(name)/colcon-defaults.yaml" >> /home/@(name)/.bashrc
 
-# Install rosdeps for main workspace when it's mounted (generic approach)
-RUN echo 'if [ ! -f "/home/@(name)/.rosdeps_installed" ] && [ -d "$(pwd)" ] && find . -name "package.xml" -type f | head -1 | grep -q .; then' >> /home/@(name)/.bashrc && \
-    echo '  echo "Installing rosdep dependencies for main workspace..."' >> /home/@(name)/.bashrc && \
-    echo '  rosdep update' >> /home/@(name)/.bashrc && \
-    echo '  rosdep install --ignore-src --rosdistro jazzy --from-paths . -y -r || true' >> /home/@(name)/.bashrc && \
-    echo '  touch "/home/@(name)/.rosdeps_installed"' >> /home/@(name)/.bashrc && \
-    echo 'fi' >> /home/@(name)/.bashrc
-
 # Set workspace directory to overlay (user code workspace)
 WORKDIR /home/@(name)/overlay
 
