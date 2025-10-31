@@ -1,66 +1,42 @@
 #!/bin/bash
-# Install rosdeps for ROS workspace packages
-# This script finds all ROS packages in the current workspace and installs their dependencies
+# Generic script to install rosdeps for any ROS workspace
+# Searches current directory for ROS packages and installs their dependencies
 
 set -e
 
-# Default workspace path
-WORKSPACE_PATH="${WORKSPACE_PATH:-$HOME/demos}"
-ROSDEPS_MARKER="$HOME/.rosdeps_installed"
+WORKSPACE_PATH="${WORKSPACE_PATH:-$(pwd)}"
+ROS_DISTRO="${ROS_DISTRO:-jazzy}"
 
-# Function to print with timestamp
-log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
-}
+echo "Installing rosdeps for workspace: $WORKSPACE_PATH"
 
-# Check if workspace exists
+# Check if workspace has ROS packages
 if [ ! -d "$WORKSPACE_PATH" ]; then
-    log "Workspace directory $WORKSPACE_PATH does not exist, skipping rosdeps installation"
+    echo "Workspace directory does not exist: $WORKSPACE_PATH"
     exit 0
 fi
 
-# Check if already installed
-if [ -f "$ROSDEPS_MARKER" ]; then
-    log "Rosdeps already installed (marker file exists: $ROSDEPS_MARKER)"
+# Find ROS packages
+PACKAGE_PATHS=$(find "$WORKSPACE_PATH" -name "package.xml" -exec dirname {} \; 2>/dev/null || true)
+
+if [ -z "$PACKAGE_PATHS" ]; then
+    echo "No ROS packages found in workspace, skipping rosdeps installation"
     exit 0
 fi
 
-log "Installing rosdeps for workspace packages in $WORKSPACE_PATH..."
+echo "Found ROS packages:"
+echo "$PACKAGE_PATHS" | while read -r dir; do
+    echo "  - $dir"
+done
 
 # Update rosdep database
-log "Updating rosdep database..."
-rosdep update 2>/dev/null || rosdep update 2>/dev/null || {
-    log "Warning: Failed to update rosdep database, continuing..."
+echo "Updating rosdep database..."
+rosdep update || echo "Warning: rosdep update failed, continuing..."
+
+# Install dependencies for all packages at once (more efficient)
+echo "Installing rosdep dependencies..."
+export DEBIAN_FRONTEND=noninteractive
+echo "$PACKAGE_PATHS" | xargs rosdep install --from-paths --ignore-src -r -y --rosdistro "$ROS_DISTRO" || {
+    echo "Warning: Some rosdep dependencies failed to install, continuing..."
 }
 
-# Find all ROS packages in workspace
-log "Searching for ROS packages..."
-WORKSPACE_DIRS=$(find "$WORKSPACE_PATH" -maxdepth 3 -name "package.xml" -exec dirname {} \; | head -30)
-
-if [ -z "$WORKSPACE_DIRS" ]; then
-    log "No ROS packages found in workspace $WORKSPACE_PATH"
-    # Still create marker to avoid repeated checks
-    touch "$ROSDEPS_MARKER"
-    exit 0
-fi
-
-log "Found workspace packages:"
-echo "$WORKSPACE_DIRS" | while read -r dir; do
-    log "  - $dir"
-done
-
-# Install dependencies for each package
-log "Installing rosdep dependencies..."
-echo "$WORKSPACE_DIRS" | while read -r pkg_dir; do
-    if [ -n "$pkg_dir" ] && [ -d "$pkg_dir" ]; then
-        log "Installing dependencies for $pkg_dir..."
-        rosdep install --from-paths "$pkg_dir" --ignore-src -r -y --rosdistro "${ROS_DISTRO:-jazzy}" \
-            --skip-keys="example_interfaces" 2>/dev/null || {
-            log "Warning: Some dependencies failed to install for $pkg_dir, continuing..."
-        }
-    fi
-done
-
-# Create marker file to indicate completion
-touch "$ROSDEPS_MARKER"
-log "Rosdeps installation completed successfully"
+echo "Rosdeps installation completed"

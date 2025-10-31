@@ -95,21 +95,15 @@ class RosJazzy(SimpleRockerExtension):
             version = info.get("version", "")
             print(f"  - {name}: {url} [{version}]")
 
-        # Include test files for the test script
-        test_package_xml = (script_dir / "test_package.xml").read_text()
-        test_setup_py = (script_dir / "setup_py_template").read_text()
-
         return {
             "colcon-defaults.yaml": dat,
             "underlay_deps.sh": underlay_deps,
             "underlay_build.sh": underlay_build,
             "install_rosdeps.sh": install_rosdeps,
             "consolidated.repos": yaml.dump(merged_repos, default_flow_style=False),
-            "test_package.xml": test_package_xml,
-            "test_setup.py": test_setup_py,
         }
 
-    def get_docker_args(self, cliargs) -> str:
+    def get_docker_args(self, cliargs) -> str:  # pylint: disable=unused-argument
         """Set the ROS_DOMAIN_ID env var from the host machine if it exists, otherwise generate one from a hash of the username"""
         ROS_DOMAIN_ID = os.environ.get("ROS_DOMAIN_ID")
         if ROS_DOMAIN_ID is None:
