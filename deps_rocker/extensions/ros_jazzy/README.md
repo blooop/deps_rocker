@@ -33,15 +33,15 @@ Installs ROS 2 Jazzy foundation during Docker build:
 - Initializes rosdep database
 - Sets base environment variables (`ROS_DISTRO=jazzy`)
 
-### Repository and Dependency Management
+### Hybrid Repository and Dependency Management
 
-**Key Design**: Dependencies built during Docker build for optimal caching.
+**Key Design**: Cached build-time dependencies with runtime update capability.
 
-- Process `*.repos` files during Docker build to import underlay dependencies
-- Install rosdep dependencies for both underlay and overlay during Docker build
-- Build underlay workspace during Docker build (cached for reuse)
-- Provides `update_repos.sh` script for runtime dependency changes when needed
-- Most dependencies cached in Docker layers, only rebuild when repositories change
+- **Docker Build**: Process `*.repos` files and install rosdep dependencies for both workspaces
+- **Build Caching**: Build underlay workspace during Docker build (cached in layers)  
+- **Runtime Flexibility**: Full capability to update underlay repos and re-run rosdep inside container
+- **Persistent State**: Underlay workspace modifications persist within container lifetime
+- **Best of Both**: Fast startup (cached) + full update capability (when needed)
 
 ### User Environment Setup
 
@@ -66,10 +66,11 @@ ROS_LOG_BASE=$HOME/overlay/log
 **Docker Build Process:**
 - Discovers and consolidates `*.repos` files in build context
 - Imports dependency repositories to underlay using `vcs import`
-- Installs rosdep dependencies for both underlay and overlay
+- Installs rosdep dependencies for both underlay and overlay (cached baseline)
 - Builds underlay workspace with `colcon build` (cached in Docker layers)
 - Creates overlay workspace structure ready for user packages
-- Installs unified management scripts for runtime operations
+- Installs unified management scripts (`workspace_deps.sh`, `workspace_build.sh`, `update_repos.sh`)
+- **Preserves runtime capability**: Scripts can modify underlay and re-run rosdep inside container
 
 **Package Collection:**
 - User packages mounted directly in `$HOME/overlay/src/` via cwd extension
@@ -90,20 +91,28 @@ The extension provides a set of unified scripts that work identically on both un
 
 ## Workspace Management Workflows
 
-### Primary Workflow: Cached Build-Time Dependencies
+### Primary Workflow: Cached Baseline (90% of use cases)
 1. **Docker Build**: 
    - Consolidate `*.repos` files and import to underlay
-   - Install rosdep dependencies for underlay and overlay
+   - Install rosdep dependencies for underlay and overlay (baseline cached)
    - Build underlay workspace (cached in Docker layers)
-2. **Container Start**: Underlay pre-built, overlay ready for user packages
-3. **Development**: Direct `colcon build` in overlay - underlay already available
-4. **Benefits**: Maximum caching, fast container startup, stable dependencies
+2. **Container Start**: Underlay pre-built with cached dependencies
+3. **Development**: Direct `colcon build` in overlay - dependencies ready
+4. **Benefits**: Maximum caching, instant startup, predictable performance
 
-### Fallback Workflow: Runtime Dependency Changes  
-1. **Container Start**: Pre-built underlay available from Docker build
-2. **Dynamic Updates**: Run `update_repos.sh` only when adding new dependencies
-3. **Rebuild**: Incremental updates to underlay when repositories change
-4. **Use Case**: Rare dependency changes, experimental repositories
+### Update Workflow: Runtime Modifications (when needed)
+1. **Container Running**: Start with cached baseline underlay
+2. **Add Repositories**: Run `update_repos.sh` to import new `*.repos` files to underlay
+3. **Update Dependencies**: Run `workspace_deps.sh ~/underlay` to install new rosdep packages
+4. **Rebuild Underlay**: Run `workspace_build.sh ~/underlay` to build updated dependencies
+5. **Continue Development**: Updated underlay available for overlay builds
+6. **Persistence**: Changes persist for container lifetime, reset on container restart
+
+### Hybrid Benefits
+- **Fast startup**: Cached baseline means immediate productivity
+- **Full flexibility**: Can add/modify any dependencies inside container
+- **No limitations**: Complete rosdep and repository management capability
+- **Development friendly**: Experiment with dependencies without Docker rebuilds
 
 ### Runtime Operations
 
@@ -130,11 +139,12 @@ cd $HOME/overlay && colcon build
 ## Design Principles
 
 1. **Unified Architecture**: Both underlay and overlay use identical workspace structure
-2. **Build-Time Caching**: Repository dependencies processed and built during Docker build for optimal caching
-3. **Script Reusability**: Same scripts work for any workspace following the standard layout
+2. **Hybrid Caching**: Build-time baseline + runtime update capability for best performance
+3. **Script Reusability**: Same scripts work for build-time and runtime operations
 4. **Clear Separation**: Dependencies (underlay) vs user packages (overlay)
 5. **Permission Safety**: All workspaces in user home directory with proper ownership
-6. **Efficient Updates**: `update_repos.sh` available for rare dependency changes
+6. **Full Runtime Capability**: Complete rosdep and repository management inside containers
+7. **No Architectural Limitations**: Can perform any dependency operation at runtime
 
 ## Usage Scenarios
 
@@ -239,15 +249,21 @@ deps_rocker --ros-jazzy --cwd ~/my_project:~/overlay/src/my_project ubuntu:24.04
 cd ~/overlay && colcon build  # Immediate build, dependencies already available
 ```
 
-### Adding New Dependencies (When Needed)
+### Runtime Dependency Updates (Full Capability)
 ```bash  
-# If project adds new *.repos files or dependencies:
+# Start with cached baseline
 deps_rocker --ros-jazzy --cwd ~/my_project:~/overlay/src/my_project ubuntu:24.04
 
-# Inside container - only when dependencies change:
-update_repos.sh              # Import new dependencies to underlay  
-workspace_build.sh ~/underlay  # Rebuild underlay with new dependencies
-cd ~/overlay && colcon build   # Build user packages against updated underlay
+# Inside container - modify dependencies as needed:
+update_repos.sh                 # Import new *.repos files to underlay
+workspace_deps.sh ~/underlay    # Install new rosdep dependencies  
+workspace_build.sh ~/underlay   # Rebuild underlay with new packages
+cd ~/overlay && colcon build    # Build against updated underlay
+
+# Or individual operations:
+rosdep install --from-paths ~/underlay/src --ignore-src -y  # Direct rosdep
+vcs import ~/underlay/src < my_new.repos                    # Direct vcs import
+colcon build --base-paths ~/underlay                       # Direct colcon build
 ```
 
 ### Dynamic Repository Loading
@@ -289,7 +305,8 @@ Unified helper scripts work with any workspace following the consistent `src/bui
 
 **`workspace_deps.sh <workspace_path>`**
 - Installs rosdep dependencies for workspace packages
-- Uses `rosdep install --from-paths <workspace>/src --ignore-src -y`
+- Uses `rosdep install --from-paths <workspace>/src --ignore-src -y`  
+- **Runtime capable**: Can install new dependencies inside running container
 
 **`workspace_build.sh <workspace_path>`**  
 - Builds workspace using `colcon build` with proper sourcing
@@ -298,10 +315,11 @@ Unified helper scripts work with any workspace following the consistent `src/bui
 
 
 **`update_repos.sh`**
-- Scans workspace for `*.repos` files
-- Consolidates and imports to `$HOME/underlay/src` using `vcs import` (via vcs2l)
-- Installs dependencies and builds underlay workspace
-- Single command for complete dependency management
+- Scans workspace for `*.repos` files (including newly added ones)
+- Imports to `$HOME/underlay/src` using `vcs import` (via vcs2l)
+- Installs new rosdep dependencies for imported packages
+- Builds updated underlay workspace
+- **Runtime updates**: Can import and build new repositories inside running container
 
 ## Caching Strategy
 
@@ -354,7 +372,9 @@ deps_rocker/extensions/ros_jazzy/
 - Must work with any ROS repository (`ros2/demos`, arbitrary user projects)  
 - Auto-detection must activate on `package.xml` and `*.repos` files
 - Unified scripts must handle both underlay and overlay workspaces
-- Dynamic repository management must work without Docker rebuilds
+- Runtime dependency updates must work inside running containers
+- Both cached baseline and runtime modifications must function correctly
+- Scripts must work identically during Docker build and container runtime
 
 ### Implementation Notes
 - Keep build-time repository consolidation in `ros_jazzy.py` for optimal caching
