@@ -45,32 +45,33 @@ echo "    url: https://github.com/example/new_package.git" >> my_deps.repos
 
 #### Single Script Solution:
 ```bash
-# /usr/local/bin/update_repos.sh - All-in-one repository management
+# /usr/local/bin/update_repos.sh - Underlay repository management
 #!/bin/bash
-# Discovers *.repos files, imports packages, installs deps, and builds
-# Usage: update_repos.sh [workspace_path]
+# Discovers *.repos files and updates underlay workspace with dependencies
+# Usage: update_repos.sh
 
-WORKSPACE=${1:-"${ROS_WORKSPACE_ROOT:-$HOME/ros_ws}"}
+UNDERLAY_WS="${ROS_UNDERLAY_ROOT:-$HOME/underlay}"
+SEARCH_ROOT="${ROS_WORKSPACE_ROOT:-$HOME}"
 
-echo "Updating repositories in: $WORKSPACE"
+echo "Updating underlay repositories: $UNDERLAY_WS"
 
-# 1. Discover and consolidate *.repos files
-echo "Discovering *.repos files..."
-find "$WORKSPACE" -name "*.repos" -type f | xargs cat > /tmp/consolidated.repos
+# 1. Discover and consolidate *.repos files from workspace
+echo "Discovering *.repos files in: $SEARCH_ROOT"
+find "$SEARCH_ROOT" -name "*.repos" -type f | xargs cat > /tmp/consolidated.repos
 
-# 2. Import with vcstool  
-echo "Importing repositories..."
-vcs import "$WORKSPACE/src" < /tmp/consolidated.repos
+# 2. Import dependencies into underlay  
+echo "Importing repositories into underlay..."
+vcs import "$UNDERLAY_WS/src" < /tmp/consolidated.repos
 
-# 3. Install dependencies
-echo "Installing dependencies..."
-rosdep install --from-paths "$WORKSPACE/src" --ignore-src -y
+# 3. Install dependencies for underlay
+echo "Installing underlay dependencies..."
+rosdep install --from-paths "$UNDERLAY_WS/src" --ignore-src -y
 
-# 4. Build workspace
-echo "Building workspace..."
-cd "$WORKSPACE" && colcon build
+# 4. Build underlay workspace
+echo "Building underlay workspace..."
+cd "$UNDERLAY_WS" && colcon build
 
-echo "Repository update complete!"
+echo "Underlay update complete!"
 ```
 
 ### Option 2: Hybrid with Auto-Refresh
@@ -117,17 +118,16 @@ echo "Repository update complete!"
 
 ### User Workflow (Improved):
 ```bash
-# User modifies .repos file
+# User modifies .repos file (adds new dependencies)
 echo "  new_package:" >> my_deps.repos  
 echo "    type: git" >> my_deps.repos
 echo "    url: https://github.com/example/new_package.git" >> my_deps.repos
 
-# Single command handles everything:
-update_repos.sh  # Discovers, imports, installs deps, builds
+# Single command updates underlay with new dependencies:
+# Single command refresh (no Docker rebuild needed!)
+update_repos.sh  # Updates underlay with new dependencies from *.repos files
 
-# Or specify workspace:  
-update_repos.sh $HOME/underlay
-update_repos.sh $HOME/overlay
+# Overlay packages (user code) remain untouched and use updated underlay
 ```
 
 ### Migration Strategy:

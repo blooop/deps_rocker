@@ -8,9 +8,9 @@ Implement dynamic repository discovery that processes `*.repos` files at runtime
 
 ## Implementation
 - Remove build-time consolidation from ros_jazzy extension
-- Create runtime scripts for dynamic repository discovery and processing
-- Maintain temporary consolidation only when needed for vcstool operations
-- Provide automatic workspace refresh commands for seamless developer workflow
+- Create `update_repos.sh` script for dynamic underlay management
+- Script discovers `*.repos` files and updates underlay workspace only
+- Overlay workspace remains for user packages via cwd extension mounting
 
 ## Benefits
 - **Zero Staleness**: Repository state always reflects current files
