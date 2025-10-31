@@ -9,8 +9,8 @@ ENV ROS_LOG_BASE=$HOME/ros_ws/log
 ENV COLCON_LOG_PATH=$HOME/ros_ws/log
 
 # Create ROS workspace directories as user
-RUN mkdir -p "$HOME/ros_ws/underlay" "$HOME/ros_ws/underlay_build" "$HOME/ros_ws/underlay_install" \
-  "$HOME/ros_ws/build" "$HOME/ros_ws/install" "$HOME/ros_ws/log"
+RUN mkdir -p "$ROS_UNDERLAY_PATH" "$ROS_UNDERLAY_BUILD" "$ROS_UNDERLAY_INSTALL" \
+  "$ROS_BUILD_BASE" "$ROS_INSTALL_BASE" "$ROS_LOG_BASE"
 
 # Import the consolidated depends.repos manifest to underlay as user
 RUN if [ -f /tmp/consolidated.repos ]; then \
