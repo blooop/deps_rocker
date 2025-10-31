@@ -32,6 +32,25 @@ class RosJazzy(SimpleRockerExtension):
     def invoke_after(self, cliargs):
         return super().invoke_after({"gemini", "claude", "codex", "user"})
 
+    def _build_template_args(self, cliargs, empy_args=None) -> dict:
+        """Override to add username to template context"""
+        import pwd
+        args = super()._build_template_args(cliargs, empy_args)
+        # Get username from user extension or environment
+        # Default to current user if available, otherwise 'user'
+        try:
+            # Try to get current username
+            username = pwd.getpwuid(os.getuid()).pw_name
+        except (OSError, KeyError):
+            username = "user"
+        
+        # Override with cliargs if provided
+        if cliargs:
+            username = cliargs.get("name", username)
+        
+        args["name"] = username
+        return args
+
     def get_files(self, cliargs) -> dict[str, str]:
         dat = self.get_config_file("configs/colcon-defaults.yaml")
 

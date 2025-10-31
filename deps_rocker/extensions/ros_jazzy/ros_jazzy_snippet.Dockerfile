@@ -23,11 +23,6 @@ ENV PYTHONPATH=/opt/ros/jazzy/local/lib/python3.12/dist-packages:/opt/ros/jazzy/
 ENV ROS_PYTHON_VERSION=3
 ENV ROS_VERSION=2
 
-# Workspace environment variables for testing
-ENV ROS_UNDERLAY_PATH=/opt/ros/underlay/src
-ENV ROS_UNDERLAY_BUILD=/opt/ros/underlay/build
-ENV ROS_UNDERLAY_INSTALL=/opt/ros/underlay/install
-
 # Initialize rosdep
 RUN if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then \
     rosdep init; \
@@ -35,9 +30,9 @@ RUN if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then \
     echo "rosdep already initialized, skipping init"; \
   fi
 
-# Create underlay workspace with proper ownership
-RUN mkdir -p /opt/ros/underlay/src /opt/ros/underlay/build /opt/ros/underlay/install && \
-    chown -R ${USERNAME}:${USERNAME} /opt/ros/underlay
+# Create underlay workspace directory structure (paths will be set in user snippet)
+RUN mkdir -p /home/@(name)/underlay/src /home/@(name)/underlay/build /home/@(name)/underlay/install && \
+    chown -R @(name):@(name) /home/@(name)/underlay
 
 # Copy scripts and make them executable
 COPY underlay_deps.sh underlay_build.sh install_rosdeps.sh /usr/local/bin/

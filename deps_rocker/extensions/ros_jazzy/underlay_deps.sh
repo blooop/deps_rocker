@@ -4,8 +4,8 @@
 
 set -e
 
-# Generic underlay path - no assumptions about user paths
-UNDERLAY_PATH="${UNDERLAY_PATH:-/opt/ros/underlay/src}"
+# Use environment variable for unified workspace architecture
+UNDERLAY_PATH="${ROS_UNDERLAY_PATH:-/home/@(name)/underlay/src}"
 
 echo "Installing underlay dependencies from: $UNDERLAY_PATH"
 

@@ -4,10 +4,11 @@
 
 set -e
 
-# Generic paths - no user-specific assumptions
-UNDERLAY_SRC="${UNDERLAY_SRC:-/opt/ros/underlay/src}"
-UNDERLAY_BUILD="${UNDERLAY_BUILD:-/opt/ros/underlay/build}"
-UNDERLAY_INSTALL="${UNDERLAY_INSTALL:-/opt/ros/underlay/install}"
+# Use environment variables or defaults for unified workspace architecture
+UNDERLAY_SRC="${ROS_UNDERLAY_PATH:-/home/@(name)/underlay/src}"
+UNDERLAY_BUILD="${ROS_UNDERLAY_BUILD:-/home/@(name)/underlay/build}"
+UNDERLAY_INSTALL="${ROS_UNDERLAY_INSTALL:-/home/@(name)/underlay/install}"
+UNDERLAY_ROOT="${ROS_UNDERLAY_ROOT:-/home/@(name)/underlay}"
 ROS_DISTRO="${ROS_DISTRO:-jazzy}"
 
 echo "Building underlay workspace from: $UNDERLAY_SRC"
@@ -34,7 +35,7 @@ mkdir -p "$UNDERLAY_BUILD" "$UNDERLAY_INSTALL"
 
 # Build underlay packages
 echo "Building underlay packages..."
-cd /opt/ros/underlay
+cd "$UNDERLAY_ROOT"
 colcon build \
     --base-paths "$UNDERLAY_SRC" \
     --build-base "$UNDERLAY_BUILD" \
