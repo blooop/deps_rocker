@@ -7,12 +7,12 @@ RUN add-apt-repository universe \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null \
     && apt-get update && apt-get install -y --no-install-recommends \
     ros-jazzy-ros-core \
-    python3-vcstool \
+    python3-vcs2l \
     python3-rosdep \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install colcon, vcstool, numpy, and lark via pip
-RUN pip install colcon-common-extensions colcon-defaults colcon-spawn-shell colcon-runner colcon-clean rosdep vcstool numpy lark --break-system-packages
+RUN pip install colcon-common-extensions colcon-defaults colcon-runner colcon-clean lark --break-system-packages
 
 ENV ROS_DISTRO=jazzy
 ENV AMENT_PREFIX_PATH=/opt/ros/jazzy
