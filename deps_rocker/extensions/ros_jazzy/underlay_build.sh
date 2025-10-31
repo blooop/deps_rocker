@@ -5,10 +5,10 @@
 set -e
 
 # Use workspace layout from environment
-UNDERLAY_PATH="${ROS_UNDERLAY_PATH:-/ros_ws/underlay}"
-UNDERLAY_BUILD="${ROS_UNDERLAY_BUILD:-/ros_ws/underlay_build}"
-UNDERLAY_INSTALL="${ROS_UNDERLAY_INSTALL:-/ros_ws/underlay_install}"
-WORKSPACE_ROOT="${ROS_WORKSPACE_ROOT:-/ros_ws}"
+UNDERLAY_PATH="${ROS_UNDERLAY_PATH:-/home/user/ros_ws/underlay}"
+UNDERLAY_BUILD="${ROS_UNDERLAY_BUILD:-/home/user/ros_ws/underlay_build}"
+UNDERLAY_INSTALL="${ROS_UNDERLAY_INSTALL:-/home/user/ros_ws/underlay_install}"
+WORKSPACE_ROOT="${ROS_WORKSPACE_ROOT:-/home/user/ros_ws}"
 ROS_DISTRO="${ROS_DISTRO:-jazzy}"
 ROS_SETUP_SCRIPT="${ROS_SETUP_SCRIPT:-/opt/ros/${ROS_DISTRO}/setup.bash}"
 

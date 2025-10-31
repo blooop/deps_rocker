@@ -17,10 +17,18 @@ fi
 
 cd "${UNDERLAY_PATH}"
 
+# Determine rosdep cache directory based on user
+CURRENT_USER=$(whoami)
+if [ "$CURRENT_USER" = "root" ]; then
+    ROSDEP_CACHE_DIR="/root/.ros/rosdep"
+else
+    ROSDEP_CACHE_DIR="$HOME/.ros/rosdep"
+fi
+
 # Update rosdep (with caching to speed up repeated builds)
 echo "Updating rosdep..."
-if [ ! -f /root/.ros/rosdep/sources.cache ] || \
-   [ -z "$(find /root/.ros/rosdep/sources.cache -mmin -1440 2>/dev/null)" ]; then
+if [ ! -f "${ROSDEP_CACHE_DIR}/sources.cache" ] || \
+   [ -z "$(find "${ROSDEP_CACHE_DIR}/sources.cache" -mmin -1440 2>/dev/null)" ]; then
     # Cache is missing or older than 24 hours
     rosdep update
 else

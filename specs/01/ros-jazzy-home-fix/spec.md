@@ -1,15 +1,23 @@
 # ROS Jazzy $HOME Variable Fix
 
 ## Problem
-The `ros_jazzy_user_snippet.Dockerfile` uses `$HOME` environment variable in ENV statements, but `$HOME` is not available during Docker build time when the user snippet runs. This causes permission errors when trying to create directories like `/ros_ws` instead of the intended `~/ros_ws`.
+The `ros_jazzy_user_snippet.Dockerfile` uses environment variables (`$ROS_UNDERLAY_PATH`, etc.) in the mkdir command that reference the old `/ros_ws` paths from the main snippet, even though the user snippet redefines them to use `$HOME/ros_ws`. This causes permission errors when trying to create directories like `/ros_ws` instead of the intended `~/ros_ws`.
 
 ## Root Cause
-The user snippet runs before the USER directive is processed, so `$HOME` is not set. Other extensions solve this by using `cliargs.get("user_home_dir")` in Python and passing the actual path to the Dockerfile template.
+The main snippet sets environment variables to absolute paths like `/ros_ws`. The user snippet then redefines these to use `$HOME/ros_ws`, but immediately uses the environment variables in a mkdir command. Docker may not have fully processed the ENV changes within the same build context, causing it to use the old values.
 
 ## Solution
-1. Update the ROS Jazzy extension to get the container home directory from `cliargs.get("user_home_dir")`
-2. Pass this path to the user snippet template via `empy_user_args`
-3. Replace `$HOME` references in the user snippet with the actual path
+Use `$HOME` directly in the mkdir command instead of relying on the environment variables that were just redefined:
+
+```dockerfile
+# Instead of:
+RUN mkdir -p "$ROS_UNDERLAY_PATH" "$ROS_UNDERLAY_BUILD" "$ROS_UNDERLAY_INSTALL" \
+  "$ROS_BUILD_BASE" "$ROS_INSTALL_BASE" "$ROS_LOG_BASE"
+
+# Use:
+RUN mkdir -p "$HOME/ros_ws/underlay" "$HOME/ros_ws/underlay_build" "$HOME/ros_ws/underlay_install" \
+  "$HOME/ros_ws/build" "$HOME/ros_ws/install" "$HOME/ros_ws/log"
+```
 
 ## Expected Outcome
 The ROS workspace directories will be created in the correct user home directory (e.g., `/home/user/ros_ws`) instead of failing to create `/ros_ws` due to permission errors.

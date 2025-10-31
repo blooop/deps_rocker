@@ -1,7 +1,25 @@
-# Change ownership of ROS workspace directories to the user
-# This runs after the user is created, ensuring they can write to build directories
-RUN chown -R ${USER_NAME}:${USER_NAME} /ros_ws
-  
+# Override workspace paths to use home directory
+ENV ROS_WORKSPACE_ROOT=$HOME/ros_ws
+ENV ROS_UNDERLAY_PATH=$HOME/ros_ws/underlay
+ENV ROS_UNDERLAY_BUILD=$HOME/ros_ws/underlay_build
+ENV ROS_UNDERLAY_INSTALL=$HOME/ros_ws/underlay_install
+ENV ROS_BUILD_BASE=$HOME/ros_ws/build
+ENV ROS_INSTALL_BASE=$HOME/ros_ws/install
+ENV ROS_LOG_BASE=$HOME/ros_ws/log
+ENV COLCON_LOG_PATH=$HOME/ros_ws/log
+
+# Create ROS workspace directories as user
+RUN mkdir -p "$HOME/ros_ws/underlay" "$HOME/ros_ws/underlay_build" "$HOME/ros_ws/underlay_install" \
+  "$HOME/ros_ws/build" "$HOME/ros_ws/install" "$HOME/ros_ws/log"
+
+# Import the consolidated depends.repos manifest to underlay as user
+RUN if [ -f /tmp/consolidated.repos ]; then \
+        vcs import --recursive "$ROS_UNDERLAY_PATH" < /tmp/consolidated.repos || true; \
+    fi
+
+# Build the underlay workspace as user if it contains packages
+RUN underlay_deps.sh && underlay_build.sh
+
 #ROS user snippet
 RUN DEPS_ROOT="${ROS_DEPENDENCIES_ROOT}" && \
     if [ -d "$DEPS_ROOT" ]; then \
@@ -9,6 +27,9 @@ RUN DEPS_ROOT="${ROS_DEPENDENCIES_ROOT}" && \
         rosdep install --from-paths "$DEPS_ROOT" --ignore-src -r -y; \
     fi
 
+
+# Update COLCON_DEFAULTS_FILE to use home directory
+ENV COLCON_DEFAULTS_FILE=$HOME/ros_ws/colcon-defaults.yaml
 
 #need to work out why I can't just copy directly to the right location...
 COPY colcon-defaults.yaml /colcon-defaults.yaml

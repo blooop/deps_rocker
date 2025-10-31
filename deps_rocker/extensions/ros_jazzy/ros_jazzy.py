@@ -10,7 +10,7 @@ class RosJazzy(SimpleRockerExtension):
 
     name = "ros_jazzy"
 
-    depends_on_extension = ("curl", "git_clone")
+    depends_on_extension = ("curl", "git_clone", "user")
     # Use apt_packages feature for ROS dependencies
     apt_packages = [
         "locales",
@@ -30,7 +30,7 @@ class RosJazzy(SimpleRockerExtension):
     ]
 
     def invoke_after(self, cliargs):
-        return super().invoke_after({"gemini", "claude", "codex"})
+        return super().invoke_after({"gemini", "claude", "codex", "user"})
 
     def get_files(self, cliargs) -> dict[str, str]:
         dat = self.get_config_file("configs/colcon-defaults.yaml")
