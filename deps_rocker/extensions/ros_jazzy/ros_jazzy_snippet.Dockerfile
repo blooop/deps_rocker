@@ -56,3 +56,9 @@ RUN mkdir -p /home/@(name)/.cache/pip && \
 # Copy consolidated repos file (always exists, may be empty)
 COPY consolidated.repos /tmp/consolidated.repos
 
+# Import repositories from consolidated.repos into underlay workspace
+# Use cache mount for repository cloning to speed up builds
+RUN --mount=type=cache,target=/root/.cache/vcs-repos,id=vcs-repos-cache \
+    --mount=type=cache,target=/home/@(name)/.cache/pip,id=pip-cache-@(name) \
+    su - @(name) -c 'update_repos.sh' || echo "No repositories to import"
+
