@@ -3,7 +3,18 @@ RUN mkdir -p /home/@(name)/underlay/src /home/@(name)/underlay/build /home/@(nam
     mkdir -p /home/@(name)/overlay/src /home/@(name)/overlay/build /home/@(name)/overlay/install /home/@(name)/overlay/log && \
     chown -R @(name):@(name) /home/@(name)/underlay /home/@(name)/overlay
 
-# Set up unified workspace environment variables in bashrc for proper user context
+# Set up unified workspace environment variables both as ENV commands and in bashrc
+# ENV commands ensure availability in all shell contexts, bashrc for interactive shells
+ENV ROS_UNDERLAY_ROOT="/home/@(name)/underlay" \
+    ROS_UNDERLAY_PATH="/home/@(name)/underlay/src" \
+    ROS_UNDERLAY_BUILD="/home/@(name)/underlay/build" \
+    ROS_UNDERLAY_INSTALL="/home/@(name)/underlay/install" \
+    ROS_OVERLAY_ROOT="/home/@(name)/overlay" \
+    ROS_WORKSPACE_ROOT="/home/@(name)/overlay" \
+    ROS_BUILD_BASE="/home/@(name)/overlay/build" \
+    ROS_INSTALL_BASE="/home/@(name)/overlay/install" \
+    ROS_LOG_BASE="/home/@(name)/overlay/log"
+
 RUN echo "# ROS Unified Workspace Architecture Environment Variables" >> /home/@(name)/.bashrc && \
     echo "export ROS_UNDERLAY_ROOT=\$HOME/underlay" >> /home/@(name)/.bashrc && \
     echo "export ROS_UNDERLAY_PATH=\$HOME/underlay/src" >> /home/@(name)/.bashrc && \
