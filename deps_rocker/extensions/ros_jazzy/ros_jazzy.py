@@ -10,7 +10,7 @@ class RosJazzy(SimpleRockerExtension):
 
     name = "ros_jazzy"
 
-    depends_on_extension = ("curl", "git_clone", "user")
+    depends_on_extension = ("curl", "git_clone", "user", "workdir")
     # Use apt_packages feature for ROS dependencies
     apt_packages = [
         "locales",
@@ -30,10 +30,10 @@ class RosJazzy(SimpleRockerExtension):
     ]
 
     def invoke_after(self, cliargs):
-        return super().invoke_after({"gemini", "claude", "codex", "user"})
+        return super().invoke_after({"gemini", "claude", "codex", "user", "workdir"})
 
     def _build_template_args(self, cliargs, empy_args=None) -> dict:
-        """Override to add username to template context"""
+        """Override to add username to template context and configure workdir"""
         import pwd
 
         args = super()._build_template_args(cliargs, empy_args)
@@ -47,7 +47,37 @@ class RosJazzy(SimpleRockerExtension):
             username = os.getenv("USER", "user")
 
         args["name"] = username
+
+        # Configure workdir extension for ROS workspace layout
+        self._configure_workdir_for_ros(cliargs, username)
+
         return args
+
+    def _configure_workdir_for_ros(self, cliargs, username):
+        """Configure workdir extension to mount project source to ~/overlay/src"""
+
+        # Get the workspace path
+        workspace = self._resolve_workspace(cliargs)
+
+        # Set workdir arguments for ROS workspace structure
+        container_home = f"/home/{username}"
+        overlay_src_path = f"{container_home}/overlay/src"
+        overlay_path = f"{container_home}/overlay"
+
+        # Configure workdir extension arguments
+        cliargs["workdir_host_path"] = str(workspace)
+        cliargs["workdir_container_path"] = overlay_src_path
+        cliargs["workdir_working_dir"] = overlay_path
+
+    def _resolve_workspace(self, cliargs):
+        """Resolve workspace path using the same logic as auto extension"""
+        root = cliargs.get("auto")
+        # If root is True (from --auto with no value), treat as None
+        if root is True or root is None or not isinstance(root, (str, Path)):
+            path = Path.cwd().expanduser().resolve()
+        else:
+            path = Path(root).expanduser().resolve()
+        return path
 
     def get_files(self, cliargs) -> dict[str, str]:
         dat = self.get_config_file("configs/colcon-defaults.yaml")
@@ -64,14 +94,8 @@ class RosJazzy(SimpleRockerExtension):
         build_underlay = (script_dir / "build_underlay.sh").read_text()
         update_repos = (script_dir / "update_repos.sh").read_text()
 
-        # Discover and merge all depends.repos files
-        workspace = self.get_workspace_path()
-        auto_value = cliargs.get("auto", workspace)
-        # Handle case where auto is True (from CLI flag) vs actual path
-        if auto_value is True or auto_value is None:
-            workspace = Path(workspace).expanduser()
-        else:
-            workspace = Path(auto_value).expanduser()
+        # Discover and merge all depends.repos files using proper workspace resolution
+        workspace = self._resolve_workspace(cliargs)
 
         print("ROS Jazzy: searching for depends.repos in:", workspace)
         merged_repos = {"repositories": {}}
@@ -118,7 +142,7 @@ class RosJazzy(SimpleRockerExtension):
             version = info.get("version", "")
             print(f"  - {name}: {url} [{version}]")
 
-        return {
+        files = {
             "colcon-defaults.yaml": dat,
             "underlay_deps.sh": underlay_deps,
             "underlay_build.sh": underlay_build,
@@ -127,8 +151,20 @@ class RosJazzy(SimpleRockerExtension):
             "rosdep_overlay.sh": rosdep_overlay,
             "build_underlay.sh": build_underlay,
             "update_repos.sh": update_repos,
-            "consolidated.repos": yaml.dump(merged_repos, default_flow_style=False),
         }
+
+        # Always create consolidated.repos but mark it as empty if no repositories found
+        if merged_repos["repositories"]:
+            print(
+                f"ROS Jazzy: creating consolidated.repos with {len(merged_repos['repositories'])} repositories"
+            )
+            files["consolidated.repos"] = yaml.dump(merged_repos, default_flow_style=False)
+        else:
+            print("ROS Jazzy: no repositories found, creating empty consolidated.repos")
+            # Create an empty file with a comment indicating no repositories
+            files["consolidated.repos"] = "# No repositories found in workspace\nrepositories: {}\n"
+
+        return files
 
     def get_docker_args(self, cliargs) -> str:  # pylint: disable=unused-argument
         """Set the ROS_DOMAIN_ID env var from the host machine if it exists, otherwise generate one from a hash of the username"""

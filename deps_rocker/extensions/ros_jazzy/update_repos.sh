@@ -37,8 +37,25 @@ for pattern in "*.repos" "repos" "*.rosinstall" ".rosinstall"; do
 done
 
 # If no repos files found, try to use consolidated.repos if available
-if [ ${#REPOS_FILES[@]} -eq 0 ] && [ -f "/tmp/consolidated.repos" ]; then
-    REPOS_FILES+=("/tmp/consolidated.repos")
+if [ ${#REPOS_FILES[@]} -eq 0 ] && [ -f "/tmp/consolidated.repos" ] && [ -s "/tmp/consolidated.repos" ]; then
+    # Check if consolidated.repos actually has repositories (not just empty structure)
+    # Look for non-empty repositories section
+    if grep -q "repositories:" "/tmp/consolidated.repos"; then
+        # Check if there are actual repositories (not just empty {})
+        if ! grep -A 1 "repositories:" "/tmp/consolidated.repos" | grep -q "{}"; then
+            # Further check: look for actual repository entries (lines that don't start with # and have content after repositories:)
+            if sed -n '/^repositories:/,$p' "/tmp/consolidated.repos" | grep -v "^#" | grep -v "^repositories:" | grep -v "^[[:space:]]*$" | grep -q .; then
+                REPOS_FILES+=("/tmp/consolidated.repos")
+                echo "Using consolidated.repos with detected repositories"
+            else
+                echo "consolidated.repos contains empty repositories section"
+            fi
+        else
+            echo "consolidated.repos contains empty repositories: {}"
+        fi
+    else
+        echo "consolidated.repos does not contain repositories section"
+    fi
 fi
 
 # Import repositories

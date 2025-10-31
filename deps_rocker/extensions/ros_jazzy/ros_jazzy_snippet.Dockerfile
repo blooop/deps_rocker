@@ -44,14 +44,15 @@ RUN chmod +x /usr/local/bin/underlay_deps.sh /usr/local/bin/underlay_build.sh /u
              /usr/local/bin/rosdep_underlay.sh /usr/local/bin/rosdep_overlay.sh \
              /usr/local/bin/build_underlay.sh /usr/local/bin/update_repos.sh
 
-# Create underlay workspace directory structure (paths will be set in user snippet)
+# Create underlay and overlay workspace directory structure
 RUN mkdir -p /home/@(name)/underlay/src /home/@(name)/underlay/build /home/@(name)/underlay/install && \
-    chown -R @(name):@(name) /home/@(name)/underlay
+    mkdir -p /home/@(name)/overlay/build /home/@(name)/overlay/install && \
+    chown -R @(name):@(name) /home/@(name)/underlay /home/@(name)/overlay
 
 # Create user-accessible cache directories for BuildKit mounts
 RUN mkdir -p /home/@(name)/.cache/vcs-repos /home/@(name)/.cache/pip && \
     chown -R @(name):@(name) /home/@(name)/.cache
 
-# Copy consolidated repos file if it exists
+# Copy consolidated repos file (always exists, may be empty)
 COPY consolidated.repos /tmp/consolidated.repos
 
