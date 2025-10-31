@@ -6,10 +6,10 @@ The `ros_jazzy` extension provides a complete ROS 2 Jazzy development environmen
 
 ```bash
 # Basic ROS Jazzy environment
-deps_rocker --ros-jazzy ubuntu:24.04
+rockerc --ros-jazzy ubuntu:24.04
 
 # With additional development tools
-deps_rocker --ros-jazzy --nvim --lazygit ubuntu:24.04
+rockerc --ros-jazzy --nvim --lazygit ubuntu:24.04
 ```
 
 ## Architecture Overview
@@ -69,7 +69,7 @@ ROS_LOG_BASE=$HOME/overlay/log
 - Installs rosdep dependencies for both underlay and overlay (cached baseline)
 - Builds underlay workspace with `colcon build` (cached in Docker layers)
 - Creates overlay workspace structure ready for user packages
-- Installs unified management scripts (`workspace_deps.sh`, `workspace_build.sh`, `update_repos.sh`)
+**Installs unified management scripts (`rosdep_underlay.sh`, `rosdep_overlay.sh`, `build_underlay.sh`, `update_repos.sh`)**
 - **Preserves runtime capability**: Scripts can modify underlay and re-run rosdep inside container
 
 **ROS-Specific Package Mounting:**
@@ -85,8 +85,9 @@ The extension provides a set of unified scripts that work identically on both un
 
 ### Core Scripts
 
-- **`workspace_deps.sh <workspace_path>`**: Installs rosdep dependencies for any workspace
-- **`workspace_build.sh <workspace_path>`**: Builds any workspace using colcon  
+- **`rosdep_underlay.sh`**: Installs rosdep dependencies for underlay workspace
+- **`rosdep_overlay.sh`**: Installs rosdep dependencies for overlay workspace  
+- **`build_underlay.sh`**: Builds underlay workspace using colcon
 - **`update_repos.sh`**: Dynamically imports `*.repos` dependencies into underlay
 
 
@@ -130,12 +131,11 @@ source $HOME/overlay/install/setup.bash            # User packages (if built)
 # Update dependencies from *.repos files
 update_repos.sh
 
-# Build workspaces using unified scripts
-workspace_build.sh $HOME/underlay   # Build dependencies
-workspace_build.sh $HOME/overlay    # Build user packages
+# Install underlay dependencies and build
+cd ~/underlay && rosdep_underlay.sh && build_underlay.sh
 
-# Or use standard colcon (from overlay workspace)
-cd $HOME/overlay && colcon build
+# Install overlay dependencies and build
+cd ~/overlay && rosdep_overlay.sh && colcon build --symlink-install
 ```
 
 ## Design Principles
@@ -152,16 +152,16 @@ cd $HOME/overlay && colcon build
 
 ### Basic Development
 ```bash
-cd ~/my_project && deps_rocker --ros-jazzy ubuntu:24.04
+cd ~/my_project && rockerc --ros-jazzy ubuntu:24.04
 # Result: ~/my_project automatically mounted as ~/overlay/src/my_project
 ```
 
 ### With Dependencies  
 ```bash
-cd ~/my_project && deps_rocker --ros-jazzy ubuntu:24.04
+cd ~/my_project && rockerc --ros-jazzy ubuntu:24.04
 # Inside container - project auto-mounted, if it contains *.repos files:
 update_repos.sh                    # Import dependencies to underlay
-workspace_build.sh $HOME/underlay  # Build dependencies  
+build_underlay.sh                  # Build dependencies  
 cd $HOME/overlay && colcon build   # Build user packages
 ```
 
@@ -216,7 +216,7 @@ $HOME/underlay/
 ```
 $HOME/overlay/
 ├── src/                # User packages mounted directly here via cwd extension
-│   ├── my_project/     # Auto-mounted: cd ~/my_project && deps_rocker --ros-jazzy
+│   ├── my_project/     # Auto-mounted: cd ~/my_project && rockerc --ros-jazzy
 │   ├── another_pkg/    # (Extension determines mount path automatically)
 │   └── ...
 ├── build/              # Build artifacts
@@ -246,7 +246,7 @@ $HOME/overlay/
 ### Standard Usage (Cached Dependencies)
 ```bash
 # Mount current directory into overlay workspace automatically
-cd ~/my_project && deps_rocker --ros-jazzy ubuntu:24.04
+cd ~/my_project && rockerc --ros-jazzy ubuntu:24.04
 
 # Inside container - project automatically mounted in ~/overlay/src/my_project:
 cd ~/overlay && colcon build  # Immediate build, dependencies already available
@@ -255,24 +255,24 @@ cd ~/overlay && colcon build  # Immediate build, dependencies already available
 ### Runtime Dependency Updates (Full Capability)
 ```bash  
 # Start with cached baseline
-cd ~/my_project && deps_rocker --ros-jazzy ubuntu:24.04
+cd ~/my_project && rockerc --ros-jazzy ubuntu:24.04
 
 # Inside container - project auto-mounted, modify dependencies as needed:
 update_repos.sh                 # Import new *.repos files to underlay
-workspace_deps.sh ~/underlay    # Install new rosdep dependencies  
-workspace_build.sh ~/underlay   # Rebuild underlay with new packages
-cd ~/overlay && colcon build    # Build against updated underlay
+rosdep_underlay.sh              # Install new rosdep dependencies for underlay
+build_underlay.sh               # Rebuild underlay with new packages
+cd ~/overlay && colcon build    # Build overlay against updated underlay
 
 # Or individual operations:
-rosdep install --from-paths ~/underlay/src --ignore-src -y  # Direct rosdep
+rosdep install --from-paths ~/underlay/src --ignore-src -y  # Direct rosdep for underlay
+rosdep install --from-paths ~/overlay/src --ignore-src -y   # Direct rosdep for overlay
 vcs import ~/underlay/src < my_new.repos                    # Direct vcs import
-colcon build --base-paths ~/underlay                       # Direct colcon build
 ```
 
 ### Dynamic Repository Loading
 ```bash
 renv ros2/demos              # Load any ROS repository (dependencies built during Docker build)
-colcon build                 # Build user packages - dependencies already cached
+cd ~/overlay && colcon build # Build user packages - dependencies already cached
 ```
 
 ## Environment Variables
@@ -306,23 +306,27 @@ Unified helper scripts work with any workspace following the consistent `src/bui
 
 ### Script Specifications
 
-**`workspace_deps.sh <workspace_path>`**
-- Installs rosdep dependencies for workspace packages
-- Uses `rosdep install --from-paths <workspace>/src --ignore-src -y`  
+**`rosdep_underlay.sh`**
+- Installs rosdep dependencies for underlay packages
+- Uses `rosdep install --from-paths ~/underlay/src --ignore-src -y`  
 - **Runtime capable**: Can install new dependencies inside running container
 
-**`workspace_build.sh <workspace_path>`**  
-- Builds workspace using `colcon build` with proper sourcing
-- Works with any workspace following standard structure
+**`rosdep_overlay.sh`**
+- Installs rosdep dependencies for overlay packages  
+- Uses `rosdep install --from-paths ~/overlay/src --ignore-src -y`
+- **Runtime capable**: Can install dependencies for newly mounted packages
 
-
+**`build_underlay.sh`**  
+- Builds underlay workspace using `colcon build` with proper sourcing
+- Works in `~/underlay` directory with correct environment setup
+- **Overlay builds**: Always use `cd ~/overlay && colcon build` directly
 
 **`update_repos.sh`**
 - Scans workspace for `*.repos` files (including newly added ones)
 - Imports to `$HOME/underlay/src` using `vcs import` (via vcs2l)
-- Installs new rosdep dependencies for imported packages
-- Builds updated underlay workspace
-- **Runtime updates**: Can import and build new repositories inside running container
+- Calls `rosdep_underlay.sh` to install dependencies for imported packages
+- Calls `build_underlay.sh` to build updated underlay workspace
+- **Runtime updates**: Complete underlay update workflow in single command
 
 ## Caching Strategy
 
