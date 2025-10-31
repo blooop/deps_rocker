@@ -4,7 +4,7 @@
 When using the ros_jazzy extension with a dynamically loaded ROS 2 demo repository (via `renv ros2/demos`), the colcon build fails with CMake errors about missing package configuration files like `example_interfacesConfig.cmake`. The issue is that the underlay build logic is building the wrong underlay workspace.
 
 ## Root Cause
-The user-side Docker initialization (ros_jazzy_user_snippet.Dockerfile) has logic to build underlay dependencies, but it's checking for packages in the static `/ros_ws/underlay` directory (populated from `consolidated.repos` during Docker build) instead of the dynamically mounted workspace that contains the actual packages being built. When using `renv ros2/demos`, the demos repository gets mounted to `/home/ags/demos`, but the underlay fix incorrectly builds dependencies for unrelated packages in `/ros_ws/underlay`. This causes:
+The user-side Docker initialization (ros_jazzy_user_snippet.Dockerfile) has logic to build underlay dependencies, but it's checking for packages in the static `/ros_ws/underlay` directory (populated from `consolidated.repos` during Docker build) instead of the dynamically mounted workspace that contains the actual packages being built. When using `renv ros2/demos`, the demos repository gets mounted to the user's workspace directory, but the underlay fix incorrectly builds dependencies for unrelated packages in `/ros_ws/underlay`. This causes:
 
 1. Wrong underlay packages are built (from consolidated.repos instead of current workspace)
 2. The actual workspace packages don't have their dependencies installed via rosdep

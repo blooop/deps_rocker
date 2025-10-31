@@ -73,7 +73,7 @@ CMD [\"echo\", \"ROS Jazzy comprehensive test complete\"]
         active_extensions = manager.get_active_extensions(cliargs)
 
         # Add the comprehensive test script as the last extension
-        test_script_path = "/home/ags/projects/deps_rocker/test/test_ros_jazzy_comprehensive.sh"
+        test_script_path = os.path.join(os.path.dirname(__file__), "test_ros_jazzy_comprehensive.sh")
         if os.path.isfile(test_script_path):
             active_extensions.append(ScriptInjectionExtension(test_script_path))
             cliargs["command"] = "/tmp/test.sh"
@@ -126,7 +126,7 @@ repositories:
             active_extensions = manager.get_active_extensions(cliargs)
 
             # Add the comprehensive test script
-            test_script_path = "/home/ags/projects/deps_rocker/test/test_ros_jazzy_comprehensive.sh"
+            test_script_path = os.path.join(os.path.dirname(__file__), "test_ros_jazzy_comprehensive.sh")
             if os.path.isfile(test_script_path):
                 active_extensions.append(ScriptInjectionExtension(test_script_path))
                 cliargs["command"] = "/tmp/test.sh"
@@ -298,7 +298,7 @@ rm -rf "$ROS_UNDERLAY_PATH"/* 2>/dev/null || true
 mkdir -p "$ROS_UNDERLAY_PATH"
 
 # Create a writable test directory  
-SCRIPT_TEST_DIR="/home/ags/script_test"
+SCRIPT_TEST_DIR="/tmp/script_test"
 mkdir -p "$SCRIPT_TEST_DIR"
 cd "$SCRIPT_TEST_DIR"
 
