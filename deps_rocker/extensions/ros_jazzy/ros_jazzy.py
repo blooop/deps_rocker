@@ -97,21 +97,17 @@ class RosJazzy(SimpleRockerExtension):
         # Discover and merge all depends.repos files using proper workspace resolution
         workspace = self._resolve_workspace(cliargs)
 
-        print("ROS Jazzy: searching for depends.repos in:", workspace)
-        print("ROS Jazzy: resolved workspace path:", workspace.absolute())
-        print("ROS Jazzy: workspace exists:", workspace.exists())
-        print("ROS Jazzy: workspace is directory:", workspace.is_dir())
+        print("ROS Jazzy: searching for repository files in:", workspace)
         merged_repos = {"repositories": {}}
 
         # Search for all *.repos and *.repos.yaml files in workspace (not just depends.repos)
         repos_files_found = list(workspace.rglob("*.repos")) + list(workspace.rglob("*.repos.yaml"))
-        print(f"ROS Jazzy: found {len(repos_files_found)} repos files in workspace")
+        print(f"ROS Jazzy: found {len(repos_files_found)} repository files")
         for repos_file in repos_files_found:
-            print("ROS Jazzy: repos file path:", repos_file.absolute())
-            
+            print("ROS Jazzy: processing:", repos_file.relative_to(workspace))
+
         for repos_file in repos_files_found:
             if repos_file.is_file():
-                print("ROS Jazzy: processing repos file:", repos_file)
                 with repos_file.open(encoding="utf-8") as f:
                     try:
                         repos_data = yaml.safe_load(f)
