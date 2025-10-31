@@ -168,44 +168,51 @@ class RosJazzy(SimpleRockerExtension):
     def _create_unified_package_xml(self, workspace):
         """Create a unified package.xml with all dependencies from workspace packages"""
         import xml.etree.ElementTree as ET
-        
+
         print("ROS Jazzy: searching for package.xml files in:", workspace)
         package_files_found = list(workspace.rglob("package.xml"))
         print(f"ROS Jazzy: found {len(package_files_found)} package.xml files")
-        
+
         if not package_files_found:
             print("ROS Jazzy: no package.xml files found in workspace")
             return self._create_empty_package_xml()
-        
+
         # Set to collect all unique dependencies
         all_dependencies = set()
-        
+
         for pkg_file in package_files_found:
             if pkg_file.is_file():
                 try:
                     print(f"  - Processing: {pkg_file.relative_to(workspace)}")
-                    
+
                     # Parse the package.xml file
                     tree = ET.parse(pkg_file)
                     root = tree.getroot()
-                    
+
                     # Extract all dependency types
-                    for dep_type in ['depend', 'build_depend', 'build_export_depend', 
-                                   'buildtool_depend', 'buildtool_export_depend',
-                                   'exec_depend', 'run_depend', 'test_depend']:
+                    for dep_type in [
+                        "depend",
+                        "build_depend",
+                        "build_export_depend",
+                        "buildtool_depend",
+                        "buildtool_export_depend",
+                        "exec_depend",
+                        "run_depend",
+                        "test_depend",
+                    ]:
                         for dep_elem in root.findall(dep_type):
                             dep_name = dep_elem.text.strip() if dep_elem.text else None
                             if dep_name:
                                 all_dependencies.add(dep_name)
-                                
+
                 except Exception as e:
                     print(f"ROS Jazzy: failed to parse {pkg_file}: {e}")
                     continue
-        
+
         if not all_dependencies:
             print("ROS Jazzy: no dependencies found in package files")
             return self._create_empty_package_xml()
-        
+
         # Sort dependencies alphabetically for consistent caching
         sorted_dependencies = sorted(all_dependencies)
         print(f"ROS Jazzy: consolidated {len(sorted_dependencies)} unique dependencies")
@@ -213,10 +220,10 @@ class RosJazzy(SimpleRockerExtension):
             print(f"  - {dep}")
         if len(sorted_dependencies) > 10:
             print(f"  ... and {len(sorted_dependencies) - 10} more")
-        
+
         # Create unified package.xml
         return self._generate_unified_package_xml(sorted_dependencies)
-    
+
     def _create_empty_package_xml(self):
         """Create an empty package.xml when no dependencies are found"""
         return """<?xml version="1.0"?>
@@ -228,7 +235,7 @@ class RosJazzy(SimpleRockerExtension):
   <license>MIT</license>
 </package>
 """
-    
+
     def _generate_unified_package_xml(self, dependencies):
         """Generate a unified package.xml with all dependencies"""
         xml_content = """<?xml version="1.0"?>
@@ -240,13 +247,13 @@ class RosJazzy(SimpleRockerExtension):
   <license>MIT</license>
 
 """
-        
+
         # Add all dependencies as <depend> tags
         for dep in dependencies:
             xml_content += f"  <depend>{dep}</depend>\n"
-        
+
         xml_content += "</package>\n"
-        
+
         return xml_content
 
     def get_docker_args(self, cliargs) -> str:  # pylint: disable=unused-argument
