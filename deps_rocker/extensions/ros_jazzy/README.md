@@ -72,10 +72,12 @@ ROS_LOG_BASE=$HOME/overlay/log
 - Installs unified management scripts (`workspace_deps.sh`, `workspace_build.sh`, `update_repos.sh`)
 - **Preserves runtime capability**: Scripts can modify underlay and re-run rosdep inside container
 
-**Package Collection:**
-- User packages mounted directly in `$HOME/overlay/src/` via cwd extension
-- No symlink management required - direct mount point access
-- Enables seamless development with mounted source code
+**ROS-Specific Package Mounting:**
+- Current working directory automatically mounted to `$HOME/overlay/src/$(basename $PWD)`
+- Extension enforces correct workspace structure without user intervention
+- No manual `--cwd` specification required - prevents mounting errors
+- Workspace layout guaranteed to match ROS conventions
+- Enables seamless development with zero configuration
 
 ## Unified Script Architecture  
 
@@ -150,13 +152,14 @@ cd $HOME/overlay && colcon build
 
 ### Basic Development
 ```bash
-cd ~/my_project && deps_rocker --ros-jazzy --cwd ~/overlay/src/my_project ubuntu:24.04
-# Result: ~/my_project mounted directly in overlay workspace
+cd ~/my_project && deps_rocker --ros-jazzy ubuntu:24.04
+# Result: ~/my_project automatically mounted as ~/overlay/src/my_project
 ```
 
 ### With Dependencies  
 ```bash
-# If my_project contains *.repos files:
+cd ~/my_project && deps_rocker --ros-jazzy ubuntu:24.04
+# Inside container - project auto-mounted, if it contains *.repos files:
 update_repos.sh                    # Import dependencies to underlay
 workspace_build.sh $HOME/underlay  # Build dependencies  
 cd $HOME/overlay && colcon build   # Build user packages
@@ -213,8 +216,8 @@ $HOME/underlay/
 ```
 $HOME/overlay/
 ├── src/                # User packages mounted directly here via cwd extension
-│   ├── my_project/     # Mounted from host: cd ~/my_project && --cwd ~/overlay/src/my_project
-│   ├── another_pkg/    # Multiple packages: cd ~/another && --cwd ~/overlay/src/another_pkg
+│   ├── my_project/     # Auto-mounted: cd ~/my_project && deps_rocker --ros-jazzy
+│   ├── another_pkg/    # (Extension determines mount path automatically)
 │   └── ...
 ├── build/              # Build artifacts
 ├── install/            # Install space
@@ -236,25 +239,25 @@ $HOME/overlay/
 ### Related Extensions
 - **`vcstool`**: Automatically included, provides `vcs import` functionality via vcs2l
 - **`ros_underlay`**: Can build on top of ros_jazzy foundation
-- **`cwd`**: Mounts user packages directly into `$HOME/overlay/src/`
+- **ROS-specific mounting**: Extension handles workspace mounting automatically (no manual `--cwd` needed)
 
 ## Complete Usage Examples
 
 ### Standard Usage (Cached Dependencies)
 ```bash
-# Mount current directory into overlay workspace  
-cd ~/my_project && deps_rocker --ros-jazzy --cwd ~/overlay/src/my_project ubuntu:24.04
+# Mount current directory into overlay workspace automatically
+cd ~/my_project && deps_rocker --ros-jazzy ubuntu:24.04
 
-# Inside container - underlay pre-built from Docker build:
+# Inside container - project automatically mounted in ~/overlay/src/my_project:
 cd ~/overlay && colcon build  # Immediate build, dependencies already available
 ```
 
 ### Runtime Dependency Updates (Full Capability)
 ```bash  
 # Start with cached baseline
-cd ~/my_project && deps_rocker --ros-jazzy --cwd ~/overlay/src/my_project ubuntu:24.04
+cd ~/my_project && deps_rocker --ros-jazzy ubuntu:24.04
 
-# Inside container - modify dependencies as needed:
+# Inside container - project auto-mounted, modify dependencies as needed:
 update_repos.sh                 # Import new *.repos files to underlay
 workspace_deps.sh ~/underlay    # Install new rosdep dependencies  
 workspace_build.sh ~/underlay   # Rebuild underlay with new packages
@@ -380,6 +383,10 @@ deps_rocker/extensions/ros_jazzy/
 - Keep build-time repository consolidation in `ros_jazzy.py` for optimal caching
 - Build underlay workspace during Docker build with `colcon build`
 - Implement unified scripts for runtime operations when needed
-- Use direct mounting: `cd ~/project && --cwd ~/overlay/src/project`
+- **Implement ROS-specific mounting behavior:**
+  - Automatically mount `$PWD` to `~/overlay/src/$(basename $PWD)` 
+  - Override default cwd extension behavior with ROS workspace conventions
+  - Prevent user mounting errors by enforcing correct structure
+  - No `--cwd` flag needed - extension handles mounting automatically
 - Ensure proper environment sourcing chain: base → underlay → overlay
 - All workspace operations must work in user home directory with correct permissions
