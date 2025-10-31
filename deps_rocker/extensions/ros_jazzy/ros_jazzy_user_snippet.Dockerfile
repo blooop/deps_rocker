@@ -26,8 +26,12 @@ RUN export ROS_UNDERLAY_PATH="$HOME/ros_ws/underlay" && \
         vcs import --recursive "$ROS_UNDERLAY_PATH" < /tmp/consolidated.repos || true; \
     fi
 
-# Build the underlay workspace as user if it contains packages
-RUN underlay_deps.sh && underlay_build.sh
+# Build the underlay workspace as user with proper environment variables
+RUN export ROS_WORKSPACE_ROOT="$HOME/ros_ws" && \
+    export ROS_UNDERLAY_PATH="$HOME/ros_ws/underlay" && \
+    export ROS_UNDERLAY_BUILD="$HOME/ros_ws/underlay_build" && \
+    export ROS_UNDERLAY_INSTALL="$HOME/ros_ws/underlay_install" && \
+    underlay_deps.sh && underlay_build.sh
 
 # Install rosdeps for the main workspace at container startup when workspace is mounted
 RUN echo 'if [ ! -f "$HOME/.rosdeps_installed" ] && [ -d "$HOME/demos" ]; then' >> ~/.bashrc && \
