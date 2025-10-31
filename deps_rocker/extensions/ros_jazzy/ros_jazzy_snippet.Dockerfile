@@ -4,15 +4,18 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install ROS2 repository and key
 RUN add-apt-repository universe \
     && curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg \
-    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null \
-    && apt-get update && apt-get install -y --no-install-recommends \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
+    apt-get update && apt-get install -y --no-install-recommends \
     ros-jazzy-ros-core \
     python3-vcs2l \
-    python3-rosdep \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    python3-rosdep
 
 # Install colcon, vcstool, numpy, and lark via pip
-RUN pip install colcon-common-extensions colcon-defaults colcon-runner colcon-clean lark --break-system-packages
+RUN --mount=type=cache,target=/root/.cache/pip,id=pip-cache \
+    pip install colcon-common-extensions colcon-defaults colcon-runner colcon-clean lark --break-system-packages
 
 ENV ROS_DISTRO=jazzy
 ENV AMENT_PREFIX_PATH=/opt/ros/jazzy
@@ -30,9 +33,6 @@ RUN if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then \
     echo "rosdep already initialized, skipping init"; \
   fi
 
-# Create underlay workspace directory structure (paths will be set in user snippet)
-RUN mkdir -p /home/@(name)/underlay/src /home/@(name)/underlay/build /home/@(name)/underlay/install && \
-    chown -R @(name):@(name) /home/@(name)/underlay
 
 # Copy scripts and make them executable
 COPY underlay_deps.sh underlay_build.sh install_rosdeps.sh /usr/local/bin/
@@ -41,5 +41,3 @@ RUN chmod +x /usr/local/bin/underlay_deps.sh /usr/local/bin/underlay_build.sh /u
              /usr/local/bin/rosdep_underlay.sh /usr/local/bin/rosdep_overlay.sh \
              /usr/local/bin/build_underlay.sh /usr/local/bin/update_repos.sh
 
-# Copy consolidated repos file if it exists
-COPY consolidated.repos /tmp/consolidated.repos
