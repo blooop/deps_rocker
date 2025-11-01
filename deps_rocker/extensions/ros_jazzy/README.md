@@ -17,7 +17,7 @@ rockerc --ros-jazzy --nvim --lazygit ubuntu:24.04
 The ros_jazzy extension implements a unified workspace architecture with two distinct layers:
 
 - **Underlay Workspace** (`$HOME/underlay/`): Contains dependencies from `*.repos` files
-- **Overlay Workspace** (`$HOME/overlay/`): Contains user packages (mounted via cwd extension)
+- **Overlay Workspace** (`$HOME/overlay/`): Contains user packages (mounted automatically by the extension)
 
 Both workspaces use identical `src/build/install/log` structure and are managed by unified scripts.
 
@@ -74,7 +74,7 @@ ROS_LOG_BASE=$HOME/overlay/log
 
 **ROS-Specific Package Mounting:**
 - Current working directory automatically mounted to `$HOME/overlay/src/$(basename $PWD)`
-- Extension enforces correct workspace structure without user intervention
+- Built-in mounting logic keeps workspace layout correct even when other extensions (e.g. `cwd`, `workdir`) are active
 - No manual `--cwd` specification required - prevents mounting errors
 - Workspace layout guaranteed to match ROS conventions
 - Enables seamless development with zero configuration

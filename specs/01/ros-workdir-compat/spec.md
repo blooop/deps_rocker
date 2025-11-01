@@ -6,5 +6,5 @@
 - Preserve ROS Jazzy usability and existing test coverage.
 
 ## Deliverables
-- `ros_jazzy` no longer depends on the bespoke workdir extension, or that extension becomes compatible with others.
+- `ros_jazzy` handles its own mount/working-dir setup without relying on the separate `workdir` extension.
 - `pixi run ci` succeeds.

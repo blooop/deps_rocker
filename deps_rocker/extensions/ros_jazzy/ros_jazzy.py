@@ -30,44 +30,34 @@ class RosJazzy(SimpleRockerExtension):
     ]
 
     def invoke_after(self, cliargs):
-        return super().invoke_after({"gemini", "claude", "codex", "user"})
+        after = super().invoke_after(cliargs)
+        after.update({"gemini", "claude", "codex", "user", "cwd", "workdir"})
+        return after
 
     def _build_template_args(self, cliargs, empy_args=None) -> dict:
-        """Override to add username to template context and configure workdir"""
-        import pwd
-
+        """Override to add username to template context"""
         args = super()._build_template_args(cliargs, empy_args)
 
-        # Get the actual username - this is the user that will be created in the container
-        # The rocker user extension uses the current host username by default
-        try:
-            username = pwd.getpwuid(os.getuid()).pw_name
-        except (OSError, KeyError):
-            # Fallback to environment variable
-            username = os.getenv("USER", "user")
-
+        username = self._determine_username()
         args["name"] = username
-
-        # Configure workdir extension for ROS workspace layout
-        self._configure_workdir_for_ros(cliargs, username)
 
         return args
 
-    def _configure_workdir_for_ros(self, cliargs, username):
-        """Configure workdir extension to mount project source to ~/overlay/src"""
+    def _determine_username(self) -> str:
+        """Determine the username that will exist inside the container."""
+        import pwd
 
-        # Get the workspace path
-        workspace = self._resolve_workspace(cliargs)
+        try:
+            return pwd.getpwuid(os.getuid()).pw_name
+        except (OSError, KeyError):
+            return os.getenv("USER", "user")
 
-        # Set workdir arguments for ROS workspace structure
+    def _get_overlay_paths(self, username: str) -> tuple[str, str]:
+        """Return overlay workspace paths for the given username."""
         container_home = f"/home/{username}"
-        overlay_src_path = f"{container_home}/overlay/src"
-        overlay_path = f"{container_home}/overlay"
-
-        # Configure workdir extension arguments
-        cliargs["workdir_host_path"] = str(workspace)
-        cliargs["workdir_container_path"] = overlay_src_path
-        cliargs["workdir_working_dir"] = overlay_path
+        overlay_root = f"{container_home}/overlay"
+        overlay_src = f"{overlay_root}/src"
+        return overlay_root, overlay_src
 
     def _resolve_workspace(self, cliargs):
         """Resolve workspace path using the same logic as auto extension"""
@@ -257,16 +247,29 @@ class RosJazzy(SimpleRockerExtension):
         return xml_content
 
     def get_docker_args(self, cliargs) -> str:  # pylint: disable=unused-argument
-        """Set the ROS_DOMAIN_ID env var from the host machine if it exists, otherwise generate one from a hash of the username"""
+        """Configure runtime environment, workspace mount, and working directory."""
+        username = self._determine_username()
+        overlay_root, overlay_src = self._get_overlay_paths(username)
+        workspace = self._resolve_workspace(cliargs)
+
+        docker_args: list[str] = []
+
+        if workspace and workspace.exists():
+            docker_args.append(f'-v "{str(workspace)}:{overlay_src}"')
+
+        docker_args.append(f'-w "{overlay_root}"')
+
         ROS_DOMAIN_ID = os.environ.get("ROS_DOMAIN_ID")
         if ROS_DOMAIN_ID is None:
-            username = os.environ.get("USER")
-            if username:
+            host_username = os.environ.get("USER")
+            if host_username:
                 # Hash the username
-                hashed_value = int(hashlib.sha256(username.encode()).hexdigest(), 16)
+                hashed_value = int(hashlib.sha256(host_username.encode()).hexdigest(), 16)
                 # Scale the hash to a value between 2 and 99
                 ROS_DOMAIN_ID = str((hashed_value % 98) + 2)
             else:
                 raise ValueError("Unable to determine username and no ROS_DOMAIN_ID provided.")
 
-        return f" --env ROS_DOMAIN_ID={ROS_DOMAIN_ID}"
+        docker_args.append(f"--env ROS_DOMAIN_ID={ROS_DOMAIN_ID}")
+
+        return " " + " ".join(docker_args)
