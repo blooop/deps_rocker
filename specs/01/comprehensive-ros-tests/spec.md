@@ -1,20 +1,50 @@
-# Comprehensive ROS Test Suite with Performance Optimizations
+# ROS Jazzy Extension Comprehensive Test Suite
 
-## Problem
-ROS tests are very slow (dominated by apt installs) and `underlay_build.sh` fails with permissions issues when run inside containers. Need comprehensive tests that verify all ROS features work correctly.
+## Specification
 
-## Solution
-1. Fix permissions issues in underlay scripts
-2. Speed up apt installs using BuildKit cache mounts
-3. Create comprehensive test suite covering:
-   - ROS environment setup
-   - Underlay workspace build
-   - VCS tool integration
-   - Package building with dependencies
-   - Multi-workspace scenarios
+Create a comprehensive test suite for the `ros_jazzy` extension that validates all features described in the README specification. The current implementation does not fully meet the specification, so tests will be implemented first, then the implementation will be updated to pass the tests.
 
-## Key Changes
-- Use apt cache mounts in Dockerfile to speed up repeated installs
-- Fix permissions in `underlay_build.sh` and `underlay_deps.sh`
-- Add comprehensive test script that validates all ROS functionality
-- Test both with and without underlay dependencies
+## Key Features to Test
+
+### 1. Base ROS Installation
+- ROS 2 Jazzy from official repositories
+- Essential tools: colcon, rosdep, vcstool
+- Proper environment configuration
+- All required ROS environment variables
+
+### 2. Unified Workspace Architecture
+- **Underlay Workspace** (`$HOME/underlay/`): Dependencies from `*.repos` files
+- **Overlay Workspace** (`$HOME/overlay/`): User packages (auto-mounted via cwd)
+- Both use identical `src/build/install/log` structure
+- Proper environment variable setup for both workspaces
+
+### 3. Hybrid Repository and Dependency Management  
+- Build-time processing of `*.repos` files with caching
+- Runtime update capability via unified scripts
+- Best of both: fast startup + full flexibility
+
+### 4. Unified Script Architecture
+- `rosdep_underlay.sh`: Install rosdep deps for underlay
+- `rosdep_overlay.sh`: Install rosdep deps for overlay  
+- `build_underlay.sh`: Build underlay workspace
+- `update_repos.sh`: Dynamic repository import
+
+### 5. Auto-Detection
+- Activates on `package.xml` files
+- Activates on `*.repos` files
+- ROS workspace indicators
+
+### 6. ROS-Specific Package Mounting
+- Auto-mount current directory to `$HOME/overlay/src/$(basename $PWD)`
+- No manual `--cwd` specification required
+- Enforces correct workspace structure
+
+## Success Criteria
+- All environment variables properly set according to specification
+- Workspace structure matches specification exactly  
+- All scripts work identically during build-time and runtime
+- Auto-detection triggers correctly
+- Package mounting works as specified
+- Both cached baseline and runtime update workflows function
+- Dependencies resolve correctly between underlay and overlay
+- Full rosdep and repository management capability inside containers

@@ -1,8 +1,11 @@
+import os
+import pwd
 import unittest
 import tempfile
 import shutil
 import yaml
 from pathlib import Path
+from unittest.mock import patch
 from deps_rocker.extensions.ros_jazzy.ros_jazzy import RosJazzy
 
 
@@ -80,6 +83,25 @@ repositories:
 
         # Should still create consolidated.repos (just without the malformed file)
         self.assertIn("consolidated.repos", files)
+
+    def test_get_docker_args_configures_mount_and_env(self):
+        """Verify ros_jazzy sets up overlay mount, working dir, and ROS_DOMAIN_ID"""
+        workspace = Path(self.test_dir)
+        ros_ext = RosJazzy()
+        cliargs = {"auto": str(workspace)}
+        try:
+            username = pwd.getpwuid(os.getuid()).pw_name
+        except (OSError, KeyError):
+            username = os.getenv("USER", "user")
+        overlay_root = f"/home/{username}/overlay"
+        overlay_src = f"{overlay_root}/src"
+
+        with patch.dict(os.environ, {"ROS_DOMAIN_ID": "77"}, clear=False):
+            docker_args = ros_ext.get_docker_args(cliargs)
+
+        self.assertIn(f'-v "{str(workspace)}:{overlay_src}"', docker_args)
+        self.assertIn(f'-w "{overlay_root}"', docker_args)
+        self.assertIn("--env ROS_DOMAIN_ID=77", docker_args)
 
 
 if __name__ == "__main__":

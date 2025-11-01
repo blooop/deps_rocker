@@ -58,20 +58,21 @@ include = ["deps_rocker"]
 deps-rocker = "deps_rocker.dep_rocker_cli:gen_dockerfile"
 
 [project.entry-points."rocker.extensions"]
-#dependency managers
+# dependency managers
 odeps_dependencies = "deps_rocker.dependencies:Dependencies"
 
-#package managers
+# package managers
 uv = "deps_rocker.extensions.uv.uv:UV"
 npm = "deps_rocker.extensions.npm.npm:Npm"
 pixi = "deps_rocker.extensions.pixi.pixi:Pixi"
 cargo = "deps_rocker.extensions.cargo.cargo:Cargo"
 
-#host file system access
+# host file system access
 cwd = "deps_rocker.extensions.cwd.cwd:CWD"
 cwd_name = "deps_rocker.extensions.cwd.cwd:CWDName"
+workdir = "deps_rocker.extensions.workdir.workdir:Workdir"
 
-#utils
+# utils
 auto = "deps_rocker.extensions.auto.auto:Auto"
 cache_perms = "deps_rocker.extensions.cache_perms.cache_perms:CachePerms"
 curl = "deps_rocker.extensions.curl.curl:Curl"
@@ -81,7 +82,7 @@ ssh_client = "deps_rocker.extensions.ssh_client.ssh_client:SshClient"
 git_clone = "deps_rocker.extensions.git_clone.git_clone:GitClone"
 detach = "deps_rocker.extensions.detach.detach:Detach"
 
-#dev tools
+# dev tools
 ccache = "deps_rocker.extensions.ccache.ccache:Ccache"
 fzf = "deps_rocker.extensions.fzf.fzf:Fzf"
 gitui = "deps_rocker.extensions.gitui.gitui:GitUI"
@@ -92,12 +93,12 @@ palanteer = "deps_rocker.extensions.palanteer.palanteer:Palanteer"
 # developer search tools
 deps-devtools = "deps_rocker.extensions.deps_devtools.deps_devtools:DepsDevtools"
 
-#robotics
+# robotics
 ros_jazzy = "deps_rocker.extensions.ros_jazzy.ros_jazzy:RosJazzy"
 isaac_sim = "deps_rocker.extensions.isaac_sim.isaac_sim:IsaacSim"
 urdf_viz = "deps_rocker.extensions.urdf_viz.urdf_viz:UrdfViz"
 
-#AI tools
+# AI tools
 claude = "deps_rocker.extensions.claude.claude:Claude"
 codex = "deps_rocker.extensions.codex.codex:Codex"
 gemini = "deps_rocker.extensions.gemini.gemini:Gemini"

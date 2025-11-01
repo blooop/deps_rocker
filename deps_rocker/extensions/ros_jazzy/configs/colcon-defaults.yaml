@@ -1,20 +1,15 @@
 build:
   symlink-install: true
-  build-base: /ros_ws/build
-  install-base: /ros_ws/install
   cmake-args:
     - -DCMAKE_BUILD_TYPE=RelWithDebInfo
     - -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
 test:
-  build-base: /ros_ws/build
-  install-base: /ros_ws/install
-  log-base: /ros_ws/logs
   event-handlers:
     - console_direct+
 
 test-result:
-  test-result-base: /ros_ws/build
+  'yes': true
 
 clean.workspace:
   'yes': true
@@ -23,10 +18,3 @@ clean.workspace:
     - install
     - log
     - test_result
-  build-base: /ros_ws/build
-  install-base: /ros_ws/install
-  log-base: /ros_ws/logs
-  test-result-base: /ros_ws/build
-
-'':
-  log-base: /ros_ws/logs

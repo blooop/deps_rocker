@@ -1,34 +1,30 @@
 #!/bin/bash
-# Install dependencies for the underlay workspace
-# Can be called during Docker build or from inside the container
+# Generic script to install dependencies for the underlay workspace
+# Works with any ROS repository that uses *.repos dependencies
 
 set -e
 
-# Use workspace layout from environment
-UNDERLAY_PATH="${ROS_UNDERLAY_PATH:-/ros_ws/underlay}"
+# Use environment variable for unified workspace architecture
+UNDERLAY_PATH="${ROS_UNDERLAY_PATH:-/home/@(name)/underlay/src}"
 
-echo "Installing underlay dependencies"
+echo "Installing underlay dependencies from: $UNDERLAY_PATH"
 
 # Check if underlay has any packages
-if [ ! -d "${UNDERLAY_PATH}" ] || [ -z "$(find "${UNDERLAY_PATH}" -name 'package.xml' -print -quit)" ]; then
+if [ ! -d "$UNDERLAY_PATH" ] || [ -z "$(find "$UNDERLAY_PATH" -name 'package.xml' -print -quit)" ]; then
     echo "No packages found in underlay, skipping dependency installation"
     exit 0
 fi
 
-cd "${UNDERLAY_PATH}"
+# Change to underlay directory
+cd "$UNDERLAY_PATH"
 
-# Update rosdep (with caching to speed up repeated builds)
-echo "Updating rosdep..."
-if [ ! -f /root/.ros/rosdep/sources.cache ] || \
-   [ -z "$(find /root/.ros/rosdep/sources.cache -mmin -1440 2>/dev/null)" ]; then
-    # Cache is missing or older than 24 hours
-    rosdep update
-else
-    echo "Rosdep cache is recent, skipping update"
-fi
+# Update rosdep database
+echo "Updating rosdep database..."
+rosdep update || echo "Warning: rosdep update failed, continuing..."
 
-# Install dependencies
-echo "Installing rosdep dependencies from ${UNDERLAY_PATH}"
+# Install dependencies with BuildKit-friendly apt cache handling
+echo "Installing rosdep dependencies..."
+export DEBIAN_FRONTEND=noninteractive
 rosdep install --from-paths . --ignore-src -y -r --rosdistro "${ROS_DISTRO:-jazzy}"
 
-echo "Dependencies installed successfully"
+echo "Underlay dependencies installed successfully"
