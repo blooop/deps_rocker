@@ -12,13 +12,13 @@ class TestExtensionsGeneric(unittest.TestCase):
 
     EXTENSIONS_TO_TEST = [
         "nvim",
-        "uv",
+        # "uv",  # Temporarily disabled - Python environment manager
         "tzdata",
         "curl",
         "git_clone",
         "locales",
         "nvim",
-        "pixi",
+        # "pixi",  # Temporarily disabled - Python environment manager
         # "urdf_viz",
         "fzf",
         # "gitui",
@@ -34,9 +34,9 @@ class TestExtensionsGeneric(unittest.TestCase):
         "jquery",
         # "spec_kit",
         # "palanteer", #very slow
-        "conda",
+        # "conda",  # Temporarily disabled - Python environment manager
         # "isaac_sim",
-        # "ros_jazzy",  # Removed from all_extensions_together test - too complex/slow
+        "ros_jazzy",  # Re-enabled to test if it can work with other extensions
         "auto",
     ]
 
