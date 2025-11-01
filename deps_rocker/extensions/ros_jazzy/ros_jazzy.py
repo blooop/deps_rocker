@@ -254,7 +254,20 @@ class RosJazzy(SimpleRockerExtension):
 
         docker_args: list[str] = []
 
-        if workspace and workspace.exists():
+        def _has_volume_target(target: str) -> bool:
+            volumes = cliargs.get("volume") or []
+            for entry in volumes:
+                if not isinstance(entry, (list, tuple)):
+                    continue
+                for spec in entry:
+                    if not isinstance(spec, str):
+                        continue
+                    parts = spec.split(":")
+                    if len(parts) >= 2 and parts[1] == target:
+                        return True
+            return False
+
+        if workspace and workspace.exists() and not _has_volume_target(overlay_src):
             docker_args.append(f'-v "{str(workspace)}:{overlay_src}"')
 
         docker_args.append(f'-w "{overlay_root}"')

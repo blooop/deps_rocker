@@ -7,4 +7,5 @@
 
 ## Deliverables
 - `ros_jazzy` handles its own mount/working-dir setup without relying on the separate `workdir` extension.
+- `renv <repo> -- pwd` prints the overlay workspace path (`~/overlay/src`).
 - `pixi run ci` succeeds.

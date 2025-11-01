@@ -77,6 +77,7 @@ ROS_LOG_BASE=$HOME/overlay/log
 - Built-in mounting logic keeps workspace layout correct even when other extensions (e.g. `cwd`, `workdir`) are active
 - No manual `--cwd` specification required - prevents mounting errors
 - Workspace layout guaranteed to match ROS conventions
+- `renv` containers automatically start in `$HOME/overlay/src`, matching the ROS workspace layout
 - Enables seamless development with zero configuration
 
 ## Unified Script Architecture  
