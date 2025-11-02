@@ -33,11 +33,11 @@ Create a generic, robust ROS 2 Jazzy extension and test suite that:
 6. **Script Architecture**
    - rosdep_underlay.sh, rosdep_overlay.sh, build_underlay.sh, update_repos.sh
    - All scripts work for both build-time and runtime
+   - Base image includes Python tooling dependencies (numpy, vcstool) required for rosidl generation
 7. **Success Criteria**
    - renv ros2/demos -f -- colcon build works
    - renv kinisi-robotics/ros_devcontainer -f -- colcon build works
-   - pixi run ci passes
-   - Investigate current `pixi run ci` failure and resolve underlying issues
+   - pixi run ci passes, including combined extension coverage
    - No hardcoded files in get_files()
    - All environment variables and mounts correct
    - No leftover test artifacts

@@ -10,12 +10,12 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
     --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
     apt-get update && apt-get install -y --no-install-recommends \
     ros-jazzy-ros-core \
-    python3-vcs2l \
+    python3-vcstool \
     python3-rosdep
 
-# Install colcon, vcstool, numpy, and lark via pip
+# Install colcon tooling, numpy, and lark via pip
 RUN --mount=type=cache,target=/root/.cache/pip,id=pip-cache \
-    pip install colcon-common-extensions colcon-defaults colcon-runner colcon-clean lark --break-system-packages
+    pip install colcon-common-extensions colcon-defaults colcon-runner colcon-clean numpy lark --break-system-packages
 
 ENV ROS_DISTRO=jazzy
 ENV AMENT_PREFIX_PATH=/opt/ros/jazzy
