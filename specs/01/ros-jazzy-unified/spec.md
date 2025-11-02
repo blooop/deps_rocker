@@ -37,6 +37,7 @@ Create a generic, robust ROS 2 Jazzy extension and test suite that:
    - renv ros2/demos -f -- colcon build works
    - renv kinisi-robotics/ros_devcontainer -f -- colcon build works
    - pixi run ci passes
+   - Investigate current `pixi run ci` failure and resolve underlying issues
    - No hardcoded files in get_files()
    - All environment variables and mounts correct
    - No leftover test artifacts
