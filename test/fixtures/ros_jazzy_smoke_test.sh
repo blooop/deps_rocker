@@ -34,6 +34,7 @@ fixture_target="test/test_package"
 mkdir -p "$(dirname "$fixture_target")"
 rm -rf "$fixture_target"
 cp -R "$fixture_source" "$fixture_target"
+touch "$fixture_target/COLCON_IGNORE"
 
 cleanup() {
     rm -rf src/test_package
@@ -44,6 +45,7 @@ trap cleanup EXIT
 mkdir -p src
 rm -rf src/test_package
 cp -R "$fixture_target" src/test_package
+rm -f src/test_package/COLCON_IGNORE
 log "Copied test package into src/test_package"
 
 set +u
