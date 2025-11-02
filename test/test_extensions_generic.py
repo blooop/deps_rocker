@@ -14,19 +14,18 @@ class TestExtensionsGeneric(unittest.TestCase):
 
     EXTENSIONS_TO_TEST = [
         "nvim",
-        # "uv",  # Temporarily disabled - Python environment manager
+        "uv",
         "tzdata",
         "curl",
         "git_clone",
         "locales",
         "nvim",
-        # "pixi",  # Temporarily disabled - Python environment manager
+        "pixi",
         # "urdf_viz",
         "fzf",
         # "gitui",
         "lazygit",
         "cwd",
-        # "workdir",  # Removed due to conflicts in all_extensions_together test
         "ccache",
         "claude",
         "codex",
@@ -36,9 +35,8 @@ class TestExtensionsGeneric(unittest.TestCase):
         "jquery",
         # "spec_kit",
         # "palanteer", #very slow
-        # "conda",  # Temporarily disabled - Python environment manager
-        # "isaac_sim",
-        "ros_jazzy",  # Re-enabled to test if it can work with other extensions
+        "conda",
+        # "ros_jazzy",
         "auto",
     ]
 
