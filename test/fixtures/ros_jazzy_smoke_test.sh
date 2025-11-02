@@ -42,10 +42,9 @@ cleanup() {
 trap cleanup EXIT
 
 mkdir -p src
-if [ ! -e src/test_package ]; then
-    ln -s ../test/test_package src/test_package
-    log "Symlinked test package into src/test_package"
-fi
+rm -rf src/test_package
+cp -R "$fixture_target" src/test_package
+log "Copied test package into src/test_package"
 
 set +u
 source /opt/ros/jazzy/setup.bash
