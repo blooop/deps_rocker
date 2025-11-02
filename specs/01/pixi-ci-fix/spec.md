@@ -6,3 +6,6 @@
 
 ## Deliverables
 - Passing `pixi run ci` execution with necessary code and test updates committed.
+
+## Notes
+- Baseline run already passes; no remediation needed unless future failures arise.
