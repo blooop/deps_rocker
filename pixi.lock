@@ -460,7 +460,7 @@ packages:
   license: MIT
   license_family: MIT
   purls:
-  - pkg:pypi/cffi?source=compressed-mapping
+  - pkg:pypi/cffi?source=hash-mapping
   size: 244766
   timestamp: 1761203011221
 - conda: https://conda.anaconda.org/conda-forge/linux-64/cffi-2.0.0-py311h03d9500_1.conda
@@ -601,7 +601,7 @@ packages:
 - pypi: ./
   name: deps-rocker
   version: 0.23.1
-  sha256: 55a818b45025959cf66dbc4efd176b23ccfe031c31a341697ab1f1cc5fd303c6
+  sha256: 3abf3ab87d63d06cb100d3fc691e3933f3973ccb1d80526c206f4048d8473fd7
   requires_dist:
   - rocker>=0.2.19
   - off-your-rocker>=0.1.0

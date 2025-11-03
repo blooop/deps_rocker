@@ -6,6 +6,8 @@ import importlib
 import importlib.util
 import sys
 from pathlib import Path
+from pathlib import Path
+from contextlib import contextmanager, nullcontext
 from rocker.core import DockerImageGenerator, list_plugins, get_docker_client
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
@@ -40,7 +42,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         "conda",
         # "isaac_sim",
         "foxglove",
-        "ros_jazzy",  # too slow
+        # "ros_jazzy",
         "auto",
     ]
 
@@ -132,6 +134,15 @@ CMD [\"echo\", \"Extension test complete\"]
                 return attr
         return None
 
+    @contextmanager
+    def _ros_jazzy_workspace(self):
+        """Provide a temporary workspace dedicated to the ros_jazzy test run."""
+        temp_dir = tempfile.TemporaryDirectory()  # pylint: disable=consider-using-with
+        try:
+            yield str(Path(temp_dir.name))
+        finally:
+            temp_dir.cleanup()
+
     def _build_base_cliargs(self, **additional_args):
         """Helper to build base cliargs with common settings"""
         cliargs = {
@@ -148,39 +159,67 @@ CMD [\"echo\", \"Extension test complete\"]
             self.skipTest(f"Extension '{extension_name}' not available or not from deps_rocker")
 
         from rocker.core import RockerExtensionManager
-        import os
 
         # Use rocker's extension manager to properly resolve and sort dependencies
         manager = RockerExtensionManager()
         manager.available_plugins.update(self.all_plugins)
 
-        cliargs = self._build_base_cliargs(**{extension_name: True})
-        if extension_name == "odeps_dependencies":
-            cliargs["deps"] = "deps_rocker.deps.yaml"
+        workspace_cm = (
+            self._ros_jazzy_workspace() if extension_name == "ros_jazzy" else nullcontext(None)
+        )
 
-        # Let rocker's extension manager handle dependency resolution and sorting
-        active_extensions = manager.get_active_extensions(cliargs)
+        with workspace_cm as workspace_root:
+            cliargs = self._build_base_cliargs(**{extension_name: True})
+            if extension_name == "odeps_dependencies":
+                cliargs["deps"] = "deps_rocker.deps.yaml"
+            if workspace_root:
+                cliargs["auto"] = workspace_root
 
-        test_sh_path = f"deps_rocker/extensions/{extension_name}/test.sh"
-        if os.path.isfile(test_sh_path):
-            # Add the test script extension as the last extension
-            active_extensions.append(ScriptInjectionExtension(test_sh_path))
-            cliargs["command"] = "/tmp/test.sh"
+            # Let rocker's extension manager handle dependency resolution and sorting
+            active_extensions = manager.get_active_extensions(cliargs)
 
-        dig = DockerImageGenerator(active_extensions, cliargs, self.base_dockerfile_tag)
-        build_result = dig.build()
-        self.assertEqual(build_result, 0, f"Extension '{extension_name}' failed to build")
+            test_sh_path = Path(f"deps_rocker/extensions/{extension_name}/test.sh")
+            extra_files = None
+            extra_root_dir = None
+            if extension_name == "ros_jazzy":
+                test_sh_path = (
+                    Path(__file__).resolve().parent / "fixtures" / "ros_jazzy_smoke_test.sh"
+                )
+                fixture_root = Path(__file__).resolve().parent / "test_package"
+                extra_root_dir = "ros_jazzy_fixture"
+                extra_files = {}
+                for path in fixture_root.rglob("*"):
+                    if path.is_file():
+                        rel_path = path.relative_to(fixture_root)
+                        extra_path = Path(extra_root_dir) / rel_path
+                        extra_files[str(extra_path)] = path.read_text(encoding="utf-8")
+            if test_sh_path.is_file():
+                # Add the test script extension as the last extension
+                extension_kwargs = {}
+                if extra_files is not None:
+                    extension_kwargs |= {
+                        "extra_files": extra_files,
+                        "extra_root_dir": extra_root_dir,
+                    }
+                active_extensions.append(
+                    ScriptInjectionExtension(str(test_sh_path), **extension_kwargs)
+                )
+                cliargs["command"] = "/tmp/test.sh"
 
-        with tempfile.NamedTemporaryFile(mode="r+") as tmpfile:
-            run_result = dig.run(console_output_file=tmpfile.name)
-            tmpfile.seek(0)
-            output = tmpfile.read()
-            print(f"DEBUG: run_result={run_result}\nContainer output:\n{output}")
-            self.assertEqual(
-                run_result, 0, f"Extension '{extension_name}' failed to run. Output: {output}"
-            )
-            # If test.sh exists, just rely on run_result for pass/fail, no output string checks
-        dig.clear_image()
+            dig = DockerImageGenerator(active_extensions, cliargs, self.base_dockerfile_tag)
+            build_result = dig.build()
+            self.assertEqual(build_result, 0, f"Extension '{extension_name}' failed to build")
+
+            with tempfile.NamedTemporaryFile(mode="r+") as tmpfile:
+                run_result = dig.run(console_output_file=tmpfile.name)
+                tmpfile.seek(0)
+                output = tmpfile.read()
+                print(f"DEBUG: run_result={run_result}\nContainer output:\n{output}")
+                self.assertEqual(
+                    run_result, 0, f"Extension '{extension_name}' failed to run. Output: {output}"
+                )
+                # If test.sh exists, just rely on run_result for pass/fail, no output string checks
+            dig.clear_image()
 
     def test_uv_extension(self):
         self.run_extension_build_and_test("uv")
@@ -217,6 +256,9 @@ CMD [\"echo\", \"Extension test complete\"]
 
     def test_cwd_extension(self):
         self.run_extension_build_and_test("cwd")
+
+    def test_workdir_extension(self):
+        self.run_extension_build_and_test("workdir")
 
     def test_ccache_extension(self):
         self.run_extension_build_and_test("ccache")
@@ -345,25 +387,53 @@ CMD [\"echo\", \"Extension test complete\"]
 
 
 class ScriptInjectionExtension(SimpleRockerExtension):
-    """Injects a test.sh script into the Docker image and runs it as the final step."""
+    """Injects a test script (plus optional fixtures) into the Docker image and runs it."""
 
     name = "test_script"
 
-    def __init__(self, script_path):
-        self.script_path = script_path
+    def __init__(
+        self,
+        script_path_or_content,
+        is_content: bool = False,
+        *,
+        extra_files: dict[str, str] | None = None,
+        extra_root_dir: str | None = None,
+    ):
         self.context_name = "test.sh"
+        self.extra_files = extra_files or {}
+        if self.extra_files and not extra_root_dir:
+            raise ValueError("extra_root_dir must be provided when extra_files are supplied")
+        self.extra_root_dir = extra_root_dir
+
+        if is_content:
+            self.script_content = script_path_or_content
+            self.script_path = None
+        else:
+            self.script_path = script_path_or_content
+            self.script_content = None
 
     def get_snippet(self, cliargs):
-        return f'COPY {self.context_name} /tmp/test.sh\nRUN chmod +x /tmp/test.sh\nCMD ["/tmp/test.sh"]'
+        parts = []
+        if self.extra_root_dir:
+            parts.append(f"COPY {self.extra_root_dir}/ /tmp/{self.extra_root_dir}/")
+        parts.append(f"COPY {self.context_name} /tmp/test.sh")
+        parts.append("RUN chmod +x /tmp/test.sh")
+        parts.append('CMD ["/tmp/test.sh"]')
+        return "\n".join(parts)
 
     def get_files(self, cliargs):
-        with open(self.script_path, "r", encoding="utf-8") as f:
-            content = f.read()
+        if self.script_content is not None:
+            content = self.script_content
+        else:
+            with open(self.script_path, "r", encoding="utf-8") as f:
+                content = f.read()
         if not content.lstrip().startswith("#!/"):
             raise RuntimeError(
                 f"Error: test.sh script '{self.script_path}' is missing a shebang (e.g., #!/bin/bash) at the top."
             )
-        return {self.context_name: content}
+        files = {self.context_name: content}
+        files.update(self.extra_files)
+        return files
 
 
 if __name__ == "__main__":

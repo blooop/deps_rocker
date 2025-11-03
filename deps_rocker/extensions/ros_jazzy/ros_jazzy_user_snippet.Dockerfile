@@ -1,26 +1,80 @@
-# Change ownership of ROS workspace directories to the user
-# This runs after the user is created, ensuring they can write to build directories
-RUN chown -R ${USER_NAME}:${USER_NAME} /ros_ws
-  
-#ROS user snippet
-RUN DEPS_ROOT="${ROS_DEPENDENCIES_ROOT}" && \
-    if [ -d "$DEPS_ROOT" ]; then \
-        rosdep update && \
-        rosdep install --from-paths "$DEPS_ROOT" --ignore-src -r -y; \
+
+
+# Create unified workspace architecture directory structure
+RUN mkdir -p /home/@(name)/underlay/src /home/@(name)/underlay/build /home/@(name)/underlay/install /home/@(name)/underlay/log && \
+    mkdir -p /home/@(name)/overlay/src /home/@(name)/overlay/build /home/@(name)/overlay/install /home/@(name)/overlay/log && \
+    chown -R @(name):@(name) /home/@(name)/underlay /home/@(name)/overlay
+
+
+# Set up unified workspace environment variables
+# Docker ENV is sufficient for most use cases - ROS tools and build systems inherit container environment
+ENV ROS_UNDERLAY_ROOT="/home/@(name)/underlay" \
+    ROS_UNDERLAY_PATH="/home/@(name)/underlay/src" \
+    ROS_UNDERLAY_BUILD="/home/@(name)/underlay/build" \
+    ROS_UNDERLAY_INSTALL="/home/@(name)/underlay/install" \
+    ROS_OVERLAY_ROOT="/home/@(name)/overlay" \
+    ROS_WORKSPACE_ROOT="/home/@(name)/overlay" \
+    ROS_BUILD_BASE="/home/@(name)/overlay/build" \
+    ROS_INSTALL_BASE="/home/@(name)/overlay/install" \
+    ROS_LOG_BASE="/home/@(name)/overlay/log"
+
+# Copy consolidated repos file if it exists
+COPY consolidated.repos /tmp/consolidated.repos
+
+# Clon underlay dependencies from consolidated.repos using vcstool
+# Fix git ownership issues by configuring safe directories before cloning
+RUN if [ -f /tmp/consolidated.repos ] && [ -s /tmp/consolidated.repos ]; then \
+        mkdir -p /home/@(name)/underlay/src && \
+        git config --global --add safe.directory '*' && \
+        vcs import --recursive /home/@(name)/underlay/src < /tmp/consolidated.repos && \
+        chown -R @(name):@(name) /home/@(name)/underlay; \
+    fi
+
+# Build underlay workspace if dependencies exist
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
+    --mount=type=cache,target=/home/@(name)/.cache/pip,id=pip-cache \
+    if [ -d "/home/@(name)/underlay/src" ] && [ "$(ls -A /home/@(name)/underlay/src)" ]; then \
+        rm -rf /home/@(name)/underlay/build /home/@(name)/underlay/install && \
+        mkdir -p /home/@(name)/underlay/build /home/@(name)/underlay/install && \
+        /usr/local/bin/underlay_deps.sh && \
+        /usr/local/bin/underlay_build.sh && \
+        chown -R @(name):@(name) /home/@(name)/underlay; \
     fi
 
 
-#need to work out why I can't just copy directly to the right location...
-COPY colcon-defaults.yaml /colcon-defaults.yaml
-RUN cp /colcon-defaults.yaml $COLCON_DEFAULTS_FILE
+COPY --chown=@(name):@(name) colcon-defaults.yaml /home/@(name)/colcon-defaults.yaml
 
-RUN echo "source /opt/ros/jazzy/setup.bash" >> $HOME/.bashrc
-RUN printf '%s\n' 'if [ -n "${ROS_UNDERLAY_INSTALL:-}" ] && [ -f "${ROS_UNDERLAY_INSTALL}/setup.bash" ]; then source "${ROS_UNDERLAY_INSTALL}/setup.bash"; fi' >> $HOME/.bashrc
+# Copy unified overlay package.xml with all workspace dependencies
+COPY unified_overlay_package.xml /tmp/unified_overlay_package.xml
 
-RUN printf '%s\n' '' '# Run colcon build on first container start' 'if [ ! -f "$HOME/.colcon_built" ]; then' '  echo "Running colcon build for first time setup..."' '  source /opt/ros/jazzy/setup.bash' '  if [ -n "${ROS_UNDERLAY_INSTALL:-}" ] && [ -f "${ROS_UNDERLAY_INSTALL}/setup.bash" ]; then' '    source "${ROS_UNDERLAY_INSTALL}/setup.bash"' '  fi' '  colcon build' '  touch $HOME/.colcon_built' 'fi' >> $HOME/.bashrc
+# Install rosdep dependencies for overlay workspace using unified package.xml
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
+    --mount=type=cache,target=/home/@(name)/.cache/pip,id=pip-cache \
+    if [ -f /tmp/unified_overlay_package.xml ] && grep -q "<depend>" /tmp/unified_overlay_package.xml 2>/dev/null; then \
+        echo "Installing rosdep dependencies from unified overlay package.xml..." && \
+        TEMP_WS=$(mktemp -d) && \
+        mkdir -p "$TEMP_WS/unified_deps" && \
+        cp /tmp/unified_overlay_package.xml "$TEMP_WS/unified_deps/package.xml" && \
+        cd "$TEMP_WS" && \
+        rosdep update || echo "Warning: rosdep update failed, continuing..." && \
+        export DEBIAN_FRONTEND=noninteractive && \
+        rosdep install --from-paths . --ignore-src -y -r --rosdistro "${ROS_DISTRO:-jazzy}" && \
+        echo "Overlay rosdep dependencies installed successfully" && \
+        rm -rf "$TEMP_WS"; \
+    else \
+        echo "No dependencies found in unified overlay package.xml, skipping rosdep installation"; \
+    fi
 
-RUN printf '%s\n' 'if [ -f "/usr/local/share/vcstool-completion/vcs.bash" ]; then source "/usr/local/share/vcstool-completion/vcs.bash"; fi' >> $HOME/.bashrc
+# Set up proper environment sourcing in bashrc - unified workspace architecture
+RUN echo "source /opt/ros/jazzy/setup.bash" >> /home/@(name)/.bashrc && \
+    echo "if [ -f /home/@(name)/underlay/install/setup.bash ]; then source /home/@(name)/underlay/install/setup.bash; fi" >> /home/@(name)/.bashrc && \
+    echo "if [ -f /home/@(name)/overlay/install/setup.bash ]; then source /home/@(name)/overlay/install/setup.bash; fi" >> /home/@(name)/.bashrc && \
+    echo "export COLCON_DEFAULTS_FILE=/home/@(name)/colcon-defaults.yaml" >> /home/@(name)/.bashrc
 
-RUN printf '%s\n' 'if [ -f "$ROS_INSTALL_BASE/setup.bash" ]; then source "$ROS_INSTALL_BASE/setup.bash"; fi' >> $HOME/.bashrc
+# Set workspace directory to overlay (user code workspace)
+WORKDIR /home/@(name)/overlay
 
-WORKDIR $ROS_WORKSPACE_ROOT
+# Switch to the user context for final container execution
+USER @(name)
