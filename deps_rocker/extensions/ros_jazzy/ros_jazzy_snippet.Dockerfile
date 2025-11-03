@@ -1,22 +1,21 @@
-#from https://github.com/athackst/dockerfiles/blob/main/ros2/jazzy.Dockerfile
+# Generic ROS 2 Jazzy setup - works with any ROS repository
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Install ROS2 repository and key
+RUN add-apt-repository universe \
+    && curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
-# Install ROS2 repository and key with apt cache mount
-RUN --mount=type=cache,target=/var/cache/apt,id=apt-cache \
-  sudo add-apt-repository universe \
-  && curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg \
-  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null \
-  && apt-get update && apt-get install -y --no-install-recommends \
-  ros-jazzy-ros-core \
-  python3-dev \
-  python3-numpy
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
+    apt-get update && apt-get install -y --no-install-recommends \
+    ros-jazzy-ros-core \
+    python3-vcstool \
+    python3-rosdep
 
-# Install colcon, vcstool, numpy, and lark via pip
-# Installing numpy via pip ensures CMake can find Python3_NumPy_INCLUDE_DIRS
-# lark is required by rosidl_parser
+# Install colcon tooling, numpy, and lark via pip
 RUN --mount=type=cache,target=/root/.cache/pip,id=pip-cache \
-  pip install colcon-common-extensions colcon-defaults colcon-spawn-shell colcon-runner colcon-clean rosdep colcon-top-level-workspace vcstool numpy lark --break-system-packages
+    pip install colcon-common-extensions colcon-defaults colcon-runner colcon-clean numpy lark --break-system-packages
 
 ENV ROS_DISTRO=jazzy
 ENV AMENT_PREFIX_PATH=/opt/ros/jazzy
@@ -26,45 +25,39 @@ ENV PATH=/opt/ros/jazzy/bin:$PATH
 ENV PYTHONPATH=/opt/ros/jazzy/local/lib/python3.12/dist-packages:/opt/ros/jazzy/lib/python3.12/site-packages
 ENV ROS_PYTHON_VERSION=3
 ENV ROS_VERSION=2
-ENV COLCON_LOG_PATH=/ros_ws/log
 
+# Initialize rosdep
 RUN if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then \
     rosdep init; \
   else \
     echo "rosdep already initialized, skipping init"; \
   fi
 
-# Define the canonical ROS workspace layout
-ENV ROS_WORKSPACE_ROOT=/ros_ws
-ENV ROS_UNDERLAY_PATH=/ros_ws/underlay
-ENV ROS_UNDERLAY_BUILD=/ros_ws/underlay_build
-ENV ROS_UNDERLAY_INSTALL=/ros_ws/underlay_install
-ENV ROS_BUILD_BASE=/ros_ws/build
-ENV ROS_INSTALL_BASE=/ros_ws/install
-ENV ROS_LOG_BASE=/ros_ws/log
+# Create cache directories for BuildKit mounts
+RUN mkdir -p /root/.cache/vcs-repos && \
+    chmod 755 /root/.cache/vcs-repos
 
-RUN mkdir -p "$ROS_UNDERLAY_PATH" "$ROS_UNDERLAY_BUILD" "$ROS_UNDERLAY_INSTALL" \
-  "$ROS_BUILD_BASE" "$ROS_INSTALL_BASE" "$ROS_LOG_BASE" \
-  && chmod -R 777 /ros_ws
+# Copy scripts and make them executable
+COPY underlay_deps.sh underlay_build.sh install_rosdeps.sh /usr/local/bin/
+COPY rosdep_underlay.sh rosdep_overlay.sh build_underlay.sh update_repos.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/underlay_deps.sh /usr/local/bin/underlay_build.sh /usr/local/bin/install_rosdeps.sh \
+             /usr/local/bin/rosdep_underlay.sh /usr/local/bin/rosdep_overlay.sh \
+             /usr/local/bin/build_underlay.sh /usr/local/bin/update_repos.sh
 
-# Import the consolidated depends.repos manifest to underlay
-COPY consolidated.repos /ros_ws/consolidated.repos
+# Create underlay and overlay workspace directory structure
+RUN mkdir -p /home/@(name)/underlay/src /home/@(name)/underlay/build /home/@(name)/underlay/install && \
+    mkdir -p /home/@(name)/overlay/build /home/@(name)/overlay/install && \
+    chown -R @(name):@(name) /home/@(name)/underlay /home/@(name)/overlay
+
+# Create user-accessible cache directories for BuildKit mounts
+RUN mkdir -p /home/@(name)/.cache/pip && \
+    chown -R @(name):@(name) /home/@(name)/.cache
+
+# Copy consolidated repos file (always exists, may be empty)
+COPY consolidated.repos /tmp/consolidated.repos
+
+# Import repositories from consolidated.repos into underlay workspace
+# Use cache mount for repository cloning to speed up builds
 RUN --mount=type=cache,target=/root/.cache/vcs-repos,id=vcs-repos-cache \
-    rm -rf /root/.cache/vcs-repos/underlay && \
-    mkdir -p /root/.cache/vcs-repos/underlay && \
-    vcs import --recursive /root/.cache/vcs-repos/underlay < /ros_ws/consolidated.repos && \
-    cp -r /root/.cache/vcs-repos/underlay/. /ros_ws/underlay/
-
-# Install underlay build scripts
-COPY underlay_deps.sh underlay_build.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/underlay_deps.sh /usr/local/bin/underlay_build.sh
-
-# Copy test files for the test script
-COPY test_package.xml test_setup.py /tmp/
-
-# Build the underlay workspace if it contains packages
-RUN --mount=type=cache,target=/var/cache/apt,id=apt-cache \
-    --mount=type=cache,target=/root/.ros/rosdep,id=rosdep-cache \
-    underlay_deps.sh && underlay_build.sh
-
-ENV COLCON_DEFAULTS_FILE=/ros_ws/colcon-defaults.yaml
+    --mount=type=cache,target=/home/@(name)/.cache/pip,id=pip-cache-@(name) \
+    su - @(name) -c 'update_repos.sh' || echo "No repositories to import"
