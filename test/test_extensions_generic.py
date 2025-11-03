@@ -6,7 +6,6 @@ import importlib
 import importlib.util
 import sys
 from pathlib import Path
-from pathlib import Path
 from contextlib import contextmanager, nullcontext
 from rocker.core import DockerImageGenerator, list_plugins, get_docker_client
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
