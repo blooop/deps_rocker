@@ -70,7 +70,18 @@ class RosJazzy(SimpleRockerExtension):
         return path
 
     def get_files(self, cliargs) -> dict[str, str]:
-        dat = self.get_config_file("configs/colcon-defaults.yaml")
+        import em
+
+        # Load and expand colcon-defaults.yaml with empy
+        colcon_defaults_template = self.get_config_file("configs/colcon-defaults.yaml")
+        if colcon_defaults_template:
+            colcon_defaults_template = colcon_defaults_template.decode("utf-8")
+            username = self._determine_username()
+            overlay_root, _ = self._get_overlay_paths(username)
+            template_args = {"name": username, "ros_ws_root": overlay_root}
+            dat = em.expand(colcon_defaults_template, template_args)
+        else:
+            dat = ""
 
         # Get underlay build scripts and rosdeps installer
         script_dir = Path(__file__).parent
