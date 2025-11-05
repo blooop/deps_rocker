@@ -19,6 +19,7 @@ Two-pronged approach:
 1. Prevent systemd services from starting during package installation using `policy-rc.d`
 2. Configure apt to wait for dpkg locks with timeout instead of failing immediately
 3. Add retry logic for apt operations
+4. Use `sharing=private` for BuildKit cache mounts to prevent cross-job contention
 
 ## Implementation Details
 - Update `test_ros_jazzy_comprehensive.py` to remove `geometry2` from test cases

@@ -20,7 +20,11 @@ CI is hanging at random stages during ROS Jazzy comprehensive tests due to multi
 ### Issue 3: dpkg Lock Contention
 - Multiple processes trying to use apt simultaneously
 - Unattended-upgrades service may run on container startup
-- BuildKit cache mounts with `sharing=locked` can still have race conditions
+- BuildKit cache mounts with `sharing=locked` cause **cross-job blocking**:
+  - py310 and py313 CI jobs run in parallel
+  - Both use same cache IDs: `id=apt-cache`, `id=apt-lists`
+  - With `sharing=locked`, if py313 hangs, py310 waits indefinitely → timeout
+  - This causes **non-deterministic failures** (sometimes py310 fails, sometimes py313)
 - Default apt behavior is to fail immediately on lock, not wait
 
 ## Proposed Changes
@@ -67,6 +71,13 @@ CI is hanging at random stages during ROS Jazzy comprehensive tests due to multi
 - Add `/etc/apt/apt.conf.d/80-dpkg-lock`: Wait up to 120 seconds for dpkg lock
 - These settings apply globally to all apt/rosdep operations in the container
 
+**Line 18-22** - Change BuildKit cache sharing mode:
+- **Before**: `--mount=type=cache,sharing=locked,id=apt-cache`
+- **After**: `--mount=type=cache,sharing=private,id=apt-cache`
+- `sharing=private` gives each concurrent build its own cache instance
+- Eliminates cross-job blocking: py310 and py313 jobs no longer wait for each other
+- Trade-off: Slightly more disk usage, but eliminates non-deterministic failures
+
 ### Files That Don't Need Changes
 
 - `test_ros_jazzy_comprehensive.py` line 164-167: Already uses only `unique_identifier_msgs` ✓
@@ -106,15 +117,19 @@ CI is hanging at random stages during ROS Jazzy comprehensive tests due to multi
 - Added `policy-rc.d` to prevent systemd service starts during apt installation
 - Added apt configuration for dpkg lock timeout (120 seconds)
 - Added apt retry logic (3 attempts)
+- Changed BuildKit cache from `sharing=locked` to `sharing=private`
 - These fixes prevent hangs caused by:
   - Package postinstall scripts trying to start services
   - dpkg lock contention between concurrent apt processes
+  - Cross-job cache blocking (py310 waiting for py313)
   - Transient network failures during package downloads
 
 ## Actual Results
 
 ### Before
-- ❌ CI hangs at random stages (geometry2 clone/build, consolidated.repos copy, etc.)
+- ❌ CI hangs at random stages (geometry2 clone/build, consolidated.repos copy, rosdep install, etc.)
+- ❌ **Non-deterministic failures**: Sometimes py310 passes and py313 fails, sometimes vice versa
+- ❌ "Missing files" errors when builds timeout while waiting for cache locks
 - ❌ Test runtime: 5-10+ minutes (when it doesn't timeout)
 - ❌ Unreliable CI runs
 - ❌ High resource usage on GitHub Actions runners
