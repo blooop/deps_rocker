@@ -10,7 +10,14 @@ permissions:
   contents: read
 
 jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pre-commit/action@v3.0.1
+
   ci:
+    needs: pre-commit
     runs-on: ubuntu-latest
     env:
       DOCKER_BUILDKIT: 1
