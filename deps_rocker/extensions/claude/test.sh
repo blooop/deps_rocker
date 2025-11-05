@@ -19,7 +19,7 @@ which claude || true
 claude --version
 
 # Ensure help executes without triggering first-time setup
-HELP_OUT=$(claude 2>&1 | head -n 50 || true)
+HELP_OUT=$(claude --help 2>&1 | head -n 50 || true)
 echo "$HELP_OUT" | sed 's/.*/[HELP] &/'
 # Fail on onboarding phrases that indicate first-run experience or tips block
 if echo "$HELP_OUT" | grep -E "[Ff]irst[[:space:]-]*time" >/dev/null || \

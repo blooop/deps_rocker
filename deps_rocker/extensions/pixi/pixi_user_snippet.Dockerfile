@@ -1,3 +1,6 @@
+# Create cache directories for pixi and uv (used by pixi)
+RUN mkdir -p ~/.cache/pixi ~/.cache/rattler ~/.cache/uv
+
 # Install Pixi into the user home from pre-populated bundle
 RUN mkdir -p ~/.pixi && cp -a /opt/deps_rocker/pixi/. ~/.pixi/
 RUN echo 'export PATH="$HOME/.pixi/bin:$PATH"' >> ~/.bashrc
