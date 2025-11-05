@@ -18,6 +18,8 @@ Use a multi-stage Dockerfile builder pattern where:
 - Follows the established pattern used by other extensions (lazygit, urdf_viz, nvim)
 
 ## Implementation Details
-- Move build-time dependencies to `builder_apt_packages`
+- Separate build-time and runtime dependencies:
+  - `builder_apt_packages`: Build tools (cmake, gcc) + library headers (-dev packages)
+  - `apt_packages`: Runtime libraries only (no -dev packages, smaller footprint)
 - Cache both the git repository AND the compiled binaries
 - Copy compiled binaries from builder stage to final image
