@@ -4,10 +4,10 @@
 Ensure that pixi and uv can create cache directories when running as a non-root user in the container.
 
 ## Problem
-When using the uv extension via renv, pixi/uv tries to create cache directories at `/home/ags/.cache/rattler/cache/uv-cache` but fails with:
+When using the uv extension via renv, pixi/uv tries to create cache directories at `/home/user/.cache/rattler/cache/uv-cache` but fails with:
 ```
 x failed to create uv cache directory
-`-> failed to create directory `/home/ags/.cache/rattler/cache/uv-cache`: Permission denied (os error 13)
+`-> failed to create directory `/home/user/.cache/rattler/cache/uv-cache`: Permission denied (os error 13)
 ```
 
 This occurs because:
