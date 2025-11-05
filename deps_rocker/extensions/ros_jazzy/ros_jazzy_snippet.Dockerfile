@@ -1,25 +1,13 @@
 # Generic ROS 2 Jazzy setup - works with any ROS repository
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Build arg for cache isolation (e.g., python version for CI matrix)
-ARG CACHE_ID=default
-
-# Prevent services from starting during package installation
-# This is critical for Docker containers as they don't run systemd as init
-RUN echo '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d && chmod +x /usr/sbin/policy-rc.d
-
-# Configure apt to wait for locks instead of failing immediately
-# This prevents hangs/failures when multiple processes try to use apt simultaneously
-RUN echo 'Acquire::Retries "3";' > /etc/apt/apt.conf.d/80-retries && \
-    echo 'DPkg::Lock::Timeout "120";' > /etc/apt/apt.conf.d/80-dpkg-lock
-
 # Install ROS2 repository and key
 RUN add-apt-repository universe \
     && curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache-${CACHE_ID} \
-    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists-${CACHE_ID} \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
     apt-get update && apt-get install -y --no-install-recommends \
     ros-jazzy-ros-core \
     python3-rosdep
