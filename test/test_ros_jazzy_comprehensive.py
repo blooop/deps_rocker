@@ -110,10 +110,6 @@ repositories:
     type: git
     url: https://github.com/ros2/unique_identifier_msgs.git
     version: jazzy
-  geometry2:
-    type: git
-    url: https://github.com/ros2/geometry2.git
-    version: jazzy
 """
             repos_file = test_workspace / "test.repos"
             repos_file.write_text(test_repos_content.strip())
