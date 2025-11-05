@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.4
 # Use a fixed base image for the builder to maximize cache sharing across all projects
 # The compiled binaries will work across different final images with compatible glibc
-@(f"FROM ubuntu:24.04 AS {builder_stage}")
+@(f"FROM {base_image} AS {builder_stage}")
 
 # Clone and build palanteer using BuildKit cache for both git repo and build artifacts
 RUN --mount=type=cache,target=/root/.cache/palanteer-git-cache,id=palanteer-git-cache \
@@ -34,7 +34,7 @@ RUN --mount=type=cache,target=/root/.cache/palanteer-git-cache,id=palanteer-git-
         cd /tmp/palanteer && \
         mkdir -p build && cd build && \
         cmake .. -DCMAKE_BUILD_TYPE=Release && \
-        make -j$(nproc) && \
+        make -j$(nproc) palanteer && \
         # Cache the build artifacts \
         rm -rf /root/.cache/palanteer-build-cache/bin && \
         cp -r bin /root/.cache/palanteer-build-cache/ && \
