@@ -31,7 +31,7 @@ class RosJazzy(SimpleRockerExtension):
 
     def invoke_after(self, cliargs):
         after = super().invoke_after(cliargs)
-        after.update({"gemini", "claude", "codex", "user", "cwd", "workdir"})
+        after.update({"gemini", "claude", "codex", "user", "cwd"})
         return after
 
     def _build_template_args(self, cliargs, empy_args=None) -> dict:

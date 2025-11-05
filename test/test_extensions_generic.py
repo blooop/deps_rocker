@@ -256,9 +256,6 @@ CMD [\"echo\", \"Extension test complete\"]
     def test_cwd_extension(self):
         self.run_extension_build_and_test("cwd")
 
-    def test_workdir_extension(self):
-        self.run_extension_build_and_test("workdir")
-
     def test_ccache_extension(self):
         self.run_extension_build_and_test("ccache")
 
