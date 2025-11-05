@@ -28,10 +28,10 @@ jobs:
     # ... rest of existing ci job
 ```
 
-### 2. Keep `.github/workflows/pre-commit.yaml`
-- Maintain backwards compatibility
-- Some teams may rely on it as a standalone check
-- Can be removed in a future cleanup if desired
+### 2. Remove `.github/workflows/pre-commit.yaml`
+- Avoid running pre-commit twice on pull requests
+- The pre-commit job in ci.yml replaces this standalone workflow
+- No backwards compatibility concerns - both do the same thing
 
 ### 3. Test the Changes
 - Run `pixi run ci` locally to ensure nothing breaks

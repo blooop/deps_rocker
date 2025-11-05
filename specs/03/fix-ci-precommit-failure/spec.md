@@ -15,13 +15,12 @@ Update the GitHub Actions CI workflow to ensure that if the pre-commit step fail
 - Reduces wasted CI time and makes failures more obvious
 
 ## Implementation
-Modify `.github/workflows/ci.yml` to:
-1. Add a `pre-commit` job that runs pre-commit checks
+1. Add a `pre-commit` job to `.github/workflows/ci.yml`
 2. Add `needs: pre-commit` to the existing `ci` job to create dependency
-3. Keep the separate `pre-commit.yaml` workflow for backwards compatibility
+3. Remove the separate `.github/workflows/pre-commit.yaml` to avoid running pre-commit twice
 
 ## Status
-✅ Implemented - CI workflow updated with pre-commit job dependency
+✅ Implemented - CI workflow updated with pre-commit job dependency, duplicate workflow removed
 
 ## Benefits
 - Faster feedback on pre-commit failures
