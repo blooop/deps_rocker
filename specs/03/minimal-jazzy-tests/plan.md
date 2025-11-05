@@ -1,15 +1,27 @@
 # Implementation Plan: Minimal ROS Jazzy Tests
 
 ## Root Cause Analysis
-CI is hanging at random stages during ROS Jazzy comprehensive tests due to:
+CI is hanging at random stages during ROS Jazzy comprehensive tests due to multiple issues:
+
+### Issue 1: Resource Exhaustion
 - GitHub Actions runners have limited resources (2 cores, 7GB RAM)
 - Docker builds with BuildKit cache mounts are resource-intensive
-- Random hangs at different stages indicate resource exhaustion, not a specific code bug
 - The `geometry2` repository compounds the issue:
   - Large clone size (~several MB)
   - Multiple packages requiring rosdep installs
   - Long colcon build times
-  - Heavy resource usage
+
+### Issue 2: Systemd Service Starts in Docker
+- **Critical**: apt package installation tries to start systemd services inside Docker containers
+- Docker containers don't run systemd as init, causing hangs
+- Package postinstall scripts attempt to start services (systemd-network, systemd-journal, dbus, polkitd)
+- Error messages: "Failed to resolve user/group", "system_bus_socket missing"
+
+### Issue 3: dpkg Lock Contention
+- Multiple processes trying to use apt simultaneously
+- Unattended-upgrades service may run on container startup
+- BuildKit cache mounts with `sharing=locked` can still have race conditions
+- Default apt behavior is to fail immediately on lock, not wait
 
 ## Proposed Changes
 
@@ -41,6 +53,19 @@ CI is hanging at random stages during ROS Jazzy comprehensive tests due to:
 - **Current**: Uses both `unique_identifier_msgs` and `geometry2`
 - **Change**: Remove `geometry2`, keep only `unique_identifier_msgs`
 - **Rationale**: Single small repo is sufficient to validate functionality
+
+### 4. Fix Docker Container Service Hangs
+
+#### `ros_jazzy_snippet.Dockerfile`
+**Line 4-6** - Prevent systemd service starts:
+- Add `policy-rc.d` script that returns exit code 101
+- This tells Debian/Ubuntu packages not to start services during installation
+- Must be added very early in Dockerfile, before any apt commands
+
+**Line 8-11** - Configure apt timeout and retries:
+- Add `/etc/apt/apt.conf.d/80-retries`: Retry failed downloads 3 times
+- Add `/etc/apt/apt.conf.d/80-dpkg-lock`: Wait up to 120 seconds for dpkg lock
+- These settings apply globally to all apt/rosdep operations in the container
 
 ### Files That Don't Need Changes
 
@@ -76,6 +101,15 @@ CI is hanging at random stages during ROS Jazzy comprehensive tests due to:
 - All 88 tests passed (6 slow tests deselected)
 - No hangs or timeouts
 - Full test coverage maintained for non-slow tests
+
+### ✅ Step 5: Fix Docker Container Service Hangs
+- Added `policy-rc.d` to prevent systemd service starts during apt installation
+- Added apt configuration for dpkg lock timeout (120 seconds)
+- Added apt retry logic (3 attempts)
+- These fixes prevent hangs caused by:
+  - Package postinstall scripts trying to start services
+  - dpkg lock contention between concurrent apt processes
+  - Transient network failures during package downloads
 
 ## Actual Results
 

@@ -1,6 +1,15 @@
 # Generic ROS 2 Jazzy setup - works with any ROS repository
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Prevent services from starting during package installation
+# This is critical for Docker containers as they don't run systemd as init
+RUN echo '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d && chmod +x /usr/sbin/policy-rc.d
+
+# Configure apt to wait for locks instead of failing immediately
+# This prevents hangs/failures when multiple processes try to use apt simultaneously
+RUN echo 'Acquire::Retries "3";' > /etc/apt/apt.conf.d/80-retries && \
+    echo 'DPkg::Lock::Timeout "120";' > /etc/apt/apt.conf.d/80-dpkg-lock
+
 # Install ROS2 repository and key
 RUN add-apt-repository universe \
     && curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg \
