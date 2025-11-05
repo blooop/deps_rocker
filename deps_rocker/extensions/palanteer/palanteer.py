@@ -27,6 +27,7 @@ class Palanteer(SimpleRockerExtension):
     apt_packages = [
         "libgl1",  # OpenGL runtime library
         "libglu1-mesa",  # GLU runtime library
+        "libgl1-mesa-dri",  # Mesa DRI drivers (includes GPU drivers and software renderer)
         "libx11-6",  # X11 runtime library
         "libxrandr2",  # Xrandr runtime library
         "libxinerama1",  # Xinerama runtime library
