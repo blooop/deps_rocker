@@ -13,6 +13,7 @@ class Palanteer(SimpleRockerExtension):
         "cmake",  # build system
         "python3-dev",  # Python headers for building bindings
         "git",  # for cloning repository
+        "ca-certificates",  # for HTTPS git cloning
         # Library headers needed for compilation
         "libgl1-mesa-dev",
         "libglu1-mesa-dev",
