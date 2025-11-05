@@ -56,6 +56,7 @@ colcon build \
     --build-base "$UNDERLAY_BUILD" \
     --install-base "$UNDERLAY_INSTALL" \
     --merge-install \
+    --event-handlers console_direct+ \
     --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 echo "Underlay built successfully!"
