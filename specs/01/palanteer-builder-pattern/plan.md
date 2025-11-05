@@ -17,7 +17,7 @@
 
 ## 2. Create palanteer_builder_snippet.Dockerfile
 This will contain:
-- FROM base_image AS palanteer_builder
+- FROM ubuntu:24.04 AS palanteer_builder (FIXED base image for global cache sharing)
 - Cache mount for git repository (already exists in current implementation)
 - Cache mount for build artifacts (NEW)
 - Clone/update palanteer repository
@@ -28,6 +28,7 @@ Key improvements:
 - Cache the compiled binaries, not just the source
 - Build artifacts persist across Docker builds
 - Only rebuild when source changes
+- **Fixed builder base image ensures cache sharing across ALL projects** (doesn't matter what final image you're building)
 
 ## 3. Update palanteer_snippet.Dockerfile
 Simplify to:

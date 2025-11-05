@@ -15,6 +15,7 @@ Use a multi-stage Dockerfile builder pattern where:
 - Faster builds when palanteer hasn't changed
 - Cleaner separation between build dependencies and runtime dependencies
 - Build artifacts are cached across Docker builds
+- **Global cache sharing**: Builder uses fixed Ubuntu 24.04 base image, so compilation cache is shared across ALL projects/repos regardless of their base image
 - Follows the established pattern used by other extensions (lazygit, urdf_viz, nvim)
 
 ## Implementation Details
