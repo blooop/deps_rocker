@@ -68,7 +68,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
     fi
 
 # Set up proper environment sourcing in bashrc - unified workspace architecture
-RUN echo "source /opt/ros/jazzy/setup.bash" >> /home/@(name)/.bashrc && \
+# Ensure .bashrc exists and has proper ownership before appending
+RUN touch /home/@(name)/.bashrc && \
+    chown @(name):@(name) /home/@(name)/.bashrc && \
+    echo "source /opt/ros/jazzy/setup.bash" >> /home/@(name)/.bashrc && \
     echo "if [ -f /home/@(name)/underlay/install/setup.bash ]; then source /home/@(name)/underlay/install/setup.bash; fi" >> /home/@(name)/.bashrc && \
     echo "if [ -f /home/@(name)/overlay/install/setup.bash ]; then source /home/@(name)/overlay/install/setup.bash; fi" >> /home/@(name)/.bashrc && \
     echo "export COLCON_DEFAULTS_FILE=/home/@(name)/colcon-defaults.yaml" >> /home/@(name)/.bashrc
