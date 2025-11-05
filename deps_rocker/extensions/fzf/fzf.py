@@ -6,6 +6,7 @@ class Fzf(SimpleRockerExtension):
 
     name = "fzf"
     depends_on_extension = ["git_clone", "curl", "user"]
+    builder_apt_packages = ["git", "curl", "ca-certificates"]
 
     # Template arguments for both snippets
     empy_args = {
