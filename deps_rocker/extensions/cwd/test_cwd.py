@@ -2,15 +2,32 @@ import unittest
 from deps_rocker.extensions.cwd.cwd import CWD, CWDName
 from pathlib import Path
 import re
+import os
+import pwd
 
 
 class TestCWD(unittest.TestCase):
     def test_get_docker_args(self):
         cwd_ext = CWD()
-        cliargs = {}
+        # Simulate user extension providing home directory
+        container_home = pwd.getpwuid(os.getuid()).pw_dir
+        cliargs = {"user_home_dir": container_home}
         docker_args = cwd_ext.get_docker_args(cliargs)
-        expected = f" -v {Path.cwd()}:/{Path.cwd().stem} -w /{Path.cwd().stem}"
+
+        host_cwd = Path.cwd()
+        project_name = host_cwd.name
+        expected_path = f"{container_home}/{project_name}"
+        expected = f' -v "{host_cwd}:{expected_path}" -w "{expected_path}"'
         self.assertEqual(docker_args, expected)
+
+    def test_get_docker_args_no_home(self):
+        cwd_ext = CWD()
+        cliargs = {}  # No user_home_dir provided
+        docker_args = cwd_ext.get_docker_args(cliargs)
+        # Should still work with fallback
+        self.assertIn(str(Path.cwd()), docker_args)
+        self.assertIn("-v", docker_args)
+        self.assertIn("-w", docker_args)
 
     def test_invoke_after(self):
         cwd_ext = CWD()
