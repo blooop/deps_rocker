@@ -6,11 +6,15 @@ class Palanteer(SimpleRockerExtension):
 
     name = "palanteer"
     depends_on_extension = ("curl", "git_clone", "x11")
-    apt_packages = [
-        "build-essential",
-        "cmake",
-        "python3-dev",
-        "python3-pip",
+
+    # Build-time dependencies for compiling palanteer
+    builder_apt_packages = [
+        "build-essential",  # gcc, g++, make
+        "cmake",  # build system
+        "python3-dev",  # Python headers for building bindings
+        "git",  # for cloning repository
+        "ca-certificates",  # for HTTPS git cloning
+        # Library headers needed for compilation
         "libgl1-mesa-dev",
         "libglu1-mesa-dev",
         "libx11-dev",
@@ -18,4 +22,16 @@ class Palanteer(SimpleRockerExtension):
         "libxinerama-dev",
         "libxcursor-dev",
         "libxi-dev",
+    ]
+
+    # Runtime dependencies (shared libraries only, no headers)
+    apt_packages = [
+        "libgl1",  # OpenGL runtime library
+        "libglu1-mesa",  # GLU runtime library
+        "libgl1-mesa-dri",  # Mesa DRI drivers (includes GPU drivers and software renderer)
+        "libx11-6",  # X11 runtime library
+        "libxrandr2",  # Xrandr runtime library
+        "libxinerama1",  # Xinerama runtime library
+        "libxcursor1",  # Xcursor runtime library
+        "libxi6",  # Xi runtime library
     ]
