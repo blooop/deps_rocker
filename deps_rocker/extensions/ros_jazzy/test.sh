@@ -274,7 +274,7 @@ test_workspace_chaining() {
     # Test building the main workspace
     echo ""
     echo "10. Building test package that depends on underlay..."
-    if ! colcon build --packages-select test_package 2>&1 | tee /tmp/build_output.log; then
+    if ! colcon build --packages-select test_package --event-handlers console_direct+ 2>&1 | tee /tmp/build_output.log; then
         echo "ERROR: Failed to build test package"
         cat /tmp/build_output.log
         exit 1
