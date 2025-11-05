@@ -24,3 +24,6 @@ Update AGENTS.md to automatically number specifications and group them by functi
 - Update AGENTS.md workflow section to include numbering logic
 - Add category reference for agents to check when creating new specs
 - Provide examples of how to determine category membership
+
+## Note
+This change only affects AGENTS.md documentation and does not modify any code. CI tests would verify that no code functionality is broken, but since this is a documentation-only change, the risk is minimal.
