@@ -1,22 +1,23 @@
 # Spec: FZF Builder Stage Caching
 
 ## Problem
-The fzf extension currently re-downloads the fzf binary from GitHub releases on every build during the user install step (`~/.fzf/install --all`), even though the builder stage already clones the repository. This wastes time and network bandwidth.
+The fzf extension currently re-downloads the fzf binary from GitHub releases on every build during the user install step (`~/.fzf/install --all`). This wastes time and network bandwidth.
 
 ## Solution
-Move the binary download to the builder stage using BuildKit cache mounts:
+Run the native fzf install script in the builder stage to download the binary, using BuildKit cache mounts:
 1. Cache the git repository clone
-2. Pre-download the versioned fzf binary (matching `FZF_VERSION`) in the builder stage
-3. Copy both repo and binary to builder output directory
-4. In user stage, the install script will find the pre-downloaded binary and skip the download
+2. Run `./install --bin` in builder stage with cache mount (downloads binary only, no shell setup)
+3. Copy repo with pre-downloaded binary to builder output directory
+4. In user stage, run `./install --all` which detects existing binary and only sets up shell integration
 
 ## Implementation Details
-- Use `RUN --mount=type=cache,target=/root/.cache/fzf` for binary downloads
-- Download architecture-appropriate binary based on `uname -m` and `FZF_VERSION`
-- Keep binaries in cache with versioned filenames (e.g., `fzf-${VERSION}-${ARCH}.tar.gz`)
-- Install script will detect existing `~/.fzf/bin/fzf` binary and skip download
+- Use `RUN --mount=type=cache` for both git clone and fzf home directory
+- Let fzf's native install script handle architecture detection and downloading
+- Builder runs `./install --bin` to populate `bin/fzf`
+- User stage runs `./install --all` to set up completion/keybindings (skips download)
 
 ## Benefits
 - Significantly faster builds (skip ~5-10MB download per build)
 - Works offline after first download
-- Still respects FZF_VERSION for updates
+- No custom download logic - uses fzf's native installer
+- Still respects FZF_VERSION via git checkout
