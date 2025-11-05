@@ -5,7 +5,6 @@ ARG FZF_VERSION=@FZF_VERSION@
 
 # Use cache mount for git clone and fzf installation
 RUN --mount=type=cache,target=/root/.cache/fzf-repo,id=fzf-repo-cache \
-    --mount=type=cache,target=/root/.fzf-install,id=fzf-install-cache \
     bash -c "set -euxo pipefail && \
     # Clone or update repo in cache
     CACHE_DIR='/root/.cache/fzf-repo' && \
@@ -17,13 +16,15 @@ RUN --mount=type=cache,target=/root/.cache/fzf-repo,id=fzf-repo-cache \
         mkdir -p \"\$CACHE_DIR\" && \
         git clone https://github.com/junegunn/fzf.git \"\$CACHE_DIR\"; \
     fi && \
-    # Copy to fzf install location and run installer with --bin flag
-    mkdir -p /root/.fzf-install && \
-    rm -rf /root/.fzf-install/* && \
-    cp -a \"\$CACHE_DIR/.\" /root/.fzf-install/ && \
-    cd /root/.fzf-install && \
-    ./install --bin && \
+    # Download binary only if it doesn't exist in cache
+    cd \"\$CACHE_DIR\" && \
+    if [ ! -f bin/fzf ]; then \
+        echo 'Binary not cached, running install...' && \
+        ./install --bin; \
+    else \
+        echo 'Using cached fzf binary'; \
+    fi && \
     # Copy completed installation to output directory
     OUTPUT_DIR='@(f"{builder_output_dir}")' && \
     mkdir -p \"\$OUTPUT_DIR/fzf\" && \
-    cp -a /root/.fzf-install/. \"\$OUTPUT_DIR/fzf/\""
+    cp -a \"\$CACHE_DIR/.\" \"\$OUTPUT_DIR/fzf/\""
