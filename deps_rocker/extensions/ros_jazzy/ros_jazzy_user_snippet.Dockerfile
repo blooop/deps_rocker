@@ -31,8 +31,8 @@ RUN if [ -f /tmp/consolidated.repos ] && [ -s /tmp/consolidated.repos ]; then \
     fi
 
 # Build underlay workspace if dependencies exist
-RUN --mount=type=cache,target=/var/cache/apt,sharing=private,id=apt-cache \
-    --mount=type=cache,target=/var/lib/apt/lists,sharing=private,id=apt-lists \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache-${CACHE_ID} \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists-${CACHE_ID} \
     --mount=type=cache,target=/home/@(name)/.cache/pip,id=pip-cache \
     if [ -d "/home/@(name)/underlay/src" ] && [ "$(ls -A /home/@(name)/underlay/src)" ]; then \
         rm -rf /home/@(name)/underlay/build /home/@(name)/underlay/install && \
@@ -49,8 +49,8 @@ COPY --chown=@(name):@(name) colcon-defaults.yaml /home/@(name)/colcon-defaults.
 COPY unified_overlay_package.xml /tmp/unified_overlay_package.xml
 
 # Install rosdep dependencies for overlay workspace using unified package.xml
-RUN --mount=type=cache,target=/var/cache/apt,sharing=private,id=apt-cache \
-    --mount=type=cache,target=/var/lib/apt/lists,sharing=private,id=apt-lists \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache-${CACHE_ID} \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists-${CACHE_ID} \
     --mount=type=cache,target=/home/@(name)/.cache/pip,id=pip-cache \
     if [ -f /tmp/unified_overlay_package.xml ] && grep -q "<depend>" /tmp/unified_overlay_package.xml 2>/dev/null; then \
         echo "Installing rosdep dependencies from unified overlay package.xml..." && \
