@@ -9,17 +9,18 @@ CI is hanging during ROS Jazzy tests at random stages. Root causes:
 ## Solution
 Two-pronged approach:
 
-### A. Skip Resource-Intensive Tests in CI
-1. Add `@pytest.mark.slow` decorator to comprehensive ROS Jazzy tests
+### A. Skip Docker-Building Tests in CI
+1. Add `@pytest.mark.slow` decorator to comprehensive ROS Jazzy tests (only tests requiring Docker builds)
 2. Configure CI coverage task to skip slow tests with `-m 'not slow'`
 3. Provide `test-all` and `coverage-all` tasks for running full test suite locally
 4. Remove large `geometry2` repository from remaining test fixtures
+5. Keep unit tests running (robustness, scripts, colcon_defaults) - they don't build Docker
 
-### B. Fix Docker Container Service Hang Issues
+### B. Fix Docker Container Service Hang Issues (for local testing)
 1. Prevent systemd services from starting during package installation using `policy-rc.d`
 2. Configure apt to wait for dpkg locks with timeout instead of failing immediately
 3. Add retry logic for apt operations
-4. Use `sharing=private` for BuildKit cache mounts to prevent cross-job contention
+4. Use dynamic cache IDs (`ARG CACHE_ID`) with `sharing=locked` for per-environment isolation
 
 ## Implementation Details
 - Update `test_ros_jazzy_comprehensive.py` to remove `geometry2` from test cases

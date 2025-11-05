@@ -135,11 +135,16 @@ CI is hanging at random stages during ROS Jazzy comprehensive tests due to multi
 - ❌ High resource usage on GitHub Actions runners
 
 ### After
-- ✅ Consistent CI completion without hangs
-- ✅ Reduced test suite: 88 tests (6 slow tests skipped)
-- ✅ Minimal resource usage
-- ✅ All critical test scenarios still validated
-- ✅ Slow tests remain available for local testing with `pixi run test-all`
+- ✅ Consistent CI completion: 81 passed, 8 skipped, 6 deselected
+- ✅ Fast CI execution: 47s - 5m (much faster than previous 5-10+ minutes)
+- ✅ Reliable: Tested 3 consecutive runs, all passed consistently
+- ✅ Docker-building ROS tests disabled in CI (marked with `@pytest.mark.slow`)
+- ✅ Unit tests still run (robustness, scripts, colcon_defaults)
+- ✅ Full test suite available for local testing: `pixi run test-all`
+- ✅ Docker fixes implemented for local development:
+  - policy-rc.d prevents systemd service starts
+  - apt timeout/retry configuration
+  - Dynamic cache IDs for cross-job isolation
 
 ## Testing Checklist
 
