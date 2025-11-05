@@ -3,7 +3,7 @@
 ## Problem
 The rocker X11 extension fails when `~/.Xauthority` doesn't exist on the host system:
 ```
-xauth:  file /home/ags/.Xauthority does not exist
+xauth:  file /home/user/.Xauthority does not exist
 xauth: (argv):1:  unable to read any entries from file "(stdin)"
 ```
 
