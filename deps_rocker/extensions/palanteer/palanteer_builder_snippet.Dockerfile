@@ -13,8 +13,8 @@ RUN --mount=type=cache,target=/root/.cache/palanteer-git-cache,id=palanteer-git-
     # Clone or update palanteer repository in cache \
     if [ -d /root/.cache/palanteer-git-cache/palanteer ]; then \
         cd /root/.cache/palanteer-git-cache/palanteer && \
-        git fetch --depth 1 origin && \
-        git reset --hard origin/master; \
+        git fetch --depth 1 origin main && \
+        git reset --hard FETCH_HEAD; \
     else \
         git clone --depth 1 https://github.com/dfeneyrou/palanteer.git /root/.cache/palanteer-git-cache/palanteer; \
     fi && \
