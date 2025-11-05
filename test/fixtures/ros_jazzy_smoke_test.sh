@@ -66,7 +66,8 @@ colcon build \
     --packages-select test_package \
     --build-base "$build_base" \
     --install-base "$install_base" \
-    --merge-install
+    --merge-install \
+    --event-handlers console_direct+
 
 if [ ! -f "${install_base}/setup.bash" ]; then
     echo "ERROR: Expected workspace setup file at ${install_base}/setup.bash"

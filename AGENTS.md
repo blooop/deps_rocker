@@ -4,8 +4,12 @@ look at the pyproject.toml to see the pixi tasks
 
 Workflow:
     * On first message:
-        - create a new specification according to the pattern specs/01/short-spec-name/spec.md.  Keep it as concise as possible
-        - create a plan in the same folder, you can expand more here
+        - analyze the request and determine which category it belongs to (see Specification Categories below)
+        - find the highest existing spec number by running: ls -d specs/*/ | grep -oP 'specs/\K\d+' | sort -n | tail -1
+        - create a new specification at specs/NN-short-spec-name/spec.md where NN is highest+1, zero-padded to 2 digits
+        - if the spec clearly fits into an existing category, consider mentioning the category in the spec name or grouping context
+        - keep spec.md as concise as possible
+        - create a plan.md in the same folder with expanded implementation details
         - commit the contents of this folder only
 
     * Every time I ask for a change
@@ -14,6 +18,40 @@ Workflow:
         - run `pixi run ci`
         - fix errors and iterate until ci passes
         - only if ci passes commit the changes.
+
+## Specification Categories
+
+When creating a new specification, determine which category it belongs to. This helps organize related work and provides context for future agents.
+
+**cache-optimization**: Performance improvements via caching
+- BuildKit cache mounts, pip/pixi/vcstool caching, ccache integration
+- Example: buildkit-cache-mount, pip-buildkit-cache, vcstool-repo-cache
+
+**auto-detection**: Automatic extension and dependency detection
+- Workspace scanning, file pattern detection, auto-enabling extensions
+- Example: auto, auto-detect-llm-extensions, pixi-auto-detect
+
+**ros-integration**: ROS/ROS2 workspace and dependency management
+- ROS installation, underlay/overlay setup, vcstool integration, workspace layout
+- Example: ros-jazzy-unified, ros-underlay-builder, ros-workspace-layout
+
+**tool-extensions**: Individual development tool installations
+- Installing specific tools (editors, language tools, utilities)
+- Example: nvim, npm, uv, deps-dev
+
+**build-optimization**: Docker build performance and structure
+- Multi-stage builds, layer optimization, build strategies
+- Example: multi-stage-builds
+
+**bug-fixes**: Specific fixes for broken functionality
+- Addressing errors, correcting invalid syntax, fixing edge cases
+- Example: neovim-version-pin, palanteer-dockerfile-copy-fix
+
+**workflow**: Meta-improvements to development process
+- Changes to AGENTS.md, CI/CD improvements, project organization
+- Example: auto-number-specs
+
+If a specification spans multiple categories or doesn't fit neatly into one, use your best judgment or create a new category as needed.
 
 # Claude Instructions for deps_rocker
 
