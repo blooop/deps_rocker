@@ -18,7 +18,7 @@ from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 @pytest.mark.docker
 @pytest.mark.slow
-@pytest.mark.skip
+@pytest.mark.skip(reason="Temporarily disabling ros_jazzy tests")
 class TestRosJazzyComprehensive(unittest.TestCase):
     """Comprehensive tests for ROS Jazzy extension based on README specification"""
 
