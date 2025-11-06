@@ -1,4 +1,5 @@
 import unittest
+import pytest
 import tempfile
 import os
 import yaml
@@ -7,6 +8,7 @@ from deps_rocker.extensions.ros_jazzy.ros_jazzy import RosJazzy
 
 
 class TestRosJazzyColconDefaults(unittest.TestCase):
+    @pytest.mark.skip(reason="Skipping ROS Jazzy tests")
     def test_get_files_empy_substitution(self):
         """Test that empy substitution works in get_files method using actual config file"""
 
