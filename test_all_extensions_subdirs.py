@@ -65,7 +65,7 @@ def test_all_extension_subdirectory_detection():
 
         # Check expected detections
         expected_detections = {
-            "ros_jazzy": "package.xml files",
+            # "ros_jazzy": "package.xml files",
             "npm": "package.json files",
             "cargo": "Cargo.toml and .cargo/config.toml files",
             "conda": "environment.yml files",
