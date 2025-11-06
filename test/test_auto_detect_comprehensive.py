@@ -78,7 +78,7 @@ class TestAutoDetectYmlQuoting(unittest.TestCase):
   <license>MIT</license>
 </package>"""
         }
-        expected = set()  # Temporarily skipping ros_jazzy detection
+        expected = set()  # Permanently skipping ros_jazzy detection
         self._test_detection_in_dir(setup_files, expected)
 
     def test_package_json_detection(self):
@@ -193,7 +193,13 @@ name = "pixi-project"
             "main.cpp": "#include <iostream>",
             "requirements.txt": "requests==2.25.1",
         }
-        expected = {"npm", "cargo", "pixi", "ccache", "uv"}  # Removed ros_jazzy
+        expected = {
+            "npm",
+            "cargo",
+            "pixi",
+            "ccache",
+            "uv",
+        }  # Explicitly exclude ros_jazzy  # Removed ros_jazzy
         self._test_detection_in_dir(setup_files, expected)
 
     def test_no_false_positives(self):
@@ -234,7 +240,7 @@ name = "backend"
 version = "0.1.0"
 """,
         }
-        expected = {"npm", "cargo"}  # Removed ros_jazzy
+        expected = {"npm", "cargo"}  # Explicitly exclude ros_jazzy  # Removed ros_jazzy
         self._test_detection_in_dir(setup_files, expected)
 
 
