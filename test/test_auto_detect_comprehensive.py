@@ -78,7 +78,7 @@ class TestAutoDetectYmlQuoting(unittest.TestCase):
   <license>MIT</license>
 </package>"""
         }
-        expected = set("ros_jazzy")
+        expected = set(["ros_jazzy"])
         self._test_detection_in_dir(setup_files, expected)
 
     def test_package_json_detection(self):
