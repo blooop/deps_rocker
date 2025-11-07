@@ -261,7 +261,7 @@ apt_base: #lowest level of dependency that changes very infrequently
   - build-essential
 
 apt_io: #graphics sound, input devices etc
-  - libasound2
+  - libasound2t64
 
 apt_sources: #apt dependencies for setting up software sources
   - ca-certificates #needed for wget
