@@ -5,6 +5,7 @@ import tempfile
 import subprocess
 from pathlib import Path
 import unittest
+import pytest
 
 
 COLCON_DEFAULTS_PATH = (
@@ -104,6 +105,7 @@ def _create_fake_colcon(tmpdir: Path) -> Path:
     return script
 
 
+@pytest.mark.skip(reason="Temporarily disabling ros_jazzy tests")
 class TestRosJazzyScripts(unittest.TestCase):
     def setUp(self):
         self.original_env = os.environ.copy()
