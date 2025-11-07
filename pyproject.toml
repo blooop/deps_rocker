@@ -127,7 +127,9 @@ style = { depends-on = ["format", "lint"] }
 commit-format = "git commit -a -m'autoformat code' || true"
 test = "python -m pytest -v -s"
 test-claude = "python -m pytest -v -s -m claude"
-coverage = "coverage run -m pytest --durations=0 -v -s && coverage xml -o coverage.xml"
+test-all = "python -m pytest -v -s --durations=10"
+coverage = "coverage run -m pytest --durations=0 -v -s -m 'not slow' && coverage xml -o coverage.xml"
+coverage-all = "coverage run -m pytest --durations=0 -v -s && coverage xml -o coverage.xml"
 coverage-report = "coverage report -m"
 update-lock = "pixi update && git commit -a -m'update pixi.lock' || true"
 push = "git push"
@@ -179,4 +181,5 @@ exclude_also = [
 markers = [
     "docker: marks tests as requiring docker (deselect with '-m \"not docker\"')",
     "claude: claude-specific tests (run with '-m claude')",
+    "slow: marks tests as slow/resource-intensive (deselect with '-m \"not slow\"')",
 ]
