@@ -1,4 +1,3 @@
 # Auto detection rules for ros_jazzy extension
-# Auto detection rules for ros_jazzy extension
 files:
   - "package.xml"
