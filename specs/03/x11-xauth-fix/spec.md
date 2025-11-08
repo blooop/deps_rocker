@@ -12,10 +12,12 @@ The upstream rocker X11 extension runs `xauth nlist $DISPLAY` which tries to rea
 
 ## Solution Options
 
-### Option 1: Documentation (Immediate)
+### Option 1: Documentation (Immediate) ✅ COMPLETED
 Document the workaround in deps_rocker README:
 - Create empty `.Xauthority`: `touch ~/.Xauthority`
 - Or remove x11 from rockerc.yaml if GUI not needed
+
+**Status:** Implemented in README.md troubleshooting section
 
 ### Option 2: Wrapper Extension (Robust)
 Create a `x11_safe` deps_rocker extension that:
