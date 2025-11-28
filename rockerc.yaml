@@ -7,7 +7,6 @@
 
 image: ubuntu:22.04
 args:
-  # - nvidia
   - jquery
   - x11
   - user
@@ -16,5 +15,3 @@ args:
   - cwd
   - pixi
   - uv
-  # - gitui
-  # - isaacsim
