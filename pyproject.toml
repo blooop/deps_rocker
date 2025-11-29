@@ -96,6 +96,7 @@ deps-devtools = "deps_rocker.extensions.deps_devtools.deps_devtools:DepsDevtools
 ros_jazzy = "deps_rocker.extensions.ros_jazzy.ros_jazzy:RosJazzy"
 isaac_sim = "deps_rocker.extensions.isaac_sim.isaac_sim:IsaacSim"
 urdf_viz = "deps_rocker.extensions.urdf_viz.urdf_viz:UrdfViz"
+foxglove = "deps_rocker.extensions.foxglove.foxglove:Foxglove"
 
 # AI tools
 claude = "deps_rocker.extensions.claude.claude:Claude"
