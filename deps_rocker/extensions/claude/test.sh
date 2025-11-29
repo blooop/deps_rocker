@@ -37,10 +37,10 @@ fi
 
 echo "Using Claude config at: $CONFIG_DIR"
 
-# Sanity: ensure config dir exists and is writable
+# Create config dir if it doesn't exist
 if [ ! -d "$CONFIG_DIR" ]; then
-  echo "ERROR: Claude config dir does not exist: $CONFIG_DIR" >&2
-  exit 1
+  echo "Creating Claude config directory: $CONFIG_DIR" >&2
+  mkdir -p "$CONFIG_DIR"
 fi
 if [ ! -w "$CONFIG_DIR" ]; then
   echo "ERROR: Claude config dir not writable: $CONFIG_DIR" >&2

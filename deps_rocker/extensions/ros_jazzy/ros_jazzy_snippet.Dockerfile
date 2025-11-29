@@ -1,5 +1,6 @@
 # Generic ROS 2 Jazzy setup - works with any ROS repository
 ENV DEBIAN_FRONTEND=noninteractive
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
 
 # Install ROS2 repository and key
 RUN add-apt-repository universe \
