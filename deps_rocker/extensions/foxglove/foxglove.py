@@ -1,5 +1,7 @@
 import os
 import pkgutil
+import logging
+import shutil
 from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
@@ -7,7 +9,8 @@ class Foxglove(SimpleRockerExtension):
     """Install Foxglove Studio for robotics data visualization"""
 
     name = "foxglove"
-    depends_on_extension = ("curl", "x11")
+    # Always require curl; attempt x11 only when the host can support it
+    depends_on_extension = ("curl",)
     builder_apt_packages = ["curl", "ca-certificates"]
     empy_args = {"FOXGLOVE_VERSION": "2.39.1"}
     apt_packages = [
@@ -31,7 +34,7 @@ class Foxglove(SimpleRockerExtension):
         - Named volume for agent index: foxglove-agent-index:/index
         - Host directory for recordings: ${HOME}/foxglove_recordings:/storage
 
-        Note: Browser integration is provided via x11 dependency for GUI forwarding.
+        Note: Browser integration is provided via the x11 dependency for GUI forwarding when available.
         """
         home_dir = os.path.expanduser("~")
         recordings_dir = os.path.join(home_dir, "foxglove_recordings")
@@ -40,6 +43,32 @@ class Foxglove(SimpleRockerExtension):
         os.makedirs(recordings_dir, exist_ok=True)
 
         return f' -v foxglove-agent-index:/index -v "{recordings_dir}:/storage"'
+
+    def _supports_x11(self) -> bool:
+        """
+        Determine whether the host can satisfy the x11 precondition.
+        Skip x11 when DISPLAY or xauth are unavailable (common in headless CI).
+        """
+        display = os.getenv("DISPLAY")
+        if not display:
+            logging.warning("foxglove: DISPLAY not set, skipping x11 dependency")
+            return False
+        if shutil.which("xauth") is None:
+            logging.warning("foxglove: xauth not found on host, skipping x11 dependency")
+            return False
+        return True
+
+    def _dependencies(self) -> set[str]:
+        deps = set(self.depends_on_extension)
+        if self._supports_x11():
+            deps.add("x11")
+        return deps
+
+    def required(self, cliargs) -> set[str]:
+        return self._dependencies()
+
+    def invoke_after(self, cliargs) -> set[str]:
+        return self._dependencies()
 
     def get_files(self, cliargs) -> dict[str, str]:
         files = super().get_files(cliargs) or {}
