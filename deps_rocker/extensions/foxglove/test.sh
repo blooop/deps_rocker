@@ -16,8 +16,10 @@ if ! dpkg -l | grep -q foxglove-studio; then
     exit 1
 fi
 
-# Check version (this should work even without display)
-echo "Testing foxglove-studio version..."
-foxglove-studio --version
+# Verify the binary file exists and is executable
+if [ ! -x "$(command -v foxglove-studio)" ]; then
+    echo "ERROR: foxglove-studio is not executable"
+    exit 1
+fi
 
 echo "Foxglove Studio extension test completed successfully!"

@@ -6,7 +6,7 @@ class Foxglove(SimpleRockerExtension):
     """Install Foxglove Studio for robotics data visualization"""
 
     name = "foxglove"
-    depends_on_extension = ("curl",)
+    depends_on_extension = ("curl", "x11")
     apt_packages = [
         "libgtk-3-0",
         "libnotify4",
@@ -17,7 +17,7 @@ class Foxglove(SimpleRockerExtension):
         "libdrm2",
         "libgbm1",
         "libxcb-dri3-0",
-        "libasound2",
+        "libasound2t64",
         "desktop-file-utils",
         "gnupg",
     ]
