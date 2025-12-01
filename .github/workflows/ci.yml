@@ -13,7 +13,7 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: pre-commit/action@v3.0.1
 
   ci:
@@ -26,7 +26,7 @@ jobs:
         environment: [py310, py313]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Build and run Dev Container task
         uses: devcontainers/ci@v0.3
         with:
