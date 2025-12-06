@@ -1,10 +1,11 @@
 # Use Pixi for Tool Installation
 
 ## Goal
-Replace git clone-based tool installations with pixi where the tool is available in conda-forge to simplify extensions and leverage pixi's ecosystem.
+Replace apt/git-based tool installations with pixi where the tool is available in conda-forge to simplify extensions and leverage pixi's ecosystem.
 
 ## Tools Migrated
-- fzf (was git clone + custom install, now pixi global install)
+- **fzf** (was git clone + custom install, now pixi global install)
+- **deps-devtools** (ripgrep, fd-find - was apt install, now pixi global install)
 
 ## Tools NOT Migrated
 - lazygit: not available in conda-forge/pixi
@@ -12,13 +13,25 @@ Replace git clone-based tool installations with pixi where the tool is available
 - gitui: extension doesn't exist
 
 ## Changes
+
+### fzf Extension
 - Removed fzf builder stage
 - Replaced git clone + install logic with `pixi global install fzf` in user snippet
 - Updated test script to manually export PATH for non-interactive shells
 - Maintained shell integration setup for key bindings and completion
 
+### deps-devtools Extension
+- Removed apt_packages (ripgrep, fd-find)
+- Added pixi dependency
+- Created user snippet to install ripgrep and fd-find via pixi
+- Updated test script to:
+  - Export PATH for non-interactive shells
+  - Check for `fd` instead of `fdfind` (pixi naming convention)
+  - Check for `rg` (ripgrep command)
+
 ## Benefits
-- Simpler Dockerfile for fzf (no multi-stage build needed)
-- Consistent with pixi installation pattern
+- Simpler Dockerfiles (no apt or multi-stage builds)
+- Consistent installation method across all dev tools
 - Automatic version management via conda-forge
 - Faster builds through pixi caching
+- Better tool versions from conda-forge vs apt
