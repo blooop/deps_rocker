@@ -9,6 +9,7 @@ Replace apt/git-based tool installations with pixi where the tool is available i
 - **lazygit** (was GitHub release download, now pixi global install)
 - **ccache** (was apt install, now pixi global install)
 - **git_clone** (git, git-lfs - was apt install, now pixi global install)
+- **jquery** (jq - was apt install, now pixi global install)
 
 ## Tools NOT Migrated
 - **curl**: Cannot be migrated because it's required to bootstrap pixi itself (circular dependency)
@@ -55,6 +56,13 @@ Replace apt/git-based tool installations with pixi where the tool is available i
 - Updated test script to:
   - Export PATH for non-interactive shells
   - Test both git and git-lfs versions
+
+### jquery Extension
+- Removed apt install from jquery_snippet.Dockerfile
+- Added pixi dependency
+- Created user snippet to install jq via pixi
+- Updated test script to export PATH for non-interactive shells
+- Maintained jq JSON processing functionality test
 
 ## Benefits
 - Simpler Dockerfiles (no apt or multi-stage builds)
