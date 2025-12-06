@@ -9,8 +9,9 @@ Replace apt/git-based tool installations with pixi where the tool is available i
 - **lazygit** (was GitHub release download, now pixi global install)
 
 ## Tools NOT Migrated
-- nvim: not available in conda-forge/pixi
-- gitui: extension doesn't exist
+- **curl**: Cannot be migrated because it's required to bootstrap pixi itself (circular dependency)
+- **nvim**: Not available in conda-forge/pixi
+- **gitui**: Extension doesn't exist
 
 ## Changes
 
