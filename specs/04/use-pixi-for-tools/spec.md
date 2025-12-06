@@ -6,9 +6,9 @@ Replace apt/git-based tool installations with pixi where the tool is available i
 ## Tools Migrated
 - **fzf** (was git clone + custom install, now pixi global install)
 - **deps-devtools** (ripgrep, fd-find - was apt install, now pixi global install)
+- **lazygit** (was GitHub release download, now pixi global install)
 
 ## Tools NOT Migrated
-- lazygit: not available in conda-forge/pixi
 - nvim: not available in conda-forge/pixi
 - gitui: extension doesn't exist
 
@@ -28,6 +28,14 @@ Replace apt/git-based tool installations with pixi where the tool is available i
   - Export PATH for non-interactive shells
   - Check for `fd` instead of `fdfind` (pixi naming convention)
   - Check for `rg` (ripgrep command)
+
+### lazygit Extension
+- Removed GitHub release download builder stage
+- Removed curl, git_clone dependencies and builder_apt_packages
+- Added pixi dependency
+- Created user snippet to install lazygit via pixi
+- Updated test script to export PATH for non-interactive shells
+- Maintained bash alias (lg='lazygit')
 
 ## Benefits
 - Simpler Dockerfiles (no apt or multi-stage builds)
