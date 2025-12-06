@@ -7,6 +7,8 @@ Replace apt/git-based tool installations with pixi where the tool is available i
 - **fzf** (was git clone + custom install, now pixi global install)
 - **deps-devtools** (ripgrep, fd-find - was apt install, now pixi global install)
 - **lazygit** (was GitHub release download, now pixi global install)
+- **ccache** (was apt install, now pixi global install)
+- **git_clone** (git, git-lfs - was apt install, now pixi global install)
 
 ## Tools NOT Migrated
 - **curl**: Cannot be migrated because it's required to bootstrap pixi itself (circular dependency)
@@ -37,6 +39,22 @@ Replace apt/git-based tool installations with pixi where the tool is available i
 - Created user snippet to install lazygit via pixi
 - Updated test script to export PATH for non-interactive shells
 - Maintained bash alias (lg='lazygit')
+
+### ccache Extension
+- Removed apt_packages (ccache)
+- Added pixi dependency
+- Created user snippet to install ccache via pixi
+- Updated test script to export PATH for non-interactive shells
+- Maintained ccache_snippet.Dockerfile for ENV CCACHE_DIR
+- Kept get_docker_args for mounting host ccache directory
+
+### git_clone Extension
+- Removed apt_packages (git, git-lfs, ca-certificates)
+- Added pixi dependency
+- Created user snippet to install git and git-lfs via pixi
+- Updated test script to:
+  - Export PATH for non-interactive shells
+  - Test both git and git-lfs versions
 
 ## Benefits
 - Simpler Dockerfiles (no apt or multi-stage builds)
