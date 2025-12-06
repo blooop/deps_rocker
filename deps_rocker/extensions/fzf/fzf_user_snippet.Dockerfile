@@ -1,9 +1,13 @@
-# Install fzf from staged source (binary already present from builder stage)
-RUN rm -rf ~/.fzf && mkdir -p ~/.fzf && cp -a /opt/deps_rocker/fzf/. ~/.fzf/
+# Install fzf via pixi
+RUN pixi global install fzf
 
-# Set up completion and key-bindings by sourcing shell files directly (no install script)
-RUN echo '# fzf setup' >> ~/.bashrc && \
-    echo 'export PATH="$HOME/.fzf/bin:$PATH"' >> ~/.bashrc && \
-    echo '[ -f ~/.fzf/shell/completion.bash ] && source ~/.fzf/shell/completion.bash' >> ~/.bashrc && \
-    echo '[ -f ~/.fzf/shell/key-bindings.bash ] && source ~/.fzf/shell/key-bindings.bash' >> ~/.bashrc && \
-    echo 'cdfzf() { file="$(fzf)"; [ -n "$file" ] && cd "$(dirname "$file")"; }' >> ~/.bashrc
+# Set up fzf shell integration
+# Find fzf package files in pixi environment
+RUN bash -c ' \
+    FZF_BASE=$(find ~/.pixi/envs -name "fzf" -type d 2>/dev/null | head -1) && \
+    if [ -n "$FZF_BASE" ] && [ -d "$FZF_BASE/shell" ]; then \
+        echo "# fzf setup" >> ~/.bashrc && \
+        echo "[ -f $FZF_BASE/shell/completion.bash ] && source $FZF_BASE/shell/completion.bash" >> ~/.bashrc && \
+        echo "[ -f $FZF_BASE/shell/key-bindings.bash ] && source $FZF_BASE/shell/key-bindings.bash" >> ~/.bashrc; \
+    fi && \
+    echo "cdfzf() { file=\"\$(fzf)\"; [ -n \"\$file\" ] && cd \"\$(dirname \"\$file\")\"; }" >> ~/.bashrc'
