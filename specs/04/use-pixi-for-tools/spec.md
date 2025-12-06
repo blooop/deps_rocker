@@ -64,9 +64,21 @@ Replace apt/git-based tool installations with pixi where the tool is available i
 - Updated test script to export PATH for non-interactive shells
 - Maintained jq JSON processing functionality test
 
+## Builder Stage Pattern
+
+Extensions with multi-stage builds (npm, palanteer, etc.) need tools like git and curl in their builder stages. Since builder stages run before the user stage where pixi tools are installed, these extensions:
+
+1. Declare the tool in `depends_on_extension` (e.g., git_clone, curl) - ensures final image has pixi version
+
+
+Example (npm):
+- `depends_on_extension = ("curl", "git_clone")` - final image gets pixi git + apt curl
+- `builder_pixi_packages = ["curl", "git"]` - builder can clone repositories
+
 ## Benefits
-- Simpler Dockerfiles (no apt or multi-stage builds)
+- Simpler Dockerfiles (no apt or multi-stage builds for most extensions)
 - Consistent installation method across all dev tools
 - Automatic version management via conda-forge
 - Faster builds through pixi caching
 - Better tool versions from conda-forge vs apt
+- builder stages use pixi where possible
