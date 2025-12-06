@@ -5,10 +5,4 @@ class Fzf(SimpleRockerExtension):
     """Adds fzf autocomplete to your container"""
 
     name = "fzf"
-    depends_on_extension = ["git_clone", "curl", "user"]
-    builder_apt_packages = ["git", "curl", "ca-certificates"]
-
-    # Template arguments for both snippets
-    empy_args = {
-        "FZF_VERSION": "0.53.0",
-    }
+    depends_on_extension = ["pixi", "user"]

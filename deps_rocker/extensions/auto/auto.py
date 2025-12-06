@@ -41,6 +41,11 @@ class Auto(RockerExtension):
             const=str(Path.cwd()),
             help="Enable auto extension and optionally specify a search root directory. Defaults to current working directory.",
         )
+        parser.add_argument(
+            "--auto-check-home",
+            action="store_true",
+            help="Also scan the user's home directory for config dirs when auto-detecting.",
+        )
 
     name = "auto"
 
@@ -55,6 +60,11 @@ class Auto(RockerExtension):
         import yaml
 
         workspace = self._resolve_workspace(_cliargs)
+        auto_arg = _cliargs.get("auto")
+        # Default to only scanning the workspace when a path is provided; allow overriding via flag
+        check_home = auto_arg is None or auto_arg is True
+        if "auto_check_home" in _cliargs:
+            check_home = bool(_cliargs["auto_check_home"])
 
         extensions_dir = Path(__file__).parent.parent
         file_patterns = {}

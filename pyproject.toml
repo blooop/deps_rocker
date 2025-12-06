@@ -125,11 +125,11 @@ pylint = "python -m pylint --version && echo 'running pylint...' && python -m py
 lint = { depends-on = ["ruff-lint", "pylint"] }
 style = { depends-on = ["format", "lint"] }
 commit-format = "git commit -a -m'autoformat code' || true"
-test = "python -m pytest -v -s"
-test-claude = "python -m pytest -v -s -m claude"
-test-all = "python -m pytest -v -s --durations=10"
-coverage = "coverage run -m pytest --durations=0 -v -s -m 'not slow' && coverage xml -o coverage.xml"
-coverage-all = "coverage run -m pytest --durations=0 -v -s && coverage xml -o coverage.xml"
+test = { cmd = "python -m pytest -v -s", env = { DOCKER_BUILDKIT = "1" } }
+test-claude = { cmd = "python -m pytest -v -s -m claude", env = { DOCKER_BUILDKIT = "1" } }
+test-all = { cmd = "python -m pytest -v -s --durations=10", env = { DOCKER_BUILDKIT = "1" } }
+coverage = { cmd = "coverage run -m pytest --durations=0 -v -s -m 'not slow' && coverage xml -o coverage.xml", env = { DOCKER_BUILDKIT = "1" } }
+coverage-all = { cmd = "coverage run -m pytest --durations=0 -v -s && coverage xml -o coverage.xml", env = { DOCKER_BUILDKIT = "1" } }
 coverage-report = "coverage report -m"
 update-lock = "pixi update && git commit -a -m'update pixi.lock' || true"
 push = "git push"

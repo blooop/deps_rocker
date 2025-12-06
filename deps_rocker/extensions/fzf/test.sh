@@ -2,9 +2,12 @@
 
 set -e
 
-PATH="$HOME/.fzf/bin:$PATH"
-# Check that uv is installed and prints its version
+# Add pixi bin to PATH (needed for non-interactive shells)
+export PATH="$HOME/.pixi/bin:$PATH"
+
+# Source bashrc for shell integration functions
 source ~/.bashrc
+
 fzf --version
 echo "fzf is installed and working"
 

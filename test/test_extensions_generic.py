@@ -1,6 +1,7 @@
 import unittest
 import pytest
 import io
+import os
 import tempfile
 from pathlib import Path
 from contextlib import contextmanager, nullcontext
@@ -43,6 +44,9 @@ class TestExtensionsGeneric(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Build a simple base image for testing extensions"""
+        # Enable BuildKit for all tests
+        os.environ["DOCKER_BUILDKIT"] = "1"
+
         cls.base_dockerfile_tag = "testfixture_extensions_base"
         cls.base_dockerfile = """
 FROM ubuntu:24.04
