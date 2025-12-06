@@ -10,10 +10,10 @@ class IsaacSim(SimpleRockerExtension):
     """Add isaacsim to your docker container"""
 
     name = "isaacsim"
+    depends_on_extension = ("pixi",)
+    builder_pixi_packages = ["cmake", "c-compiler", "cxx-compiler", "make", "python", "pip"]
+    # Keep system libraries for NVIDIA runtime compatibility
     apt_packages = [
-        "python3-pip",
-        "cmake",
-        "build-essential",
         "libglib2.0-0",
         "libglu1-mesa",
         "libxmu-dev",

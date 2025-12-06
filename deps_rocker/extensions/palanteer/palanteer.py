@@ -7,21 +7,24 @@ class Palanteer(SimpleRockerExtension):
     name = "palanteer"
     depends_on_extension = ("curl", "git_clone", "x11")
 
-    builder_pixi_packages = ["git", "cmake"]
+    builder_pixi_packages = [
+        "git",
+        "cmake",
+        "c-compiler",
+        "cxx-compiler",
+        "make",
+        "python",
+        "mesa-libgl-devel-cos7-x86_64",
+        "mesa-libglu-devel-cos7-x86_64",
+        "libx11-devel-cos7-x86_64",
+        "libxrandr-devel-cos7-x86_64",
+        "libxinerama-devel-cos7-x86_64",
+        "libxcursor-devel-cos7-x86_64",
+        "libxi-devel-cos7-x86_64",
+    ]
 
     # Build-time dependencies for compiling palanteer
-    builder_apt_packages = [
-        "build-essential",  # gcc, g++, make
-        "python3-dev",  # Python headers for building bindings
-        # Library headers needed for compilation
-        "libgl1-mesa-dev",
-        "libglu1-mesa-dev",
-        "libx11-dev",
-        "libxrandr-dev",
-        "libxinerama-dev",
-        "libxcursor-dev",
-        "libxi-dev",
-    ]
+    builder_apt_packages: list[str] = []
 
     # Runtime dependencies (shared libraries only, no headers)
     apt_packages = [
