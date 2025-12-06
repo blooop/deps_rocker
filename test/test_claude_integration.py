@@ -1,4 +1,5 @@
 import io
+import os
 import tempfile
 import unittest
 import pytest
@@ -32,6 +33,9 @@ class ScriptInjectionExtension(SimpleRockerExtension):
 class TestClaudeIntegration(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        # Enable BuildKit for all tests
+        os.environ["DOCKER_BUILDKIT"] = "1"
+
         cls.base_dockerfile_tag = "testfixture_claude_base"
         cls.base_dockerfile = """
 FROM ubuntu:22.04

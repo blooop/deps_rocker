@@ -6,7 +6,7 @@ class Nvim(SimpleRockerExtension):
 
     name = "nvim"
     depends_on_extension = ("curl",)
-    builder_pixi_packages = ["curl", "ca-certificates"]
+    builder_pixi_packages: list[str] = []
     builder_apt_packages: list[str] = []
 
     def get_docker_args(self, cliargs):

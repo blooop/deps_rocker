@@ -126,32 +126,16 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         return "\n\n".join(fragments)
 
     def _get_builder_pixi_snippet(self, packages: list[str]) -> str:
-        """Shared builder snippet to install pixi and required packages with caching and minimal apt fallback."""
+        """Shared builder snippet to install pixi from official image and required packages with caching."""
         packages_str = " ".join(packages)
         use_buildkit_cache = is_buildkit_enabled()
-        install_mount = ""
         pixi_mount = ""
 
         if use_buildkit_cache:
-            install_mount = "--mount=type=cache,target=/root/.cache/pixi-install-cache,id=pixi-install-cache \\\n    "
             pixi_mount = "--mount=type=cache,target=/root/.cache/pixi,sharing=locked,id=pixi-global-cache \\\n    "
 
-        return f"""# Install pixi and builder toolchain
-RUN {install_mount}bash -c "set -euxo pipefail && \\
-    if ! command -v curl >/dev/null 2>&1; then \\
-        if command -v apt-get >/dev/null 2>&1; then \\
-            apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && \\
-            rm -rf /var/lib/apt/lists/*; \\
-        else \\
-            echo 'curl is required to install pixi' >&2; exit 1; \\
-        fi; \\
-    fi && \\
-    mkdir -p /root/.cache/pixi-install-cache && \\
-    script=/root/.cache/pixi-install-cache/install.sh && \\
-    if [ ! -f \\"\\$script\\" ]; then \\
-        curl -fsSL https://pixi.sh/install.sh -o \\"\\$script\\"; \\
-    fi && \\
-    bash \\"\\$script\\""
+        return f"""# Install pixi from official image (no apt dependencies needed)
+COPY --from=ghcr.io/prefix-dev/pixi:latest /usr/local/bin/pixi /usr/local/bin/pixi
 
 ENV PATH="/root/.pixi/bin:$PATH"
 

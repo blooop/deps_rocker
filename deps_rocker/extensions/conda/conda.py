@@ -6,7 +6,7 @@ class Conda(SimpleRockerExtension):
 
     name = "conda"
     depends_on_extension: tuple[str, ...] = ("curl", "user")
-    builder_pixi_packages = ["curl", "ca-certificates", "bzip2"]
+    builder_pixi_packages = ["bzip2"]
     builder_apt_packages: list[str] = []
 
     # Template arguments for both snippets

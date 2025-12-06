@@ -5,8 +5,8 @@ class Pixi(SimpleRockerExtension):
     """Install pixi and enable shell completion"""
 
     name = "pixi"
-    depends_on_extension: tuple[str, ...] = ("curl", "user")
-    builder_pixi_packages = ["curl", "ca-certificates"]
+    depends_on_extension: tuple[str, ...] = ("user",)
+    builder_pixi_packages: list[str] = []
     builder_apt_packages: list[str] = []
 
     # Template arguments for both snippets

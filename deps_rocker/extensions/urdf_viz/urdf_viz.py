@@ -6,7 +6,7 @@ class UrdfViz(SimpleRockerExtension):
 
     name = "urdf_viz"
     apt_packages = ["libxi6", "libxcursor-dev", "libxrandr-dev", "ros-humble-xacro"]
-    builder_pixi_packages = ["curl", "ca-certificates", "jq"]
+    builder_pixi_packages = ["jq"]
     builder_apt_packages: list[str] = []
 
     def required(self, cliargs):

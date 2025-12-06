@@ -9,8 +9,10 @@ Copy pixi binary from official pixi Docker image (`ghcr.io/prefix-dev/pixi:lates
 - Removes apt usage, significantly speeding up builds
 - Works for both builder stages and pixi extension
 
-## Changes
+## Changes Made
 
-- Update `SimpleRockerExtension._get_builder_pixi_snippet()` to use multi-stage FROM to copy pixi binary
-- Remove `builder_pixi_packages = ["curl", "ca-certificates"]` from pixi extension
-- Ensure pixi binary is executable and in PATH
+1. Updated `SimpleRockerExtension._get_builder_pixi_snippet()` to copy pixi from official Docker image
+2. Removed `curl` and `ca-certificates` from `builder_pixi_packages` in all extensions (pixi, cargo, claude, nvim, npm, conda, palanteer, urdf_viz)
+3. Updated pixi builder snippet to copy pixi binary to `.pixi/bin` directory structure
+4. Enabled BuildKit in test suites to support cache mounts
+5. Updated pyproject.toml test tasks to enable BuildKit by default

@@ -7,7 +7,7 @@ class Palanteer(SimpleRockerExtension):
     name = "palanteer"
     depends_on_extension = ("curl", "git_clone", "x11")
 
-    builder_pixi_packages = ["curl", "git", "cmake", "ca-certificates"]
+    builder_pixi_packages = ["git", "cmake"]
 
     # Build-time dependencies for compiling palanteer
     builder_apt_packages = [

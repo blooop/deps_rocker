@@ -6,7 +6,7 @@ class Npm(SimpleRockerExtension):
 
     name = "npm"
     depends_on_extension = ("curl", "git_clone")
-    builder_pixi_packages = ["curl", "git", "ca-certificates"]
+    builder_pixi_packages = ["git"]
 
     empy_args = {
         "NODE_VERSION": "24.9.0",
