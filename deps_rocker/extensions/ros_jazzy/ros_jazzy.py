@@ -6,27 +6,19 @@ from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
 class RosJazzy(SimpleRockerExtension):
-    """Adds ros-jazzy to your docker container"""
+    """Adds ros-jazzy to your docker container using robotstack via pixi"""
 
     name = "ros_jazzy"
 
-    depends_on_extension = ("curl", "git_clone", "user")
-    # Use apt_packages feature for ROS dependencies
-    apt_packages = [
-        "locales",
-        "tzdata",
-        "curl",
-        "gnupg2",
-        "lsb-release",
-        "sudo",
-        "software-properties-common",
-        "wget",
-        "python3-pip",
-        "python3-dev",  # Required for Python development headers
-        "python3-numpy",  # Required for rosidl_generator_py when building ROS packages
-        "cmake",
-        "build-essential",
-        "python3-argcomplete",
+    depends_on_extension = ("pixi", "git_clone", "user")
+    # Use pixi packages from robotstack instead of apt
+    apt_packages: list[str] = []
+
+    # ROS Jazzy packages from robotstack/conda-forge
+    # Note: This is installed in user snippet, not builder
+    pixi_packages = [
+        "ros-jazzy-desktop",  # Full ROS desktop install
+        "colcon-common-extensions",  # Colcon build tools
     ]
 
     def invoke_after(self, cliargs):
