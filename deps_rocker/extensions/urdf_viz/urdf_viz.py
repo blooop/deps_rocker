@@ -5,11 +5,12 @@ class UrdfViz(SimpleRockerExtension):
     """Add the urdf-viz to your docker image"""
 
     name = "urdf_viz"
-    apt_packages = ["libxi6", "libxcursor-dev", "libxrandr-dev", "jq", "ros-humble-xacro"]
-    builder_apt_packages = ["curl", "ca-certificates", "jq", "tar"]
+    apt_packages = ["libxi6", "libxcursor-dev", "libxrandr-dev", "ros-humble-xacro"]
+    builder_pixi_packages = ["curl", "ca-certificates", "jq"]
+    builder_apt_packages: list[str] = []
 
     def required(self, cliargs):
-        return {"curl", "ros_humble"}
+        return {"curl", "jquery", "ros_humble"}
 
     def invoke_after(self, cliargs):
-        return {"curl", "ros_humble"}
+        return {"curl", "jquery", "ros_humble"}

@@ -83,6 +83,7 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
     depends_on_extension: tuple[str, ...] = ()  # Tuple of dependencies required by the extension
     apt_packages: list[str] = []  # List of apt packages required by the extension
     builder_apt_packages: list[str] = []  # List of apt packages required in the builder stage
+    builder_pixi_packages: list[str] = []  # List of pixi packages to install in builder stage
     builder_output_root = "/opt/deps_rocker"
 
     @classmethod
@@ -124,19 +125,64 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
 
         return "\n\n".join(fragments)
 
+    def _get_builder_pixi_snippet(self, packages: list[str]) -> str:
+        """Shared builder snippet to install pixi and required packages with caching and minimal apt fallback."""
+        packages_str = " ".join(packages)
+        use_buildkit_cache = is_buildkit_enabled()
+        install_mount = ""
+        pixi_mount = ""
+
+        if use_buildkit_cache:
+            install_mount = "--mount=type=cache,target=/root/.cache/pixi-install-cache,id=pixi-install-cache \\\n    "
+            pixi_mount = "--mount=type=cache,target=/root/.cache/pixi,sharing=locked,id=pixi-global-cache \\\n    "
+
+        return f"""# Install pixi and builder toolchain
+RUN {install_mount}bash -c "set -euxo pipefail && \\
+    if ! command -v curl >/dev/null 2>&1; then \\
+        if command -v apt-get >/dev/null 2>&1; then \\
+            apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && \\
+            rm -rf /var/lib/apt/lists/*; \\
+        else \\
+            echo 'curl is required to install pixi' >&2; exit 1; \\
+        fi; \\
+    fi && \\
+    mkdir -p /root/.cache/pixi-install-cache && \\
+    script=/root/.cache/pixi-install-cache/install.sh && \\
+    if [ ! -f \\"\\$script\\" ]; then \\
+        curl -fsSL https://pixi.sh/install.sh -o \\"\\$script\\"; \\
+    fi && \\
+    bash \\"\\$script\\""
+
+ENV PATH="/root/.pixi/bin:$PATH"
+
+# Install packages via pixi (cached)
+RUN {pixi_mount}pixi global install {packages_str}"""
+
     def get_builder_snippet(self, cliargs) -> str:
         snippet = self.get_and_expand_empy_template(
             cliargs, getattr(self, "empy_builder_args", None), snippet_prefix="builder_"
         )
 
-        # If builder_apt_packages is defined, generate apt install command and insert after FROM
-        if self.builder_apt_packages and snippet:
+        if not snippet:
+            return snippet
+
+        # Collect snippets to inject
+        snippets_to_inject = []
+
+        # If builder_pixi_packages is defined, generate pixi install commands
+        if self.builder_pixi_packages:
+            snippets_to_inject.append(self._get_builder_pixi_snippet(self.builder_pixi_packages))
+
+        # If builder_apt_packages is defined, generate apt install command
+        if self.builder_apt_packages:
             # Enable cache mounts when BuildKit is active
             apt_snippet = self.get_apt_command(
                 self.builder_apt_packages, use_cache_mount=is_buildkit_enabled()
             )
+            snippets_to_inject.append(apt_snippet)
 
-            # Insert apt command after the FROM line
+        # Insert all snippets after the FROM/ARG/ENV lines
+        if snippets_to_inject:
             lines = snippet.split("\n")
             insert_index = 0
 
@@ -156,8 +202,9 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
                     # Found first non-FROM/ARG/ENV/comment/empty line, stop here
                     break
 
-            # Insert the apt snippet at the determined position
-            lines.insert(insert_index, "\n" + apt_snippet)
+            # Insert all snippets at the determined position
+            combined_snippet = "\n\n".join(snippets_to_inject)
+            lines.insert(insert_index, "\n" + combined_snippet)
             snippet = "\n".join(lines)
 
         return snippet

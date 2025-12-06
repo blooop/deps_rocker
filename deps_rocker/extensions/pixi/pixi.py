@@ -6,7 +6,8 @@ class Pixi(SimpleRockerExtension):
 
     name = "pixi"
     depends_on_extension: tuple[str, ...] = ("curl", "user")
-    builder_apt_packages = ["curl", "ca-certificates"]
+    builder_pixi_packages = ["curl", "ca-certificates"]
+    builder_apt_packages: list[str] = []
 
     # Template arguments for both snippets
     empy_args = {
