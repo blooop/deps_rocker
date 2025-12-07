@@ -1,6 +1,3 @@
-# Install fzf via pixi
-RUN pixi global install fzf
-
 # Set up fzf shell integration
 # Find fzf package files in pixi environment
 RUN bash -c ' \

@@ -5,4 +5,4 @@ class Fzf(SimpleRockerExtension):
     """Adds fzf autocomplete to your container"""
 
     name = "fzf"
-    depends_on_extension = ["pixi", "user"]
+    depends_on_extension = ("pixi",)
