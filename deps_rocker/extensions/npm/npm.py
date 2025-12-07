@@ -5,8 +5,8 @@ class Npm(SimpleRockerExtension):
     """Install npm using nvm (Node Version Manager)"""
 
     name = "npm"
-    depends_on_extension = ("curl",)
-    builder_apt_packages = ["curl", "ca-certificates", "git"]
+    depends_on_extension = ("curl", "git_clone")
+    builder_pixi_packages = ["git", "curl"]
 
     empy_args = {
         "NODE_VERSION": "24.9.0",

@@ -334,8 +334,19 @@ class TestAutoExtension(unittest.TestCase):
             deps = self.auto.required({})
             # Remove extensions that are detected from home directory and their transitive dependencies
             # Auto now properly collects transitive dependencies, so if codex/gemini are detected from home,
-            # their dependencies (npm, user, curl) will also be included
-            home_extensions = {"claude", "gemini", "nvim", "codex", "npm", "user", "curl"}
+            # their dependencies (npm, user, curl, git_clone, git, pixi) will also be included
+            home_extensions = {
+                "claude",
+                "gemini",
+                "nvim",
+                "codex",
+                "npm",
+                "user",
+                "curl",
+                "git_clone",
+                "git",
+                "pixi",
+            }
             deps = set(deps) - home_extensions
             self.assertEqual(deps, set())
         finally:
