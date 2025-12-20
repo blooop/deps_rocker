@@ -5,10 +5,16 @@ Update the npm extension to install Node.js and npm using pixi with the nodejs p
 ## Requirements
 - Install Node.js and npm via pixi using the `nodejs` conda-forge package
 - Remove dependency on curl and NVM
-- Use BuildKit cache mounts for pixi cache
+- Use BuildKit cache mounts for pixi cache (inherited from pixi extension)
 - Maintain backward compatibility for users of the npm extension
-- Update tests to verify npm and node are properly installed
+- Existing tests should continue to work
 
 ## Out of Scope
-- Changing npm version pinning behavior
+- Changing npm version pinning behavior (pixi manages the version)
 - Modifying npm configuration beyond what's needed for pixi installation
+
+## Implementation
+- Updated `npm.py` to depend on `pixi` instead of `curl`
+- Removed `npm_builder_snippet.Dockerfile` (no longer needed)
+- Simplified `npm_snippet.Dockerfile` to use `pixi global install nodejs`
+- Kept NPM environment variables for disabling update notifier and fund messages
