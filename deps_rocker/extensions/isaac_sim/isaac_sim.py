@@ -17,7 +17,7 @@ class IsaacSim(SimpleRockerExtension):
             "The isaac_sim extension is deprecated and will be removed in a future version. "
             "It has been removed due to disk space constraints in CI. "
             "Please use the official Isaac Sim Docker images directly from NVIDIA instead.",
-            DeprecationWarning,
+            UserWarning,
             stacklevel=2,
         )
 
