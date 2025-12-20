@@ -2,17 +2,7 @@
 
 @(f"FROM {base_image} AS {builder_stage}")
 
-# Install required dependencies for Homebrew
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
-    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
-    apt-get update && \
-    apt-get install -y --no-install-recommends \
-        build-essential \
-        procps \
-        curl \
-        file \
-        git && \
-    rm -rf /var/lib/apt/lists/*
+
 
 # Download and install Homebrew with caching
 RUN --mount=type=cache,target=/tmp/homebrew-cache,id=homebrew-install-cache \

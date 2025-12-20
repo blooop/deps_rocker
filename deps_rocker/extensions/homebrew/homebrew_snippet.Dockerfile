@@ -1,16 +1,6 @@
 # syntax=docker/dockerfile:1.4
 
-# Install required runtime dependencies for Homebrew
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
-    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
-    apt-get update && \
-    apt-get install -y --no-install-recommends \
-        build-essential \
-        procps \
-        curl \
-        file \
-        git && \
-    rm -rf /var/lib/apt/lists/*
+
 
 # Copy Homebrew installation from builder stage
 @(f"COPY --from={builder_stage} {builder_output_dir}/.linuxbrew /home/linuxbrew/.linuxbrew")
