@@ -31,6 +31,7 @@ class TestExtensionsGeneric(unittest.TestCase):
         "codex",
         "npm",
         "cargo",
+        "homebrew",
         "gemini",
         "jquery",
         # "spec_kit",
@@ -216,6 +217,9 @@ CMD [\"echo\", \"Extension test complete\"]
 
     def test_cargo_extension(self):
         self.run_extension_build_and_test("cargo")
+
+    def test_homebrew_extension(self):
+        self.run_extension_build_and_test("homebrew")
 
     def test_gemini_extension(self):
         self.run_extension_build_and_test("gemini")
