@@ -6,7 +6,7 @@ class Pixi(SimpleRockerExtension):
 
     name = "pixi"
     depends_on_extension: tuple[str, ...] = ("user",)
-    builder_pixi_packages: list[str] = []
+    builder_pixi_packages: list[str] = ["curl"]
     builder_apt_packages: list[str] = []
 
     # Template arguments for both snippets

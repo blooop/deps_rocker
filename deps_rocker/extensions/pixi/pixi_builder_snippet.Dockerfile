@@ -3,19 +3,13 @@
 
 @(f"FROM {base_image} AS {builder_stage}")
 
-ARG PIXI_VERSION
-
-# Install pixi from official image (no dependencies needed)
-COPY --from=ghcr.io/prefix-dev/pixi:latest /usr/local/bin/pixi /usr/local/bin/pixi
-
-# Create pixi global directory structure and copy pixi binary to it
-RUN mkdir -p /root/.pixi/bin && \
-    cp /usr/local/bin/pixi /root/.pixi/bin/pixi
-
-ENV PATH="/root/.pixi/bin:$PATH"
-
-# Copy pixi installation to output directory
-RUN bash -c "set -euxo pipefail && \
+RUN --mount=type=cache,target=/root/.cache/pixi-install-cache,id=pixi-install-cache \
+    bash -c "set -euxo pipefail && \
     OUTPUT_DIR='@(f"{builder_output_dir}")' && \
-    mkdir -p \"\$OUTPUT_DIR\" && \
+    mkdir -p /root/.cache/pixi-install-cache \"\$OUTPUT_DIR\" && \
+    script=/root/.cache/pixi-install-cache/install.sh && \
+    if [ ! -f \"\$script\" ]; then \
+        curl -fsSL https://pixi.sh/install.sh -o \"\$script\"; \
+    fi && \
+    bash \"\$script\" && \
     cp -a /root/.pixi \"\$OUTPUT_DIR/.pixi\""
