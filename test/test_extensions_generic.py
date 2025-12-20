@@ -325,7 +325,8 @@ CMD [\"echo\", \"Extension test complete\"]
         # Get unique extension names from EXTENSIONS_TO_TEST that are available
         # Exclude extensions that cause CI resource issues
         extensions_to_enable = [
-            ext_name for ext_name in set(self.EXTENSIONS_TO_TEST)
+            ext_name
+            for ext_name in set(self.EXTENSIONS_TO_TEST)
             if ext_name in self.all_plugins and ext_name not in self.EXCLUDE_FROM_ALL_TOGETHER
         ]
 
