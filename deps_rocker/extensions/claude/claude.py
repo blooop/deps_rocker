@@ -89,6 +89,10 @@ exec "$HOME/.local/bin/claude" "$@"
             if os.path.exists(host_extra):
                 mounts.append(f' -v "{os.path.realpath(host_extra)}:{container_extra}"')
 
-        # Note: --network host can be added manually by users if needed for authentication
-        # but is not required for basic claude functionality and may not work in all CI environments
-        return "".join(mounts + envs)
+        # Add host network for simplified authentication callbacks (claude login)
+        network_args = [" --network host"]
+
+        if not (mounts or envs):
+            return "".join(network_args)
+
+        return "".join(mounts + envs + network_args)
