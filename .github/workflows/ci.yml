@@ -27,10 +27,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      - name: Free up disk space
-        run: |
-          docker system prune -af --volumes
-          df -h
       - name: Build and run Dev Container task
         uses: devcontainers/ci@v0.3
         with:
