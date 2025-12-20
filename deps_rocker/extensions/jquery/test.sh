@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e
 
-# Add pixi bin to PATH (needed for non-interactive shells)
-export PATH="$HOME/.pixi/bin:$PATH"
-
 echo "Testing jquery (jq) installation..."
 
 if ! command -v jq &> /dev/null; then

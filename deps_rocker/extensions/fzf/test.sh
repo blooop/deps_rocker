@@ -2,12 +2,6 @@
 
 set -e
 
-# Add pixi bin to PATH (needed for non-interactive shells)
-export PATH="$HOME/.pixi/bin:$PATH"
-
-# Source bashrc for shell integration functions
-source ~/.bashrc
-
 fzf --version
 echo "fzf is installed and working"
 

@@ -2,9 +2,6 @@
 
 set -e
 
-# Add pixi bin to PATH (needed for non-interactive shells)
-export PATH="$HOME/.pixi/bin:$PATH"
-
 echo "Testing ccache installation..."
 
 # Check that ccache is installed
