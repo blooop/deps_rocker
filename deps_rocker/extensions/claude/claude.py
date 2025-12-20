@@ -69,6 +69,9 @@ exec "$HOME/.local/bin/claude" "$@"
             logging.warning(
                 "No Claude config directory found on host (XDG + ~/.claude). The CLI may run first-time setup in the container."
             )
+            # Fall back to the container user's home so we don't write to /root/.claude when host config is absent
+            fallback_config = f"{container_home}/.claude"
+            envs.append(f' -e "CLAUDE_CONFIG_DIR={fallback_config}"')
         else:
             mounts.append(f' -v "{host_config}:{container_config}"')
             envs.append(f' -e "CLAUDE_CONFIG_DIR={container_config}"')

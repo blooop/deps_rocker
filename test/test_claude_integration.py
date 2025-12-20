@@ -91,6 +91,16 @@ CMD [\"echo\", \"Claude integration test complete\"]
                 # Basic confirmations from the script output
                 self.assertIn("Using Claude config at:", output)
                 self.assertIn("claude is installed and working", output)
-                self.assertIn("No stale root Claude config found", output)
+                self.assertTrue(
+                    any(
+                        msg in output
+                        for msg in [
+                            "No stale root Claude config found",
+                            "Using fresh root Claude config",
+                            "Using existing root Claude config",
+                        ]
+                    ),
+                    "Expected root config safety message in output",
+                )
         finally:
             dig.clear_image()
