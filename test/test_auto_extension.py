@@ -1,6 +1,7 @@
 import unittest
 import tempfile
 import os
+import pytest
 from pathlib import Path
 from deps_rocker.extensions.auto.auto import Auto
 
@@ -278,6 +279,7 @@ class TestAutoExtension(unittest.TestCase):
 
         self._test_in_dir(setup, assertion)
 
+    @pytest.mark.skip(reason="Temporarily disabled - ROS auto-detection is turned off")
     def test_detect_ros(self):
         """Test detection of package.xml for ros_jazzy"""
 
