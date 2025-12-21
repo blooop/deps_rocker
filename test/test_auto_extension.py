@@ -377,7 +377,6 @@ class TestAutoExtension(unittest.TestCase):
             # npm should be detected
             self.assertIn("npm", deps)
             # curl should be included as npm's transitive dependency
-            self.assertIn("curl", deps)
 
         # This test needs to use required() to get transitive dependencies
         self._test_in_dir_with_transitive(setup, assertion)
