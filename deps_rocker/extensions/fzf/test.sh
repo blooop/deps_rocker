@@ -2,9 +2,12 @@
 
 set -e
 
-PATH="$HOME/.fzf/bin:$PATH"
-# Check that uv is installed and prints its version
-source ~/.bashrc
+# Check that fzf is installed from pixi and prints its version
+if ! command -v fzf >/dev/null 2>&1; then
+    echo "ERROR: fzf not found on PATH"
+    exit 1
+fi
+
 fzf --version
 echo "fzf is installed and working"
 

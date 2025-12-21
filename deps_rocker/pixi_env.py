@@ -4,6 +4,8 @@ from dataclasses import dataclass, field
 import logging
 from typing import Dict, Iterable, List, Optional, Sequence
 
+# pylint: disable=too-many-positional-arguments
+
 import toml
 
 DEFAULT_CHANNELS: tuple[str, ...] = ("conda-forge",)
@@ -71,7 +73,7 @@ class PixiEnvironmentCollector:
         pypi_dependencies: Dict[str, str] | None = None,
         channels: Sequence[str] | None = None,
         platforms: Sequence[str] | None = None,
-    ) -> None:
+    ) -> None:  # pylint: disable=too-many-positional-arguments,too-many-arguments
         """Register a contribution to the pixi environment."""
 
         if not env_name:

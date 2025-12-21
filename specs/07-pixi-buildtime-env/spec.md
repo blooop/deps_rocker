@@ -5,3 +5,5 @@
 - Keep rocker runtime behavior intact (GPU/drivers, audio, user mapping, X11/devices, entrypoints) and remove reliance on runtime pixi sync/global installs or entrypoint hacks.
 - Provide configuration for selecting the pixi builder image/tag; prefer a compatible default (e.g., pixi jammy) and ensure Dockerfile generation adds the builder stage, install, copy, PATH, and caching-friendly layering.
 - Update docs/tests to reflect the build-time pixi flow, PATH behavior, lockfile handling, and extension contribution model; validate Dockerfile output and extension-driven dependency merging.
+- Convert the remaining common tools (curl, ccache, git/git-lfs, jq, fzf/ripgrep, lazygit, neovim, openssh) to declare pixi dependencies so they ride the shared tools env and benefit from pixi caching instead of per-extension apt/build steps.
+- Use the `nvim` pixi package (not the python-only `neovim` client) so the Neovim binary is available on PATH from the baked tools environment.
