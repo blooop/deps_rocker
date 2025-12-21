@@ -5,6 +5,7 @@ class Homebrew(SimpleRockerExtension):
     """Install Homebrew package manager"""
 
     name = "homebrew"
+    depends_on_extension = ("git_clone",)
     builder_apt_packages = [
         "build-essential",
         "procps",
