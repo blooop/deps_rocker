@@ -6,3 +6,6 @@ class Jquery(SimpleRockerExtension):
 
     name = "jquery"
     depends_on_extension = ("pixi",)
+    pixi_global_packages = [
+        {"name": "jq", "channels": ["conda-forge"], "deps": {"jq": "*"}, "exposed": {"jq": "jq"}}
+    ]

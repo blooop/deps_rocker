@@ -6,3 +6,11 @@ class Lazygit(SimpleRockerExtension):
 
     name = "lazygit"
     depends_on_extension = ("pixi", "git")
+    pixi_global_packages = [
+        {
+            "name": "lazygit",
+            "channels": ["conda-forge"],
+            "deps": {"lazygit": "*"},
+            "exposed": {"lazygit": "lazygit"},
+        }
+    ]

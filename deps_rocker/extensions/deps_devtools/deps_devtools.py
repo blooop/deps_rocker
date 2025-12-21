@@ -6,3 +6,17 @@ class DepsDevtools(SimpleRockerExtension):
 
     name = "deps-devtools"
     depends_on_extension = ("pixi", "fzf")
+    pixi_global_packages = [
+        {
+            "name": "ripgrep",
+            "channels": ["conda-forge"],
+            "deps": {"ripgrep": "*"},
+            "exposed": {"rg": "rg"},
+        },
+        {
+            "name": "fd-find",
+            "channels": ["conda-forge"],
+            "deps": {"fd-find": "*"},
+            "exposed": {"fd": "fd"},
+        },
+    ]

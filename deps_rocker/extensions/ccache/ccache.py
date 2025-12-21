@@ -6,6 +6,14 @@ class Ccache(SimpleRockerExtension):
 
     name = "ccache"
     depends_on_extension = ("pixi",)
+    pixi_global_packages = [
+        {
+            "name": "ccache",
+            "channels": ["conda-forge"],
+            "deps": {"ccache": "*"},
+            "exposed": {"ccache": "ccache"},
+        }
+    ]
 
     def get_docker_args(self, cliargs):
         from pathlib import Path

@@ -1,9 +1,7 @@
 # ROS 2 Jazzy setup using robotstack via pixi
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install ROS Jazzy and colcon from robotstack with cache mount
-RUN --mount=type=cache,target=/root/.cache/pixi,sharing=locked,id=pixi-cache \
-    pixi global install ros-jazzy-desktop colcon-common-extensions
+# ROS Jazzy and colcon are synced at runtime via pixi-global manifest
 
 # Set up ROS environment variables
 ENV ROS_DISTRO=jazzy

@@ -9,6 +9,7 @@ class Gemini(SimpleRockerExtension):
 
     name = "gemini"
     depends_on_extension = ("npm", "user")
+    npm_global_packages = ["@google/gemini-cli"]
 
     def get_template_args(self, _cliargs=None):
         return {}

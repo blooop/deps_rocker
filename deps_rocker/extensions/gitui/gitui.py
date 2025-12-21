@@ -6,3 +6,11 @@ class GitUI(SimpleRockerExtension):
 
     name = "gitui"
     depends_on_extension = ("pixi", "git", "git_clone")
+    pixi_global_packages = [
+        {
+            "name": "gitui",
+            "channels": ["conda-forge"],
+            "deps": {"gitui": "*"},
+            "exposed": {"gitui": "gitui"},
+        }
+    ]

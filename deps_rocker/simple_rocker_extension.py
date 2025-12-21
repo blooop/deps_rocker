@@ -1,12 +1,108 @@
-import pkgutil
 import logging
+import pkgutil
 import em
 from pathlib import Path
 from rocker.extensions import RockerExtension
-from typing import Type
+from typing import Any, Dict, Iterable, Type, Optional
 from argparse import ArgumentParser
-from typing import Dict, Optional
 from deps_rocker.buildkit import is_buildkit_enabled
+
+# Registry of pixi global packages contributed by enabled extensions
+_pixi_global_registry: Dict[str, Dict[str, Any]] = {}
+_npm_global_registry: set[str] = set()
+
+
+def _merge_unique(existing: list[str], new_items: Iterable[str]) -> list[str]:
+    seen = set(existing)
+    for item in new_items:
+        if item not in seen:
+            existing.append(item)
+            seen.add(item)
+    return existing
+
+
+def _merge_map(
+    target: Dict[str, str], incoming: Dict[str, str], *, env: str, ext: str, field: str
+) -> None:
+    for key, value in incoming.items():
+        if key in target and target[key] != value:
+            logging.warning(
+                "pixi global %s for env '%s' from %s overrides existing value '%s' with '%s'",
+                field,
+                env,
+                ext,
+                target[key],
+                value,
+            )
+        target[key] = value
+
+
+def register_pixi_global_packages(
+    extension_name: str, packages: Optional[Iterable[Dict[str, Any]]]
+) -> None:
+    """Record pixi global packages declared by an extension so pixi can emit a manifest."""
+    if not packages:
+        return
+
+    for pkg in packages:
+        env_name = pkg.get("name")
+        if not env_name:
+            continue
+
+        entry = _pixi_global_registry.setdefault(
+            env_name, {"name": env_name, "channels": [], "deps": {}, "exposed": {}}
+        )
+        channels = pkg.get("channels") or ["conda-forge"]
+        _merge_unique(entry["channels"], channels)
+        _merge_map(
+            entry["deps"],
+            pkg.get("deps") or {},
+            env=env_name,
+            ext=extension_name,
+            field="dependency",
+        )
+        _merge_map(
+            entry["exposed"],
+            pkg.get("exposed") or {},
+            env=env_name,
+            ext=extension_name,
+            field="exposed binary",
+        )
+
+
+def consume_pixi_global_packages() -> list[Dict[str, Any]]:
+    """Return all registered pixi global packages (deduped) and clear the registry."""
+    packages = []
+    for env_name in sorted(_pixi_global_registry.keys()):
+        entry = _pixi_global_registry[env_name]
+        exposed = entry.get("exposed") or {}
+        pkg: Dict[str, Any] = {
+            "name": env_name,
+            "channels": list(entry.get("channels") or []),
+            "deps": dict(entry.get("deps") or {}),
+        }
+        if exposed:
+            pkg["exposed"] = dict(exposed)
+        packages.append(pkg)
+
+    _pixi_global_registry.clear()
+    return packages
+
+
+def register_npm_global_packages(packages: Optional[Iterable[str]]) -> None:
+    """Record npm global packages declared by an extension so they can be installed at runtime."""
+    if not packages:
+        return
+    for pkg in packages:
+        if pkg:
+            _npm_global_registry.add(pkg)
+
+
+def consume_npm_global_packages() -> list[str]:
+    """Return all registered npm global packages and clear the registry."""
+    packages = sorted(_npm_global_registry)
+    _npm_global_registry.clear()
+    return packages
 
 
 def get_workspace_path() -> Path:
@@ -43,6 +139,14 @@ class SimpleRockerExtensionMeta(type):
 
 class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta):
     """A class to take care of most of the boilerplace required for a rocker extension"""
+
+    def __init__(self):
+        super().__init__()
+        register_pixi_global_packages(self.name, getattr(self, "pixi_global_packages", None))
+        register_npm_global_packages(getattr(self, "npm_global_packages", None))
+
+    pixi_global_packages: list[Dict[str, Any]] = []
+    npm_global_packages: list[str] = []
 
     @property
     def builder_output_dir(self):
@@ -154,10 +258,6 @@ RUN {pixi_mount}pixi global install {packages_str}"""
 
         # Collect snippets to inject
         snippets_to_inject = []
-
-        # If builder_pixi_packages is defined, generate pixi install commands
-        if self.builder_pixi_packages:
-            snippets_to_inject.append(self._get_builder_pixi_snippet(self.builder_pixi_packages))
 
         # If builder_apt_packages is defined, generate apt install command
         if self.builder_apt_packages:

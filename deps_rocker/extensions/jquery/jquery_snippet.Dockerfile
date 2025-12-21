@@ -1,5 +1,3 @@
 # syntax=docker/dockerfile:1.4
 
-# Install jq JSON processor via pixi with cache mount
-RUN --mount=type=cache,target=/root/.cache/pixi,sharing=locked,id=pixi-cache \
-    pixi global install jq
+# jq JSON processor is synced at runtime via pixi-global manifest

@@ -6,3 +6,11 @@ class Fzf(SimpleRockerExtension):
 
     name = "fzf"
     depends_on_extension = ("pixi",)
+    pixi_global_packages = [
+        {
+            "name": "fzf",
+            "channels": ["conda-forge"],
+            "deps": {"fzf": "*"},
+            "exposed": {"fzf": "fzf"},
+        }
+    ]

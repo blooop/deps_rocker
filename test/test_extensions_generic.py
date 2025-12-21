@@ -351,6 +351,7 @@ class ScriptInjectionExtension(SimpleRockerExtension):
         extra_files: dict[str, str] | None = None,
         extra_root_dir: str | None = None,
     ):
+        super().__init__()
         self.context_name = "test.sh"
         self.extra_files = extra_files or {}
         if self.extra_files and not extra_root_dir:

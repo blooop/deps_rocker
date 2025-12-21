@@ -20,6 +20,19 @@ class RosJazzy(SimpleRockerExtension):
         "ros-jazzy-desktop",  # Full ROS desktop install
         "colcon-common-extensions",  # Colcon build tools
     ]
+    pixi_global_packages = [
+        {
+            "name": "ros-jazzy-desktop",
+            "channels": ["conda-forge"],
+            "deps": {"ros-jazzy-desktop": "*"},
+        },
+        {
+            "name": "colcon-common-extensions",
+            "channels": ["conda-forge"],
+            "deps": {"colcon-common-extensions": "*"},
+            "exposed": {"colcon": "colcon"},
+        },
+    ]
 
     def invoke_after(self, cliargs):
         after = super().invoke_after(cliargs)

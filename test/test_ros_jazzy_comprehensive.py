@@ -720,6 +720,7 @@ class ScriptInjectionExtension(SimpleRockerExtension):
     name = "test_script"
 
     def __init__(self, script_path_or_content, is_content=False):
+        super().__init__()
         if is_content:
             self.script_content = script_path_or_content
             self.script_path = None

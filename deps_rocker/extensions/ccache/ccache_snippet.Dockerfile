@@ -1,6 +1,5 @@
 # Install ccache via pixi with cache mount
-RUN --mount=type=cache,target=/root/.cache/pixi,sharing=locked,id=pixi-cache \
-    pixi global install ccache
+# ccache is synced at runtime via pixi-global manifest
 
 # Set ccache directory to the mounted volume location
 ENV CCACHE_DIR=/root/.ccache
