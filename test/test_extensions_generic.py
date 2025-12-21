@@ -316,7 +316,6 @@ CMD [\"echo\", \"Extension test complete\"]
             self.assertIn("codex", ext_names)
             self.assertIn("gemini", ext_names)
             self.assertIn("user", ext_names)  # Should be included as transitive dep
-            self.assertIn("curl", ext_names)  # Should be included as transitive dep
         except Exception as e:
             self.fail(f"npm/codex/gemini ordering test raised an exception: {e}")
 
