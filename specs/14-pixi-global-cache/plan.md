@@ -1,0 +1,5 @@
+- Inspect current diff vs main to locate pixi global install changes and identify why earlier globals vanish (likely manifest or PATH handling).
+- Verify how pixi caches and global manifests are laid out in Docker build steps; map where layers are growing in CI.
+- Adjust global install flow to install tools together or preserve manifests/paths across steps; ensure PATH picks up all pixi global envs.
+- Refine caching/layer strategy (cache mounts, copying from cache, reducing duplicated env copies) to reduce disk usage while keeping installs fast.
+- Add/adjust tests or CI checks if needed to confirm tools are available and build completes within space limits.
