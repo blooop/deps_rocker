@@ -9,6 +9,7 @@ from typing import Any, Callable, Dict, Optional
 from deps_rocker.buildkit import is_buildkit_enabled
 from deps_rocker.docker_cli import docker_build_with_cli
 from deps_rocker.docker_sdk import docker_build_with_sdk
+from deps_rocker.pixi_env import get_pixi_collector
 
 OutputCallback = Optional[Callable[[str], None]]
 
@@ -93,4 +94,25 @@ def patch_rocker_docker_build() -> None:
     core._deps_rocker_buildkit_patch = True  # pylint: disable=protected-access
 
 
-__all__ = ["patch_rocker_docker_build"]
+def patch_extension_manager() -> None:
+    """Reset pixi aggregation state for each extension resolution run."""
+
+    try:
+        from rocker.core import RockerExtensionManager
+    except Exception:
+        return
+
+    if getattr(RockerExtensionManager, "_deps_rocker_extension_patch", False):
+        return
+
+    original_get_active_extensions = RockerExtensionManager.get_active_extensions
+
+    def patched_get_active_extensions(self, cli_args):
+        get_pixi_collector().reset_for_new_run()
+        return original_get_active_extensions(self, cli_args)
+
+    RockerExtensionManager.get_active_extensions = patched_get_active_extensions
+    RockerExtensionManager._deps_rocker_extension_patch = True  # pylint: disable=protected-access
+
+
+__all__ = ["patch_rocker_docker_build", "patch_extension_manager"]

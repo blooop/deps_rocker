@@ -1,5 +1,5 @@
-import pkgutil
 import logging
+import pkgutil
 import em
 from pathlib import Path
 from rocker.extensions import RockerExtension
@@ -7,6 +7,7 @@ from typing import Type
 from argparse import ArgumentParser
 from typing import Dict, Optional
 from deps_rocker.buildkit import is_buildkit_enabled
+from deps_rocker.pixi_env import DEFAULT_ENV_NAME, get_pixi_collector
 
 
 def get_workspace_path() -> Path:
@@ -43,6 +44,13 @@ class SimpleRockerExtensionMeta(type):
 
 class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta):
     """A class to take care of most of the boilerplace required for a rocker extension"""
+
+    def __init__(self):
+        super().__init__()
+        try:
+            get_pixi_collector().register_from_extension(self)
+        except Exception as exc:  # pragma: no cover - defensive only
+            logging.debug("Unable to register pixi contribution for %s: %s", self.name, exc)
 
     @property
     def builder_output_dir(self):
@@ -84,6 +92,12 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
     apt_packages: list[str] = []  # List of apt packages required by the extension
     builder_apt_packages: list[str] = []  # List of apt packages required in the builder stage
     builder_output_root = "/opt/deps_rocker"
+    # Pixi integration defaults
+    pixi_environment: Optional[str] = DEFAULT_ENV_NAME
+    pixi_dependencies: dict[str, str] = {}
+    pixi_pypi_dependencies: dict[str, str] = {}
+    pixi_channels: tuple[str, ...] = ()
+    pixi_platforms: tuple[str, ...] = ()
 
     @classmethod
     def get_name(cls) -> str:

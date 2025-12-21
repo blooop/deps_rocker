@@ -5,6 +5,8 @@ import pytest
 from pathlib import Path
 from deps_rocker.extensions.auto.auto import Auto
 
+HOME_EXTENSIONS = {"claude", "gemini", "nvim", "codex", "npm", "user", "curl", "pixi"}
+
 
 class TestAutoExtension(unittest.TestCase):
     def test_content_search_debug(self):
@@ -22,7 +24,8 @@ class TestAutoExtension(unittest.TestCase):
             self.assertIn("pixi", deps)
 
         def assertion_without_section(deps):
-            self.assertNotIn("pixi", deps)
+            filtered = set(deps) - HOME_EXTENSIONS
+            self.assertNotIn("pixi", filtered)
 
         # With section
         self._test_in_dir(setup_with_section, assertion_with_section)
@@ -220,7 +223,8 @@ class TestAutoExtension(unittest.TestCase):
                 f.write("[project]\nname = 'test'\n")
 
         def assertion(deps):
-            self.assertNotIn("pixi", deps)
+            filtered = set(deps) - HOME_EXTENSIONS
+            self.assertNotIn("pixi", filtered)
 
         self._test_in_dir(setup, assertion)
 
@@ -336,9 +340,8 @@ class TestAutoExtension(unittest.TestCase):
             deps = self.auto.required({})
             # Remove extensions that are detected from home directory and their transitive dependencies
             # Auto now properly collects transitive dependencies, so if codex/gemini are detected from home,
-            # their dependencies (npm, user, curl) will also be included
-            home_extensions = {"claude", "gemini", "nvim", "codex", "npm", "user", "curl"}
-            deps = set(deps) - home_extensions
+            # their dependencies (npm, pixi, user, curl) will also be included
+            deps = set(deps) - HOME_EXTENSIONS
             self.assertEqual(deps, set())
         finally:
             os.chdir(original_dir)
