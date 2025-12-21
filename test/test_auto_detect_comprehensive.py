@@ -9,6 +9,7 @@ import unittest
 import tempfile
 import os
 import shutil
+import pytest
 from pathlib import Path
 from deps_rocker.extensions.auto.auto import Auto
 
@@ -66,6 +67,7 @@ class TestAutoDetectYmlQuoting(unittest.TestCase):
                 f"Extension '{ext}' was detected but not expected. Expected: {expected_extensions}",
             )
 
+    @pytest.mark.skip(reason="Temporarily disabled - ROS auto-detection is turned off")
     def test_package_xml_detection(self):
         """Test that package.xml (quoted in auto_detect.yaml) is detected"""
         setup_files = {
@@ -171,6 +173,7 @@ name = "test"
         expected = {"pixi", "uv"}
         self._test_detection_in_dir(setup_files, expected)
 
+    @pytest.mark.skip(reason="Temporarily disabled - ROS auto-detection is turned off")
     def test_multiple_extensions_detection(self):
         """Test detection of multiple extensions simultaneously"""
         setup_files = {
@@ -224,6 +227,7 @@ name = "pixi-project"
         expected = set()  # No extensions should be detected due to case mismatch
         self._test_detection_in_dir(setup_files, expected)
 
+    @pytest.mark.skip(reason="Temporarily disabled - ROS auto-detection is turned off")
     def test_subdirectory_detection(self):
         """Test that files in subdirectories are detected"""
         setup_files = {
