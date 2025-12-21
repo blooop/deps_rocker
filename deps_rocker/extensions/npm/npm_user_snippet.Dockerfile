@@ -1,17 +1,8 @@
-# Install Node.js and npm via pixi global install
-RUN pixi global install nodejs
+# Configure npm to use user-writable prefix for global installs
+# Create directory structure that npm expects
+RUN mkdir -p ~/.npm-global/lib/node_modules && \
+    npm config set prefix ~/.npm-global
 
-# Add npm global bin directory to PATH for login shells
-RUN echo 'export PATH="$HOME/.pixi/envs/nodejs/bin:$PATH"' >> ~/.profile
-
-# Create symlinks in /usr/local/bin for non-interactive shell access
-RUN sudo ln -sf ~/.pixi/envs/nodejs/bin/node /usr/local/bin/node && \
-    sudo ln -sf ~/.pixi/envs/nodejs/bin/npm /usr/local/bin/npm && \
-    sudo ln -sf ~/.pixi/envs/nodejs/bin/npx /usr/local/bin/npx
-
-# Configure shell to use bash and source profile for subsequent RUN commands
-SHELL ["/bin/bash", "-l", "-c"]
-
-# Disable npm update notifier and fund messages
-ENV NPM_CONFIG_UPDATE_NOTIFIER=false
-ENV NPM_CONFIG_FUND=false
+# Add npm global bin to PATH for user-installed packages
+RUN echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.bashrc && \
+    echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.profile

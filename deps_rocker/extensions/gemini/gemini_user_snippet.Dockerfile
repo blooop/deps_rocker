@@ -2,4 +2,4 @@
 RUN npm install -g @@google/gemini-cli
 
 # Create symlink in /usr/local/bin for non-interactive shell access
-RUN sudo ln -sf ~/.pixi/envs/nodejs/bin/gemini /usr/local/bin/gemini
+RUN sudo ln -sf ~/.npm-global/bin/gemini /usr/local/bin/gemini

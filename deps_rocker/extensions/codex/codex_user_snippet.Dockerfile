@@ -2,4 +2,4 @@
 RUN npm install -g @@openai/codex
 
 # Create symlink in /usr/local/bin for non-interactive shell access
-RUN sudo ln -sf ~/.pixi/envs/nodejs/bin/codex /usr/local/bin/codex
+RUN sudo ln -sf ~/.npm-global/bin/codex /usr/local/bin/codex
