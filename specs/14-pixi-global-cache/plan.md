@@ -1,5 +1,5 @@
-- Inspect current diff vs main to locate pixi global install changes and identify why earlier globals vanish (likely manifest or PATH handling).
-- Verify how pixi caches and global manifests are laid out in Docker build steps; map where layers are growing in CI.
-- Adjust global install flow to install tools together or preserve manifests/paths across steps; ensure PATH picks up all pixi global envs.
-- Refine caching/layer strategy (cache mounts, copying from cache, reducing duplicated env copies) to reduce disk usage while keeping installs fast.
-- Add/adjust tests or CI checks if needed to confirm tools are available and build completes within space limits.
+- Remove build-time pixi global installs across extensions/templates; keep pixi bootstrap only.
+- Generate a consolidated pixi-global manifest (versions from existing logic) into `/etc/deps-rocker/pixi-global.toml` in the image.
+- Add runtime entrypoint script to `pixi global sync --manifest /etc/deps-rocker/pixi-global.toml` before user command.
+- Wire Dockerfile snippets to copy manifest and entrypoint, set ENTRYPOINT/CMD, and ensure caches are expected to be mounted.
+- Update docs/README to explain runtime sync and cache expectations; run pixi run ci to verify tests and image behavior.

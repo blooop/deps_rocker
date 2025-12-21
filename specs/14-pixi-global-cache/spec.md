@@ -1,6 +1,8 @@
 # Fix pixi globals and cache footprint
 Category: build-optimization
 
-- Ensure pixi global installs are additive so tools like git, jq, npm remain available after all installs run.
-- Rework pixi caching/layering to cut CI disk usage and speed builds by reusing cache without bloating final images.
-- Validate the resulting image exposes expected tools and CI completes without running out of space.
+- Stop baking pixi global installs into build layers; ship a manifest and sync globals at runtime instead.
+- Ensure manifest lists all required global tools with constraints and is copied into the image.
+- Add a runtime entrypoint that runs `pixi global sync --manifest` against mounted caches so first run installs, later runs are instant.
+- Keep layers small by avoiding build-time pixi downloads; rely on host/volume caches.
+- Validate images still surface expected tools after first run and CI passes without disk blowups.
