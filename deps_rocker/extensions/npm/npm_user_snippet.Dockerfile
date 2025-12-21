@@ -1,5 +1,4 @@
-# Install Node.js and npm via pixi global install
-RUN pixi global install nodejs
+# Node.js and npm are synced at runtime via pixi-global manifest
 
 # Add npm global bin directory to PATH for login shells
 RUN echo 'export PATH="$HOME/.pixi/envs/nodejs/bin:$PATH"' >> ~/.profile

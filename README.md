@@ -117,6 +117,13 @@ Find detailed documentation for all the rocker extensions this module provides [
 
 This is a [rocker](https://github.com/tfoote/rocker) extension for automating dependency installation.  The aim is to allow a projects to define its development dependencies in a deps.yaml file which are added to the rocker container.  If two projects define their dependencies in separate files, the extension will combine the common commands into the same docker layer to help reduce image size and duplication of work.
 
+### Pixi global tools are synced at runtime
+
+- Pixi global packages are not baked into the image; deps_rocker writes a manifest and syncs it when the container starts.
+- The manifest at `/etc/deps-rocker/pixi-global.toml` is built from enabled extensions and synced by the runtime entrypoint.
+- Mount pixi caches (or a Docker volume) for fast installs on first run, e.g. `-v ~/.cache/pixi:/root/.cache/pixi`.
+- Images stay small because pixi downloads happen at runtime; subsequent runs reuse the cache and start quickly.
+
 For example:
 
 pkg a requires git, make and ffmpeg and pkg_b requires git-lfs and pip.  Their deps.yaml files would look something like: 

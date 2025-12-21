@@ -1,4 +1,5 @@
 import io
+import os
 import tempfile
 import unittest
 import pytest
@@ -11,6 +12,7 @@ class ScriptInjectionExtension(SimpleRockerExtension):
     name = "test_script"
 
     def __init__(self, script_path: str):
+        super().__init__()
         self.script_path = script_path
         self.context_name = "test.sh"
 
@@ -32,6 +34,9 @@ class ScriptInjectionExtension(SimpleRockerExtension):
 class TestClaudeIntegration(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        # Enable BuildKit for all tests
+        os.environ["DOCKER_BUILDKIT"] = "1"
+
         cls.base_dockerfile_tag = "testfixture_claude_base"
         cls.base_dockerfile = """
 FROM ubuntu:22.04
@@ -53,18 +58,21 @@ CMD [\"echo\", \"Claude integration test complete\"]
             pass
 
     def test_claude_config_mount_and_env(self):
+        from rocker.core import RockerExtensionManager
+
         all_plugins = list_plugins()
         assert "claude" in all_plugins, "Claude extension not registered"
-        claude_ext = all_plugins["claude"]()
 
-        cliargs = {"base_image": self.base_dockerfile_tag, "claude": True}
-        # Include required deps
-        active_exts = []
-        for dep in claude_ext.required(cliargs):
-            if dep in all_plugins:
-                active_exts.append(all_plugins[dep]())
-                cliargs[dep] = True
-        active_exts.append(claude_ext)
+        cliargs = {
+            "base_image": self.base_dockerfile_tag,
+            "claude": True,
+            "extension_blacklist": [],
+            "strict_extension_selection": False,
+        }
+
+        # Use RockerExtensionManager to properly resolve all dependencies
+        manager = RockerExtensionManager()
+        active_exts = manager.get_active_extensions(cliargs)
 
         # Inject the claude test script which prints envs + checks
         test_sh_path = "deps_rocker/extensions/claude/test.sh"
@@ -84,6 +92,16 @@ CMD [\"echo\", \"Claude integration test complete\"]
                 # Basic confirmations from the script output
                 self.assertIn("Using Claude config at:", output)
                 self.assertIn("claude is installed and working", output)
-                self.assertIn("No stale root Claude config found", output)
+                self.assertTrue(
+                    any(
+                        msg in output
+                        for msg in [
+                            "No stale root Claude config found",
+                            "Using fresh root Claude config",
+                            "Using existing root Claude config",
+                        ]
+                    ),
+                    "Expected root config safety message in output",
+                )
         finally:
             dig.clear_image()

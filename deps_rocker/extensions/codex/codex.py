@@ -11,6 +11,7 @@ class Codex(SimpleRockerExtension):
 
     name = "codex"
     depends_on_extension = ("npm", "user")
+    npm_global_packages = ["@openai/codex"]
 
     def get_template_args(self, _cliargs=None):
         return {}

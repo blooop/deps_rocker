@@ -7,8 +7,8 @@ if ! command -v rg &> /dev/null; then
     echo "ERROR: ripgrep (rg) not found"
     exit 1
 fi
-if ! command -v fdfind &> /dev/null; then
-    echo "ERROR: fd-find (fdfind) not found"
+if ! command -v fd &> /dev/null; then
+    echo "ERROR: fd-find (fd) not found"
     exit 1
 fi
 if ! command -v fzf &> /dev/null; then
@@ -18,7 +18,7 @@ fi
 
 # Test basic usage
 rg --version
-fdfind --version
-fzf --version || true
+fd --version
+fzf --version
 
 echo "deps-devtools extension test completed successfully!"

@@ -1,6 +1,7 @@
 import unittest
 import pytest
 import io
+import os
 import tempfile
 from pathlib import Path
 from contextlib import contextmanager, nullcontext
@@ -40,9 +41,15 @@ class TestExtensionsGeneric(unittest.TestCase):
         # "auto",
     ]
 
+    # Extensions to exclude from the all-together test due to CI resource constraints
+    EXCLUDE_FROM_ALL_TOGETHER = ["gemini"]
+
     @classmethod
     def setUpClass(cls):
         """Build a simple base image for testing extensions"""
+        # Enable BuildKit for all tests
+        os.environ["DOCKER_BUILDKIT"] = "1"
+
         cls.base_dockerfile_tag = "testfixture_extensions_base"
         cls.base_dockerfile = """
 FROM ubuntu:24.04
@@ -309,7 +316,6 @@ CMD [\"echo\", \"Extension test complete\"]
             self.assertIn("codex", ext_names)
             self.assertIn("gemini", ext_names)
             self.assertIn("user", ext_names)  # Should be included as transitive dep
-            self.assertIn("curl", ext_names)  # Should be included as transitive dep
         except Exception as e:
             self.fail(f"npm/codex/gemini ordering test raised an exception: {e}")
 
@@ -319,8 +325,11 @@ CMD [\"echo\", \"Extension test complete\"]
             self.skipTest("No working extensions found")
 
         # Get unique extension names from EXTENSIONS_TO_TEST that are available
+        # Exclude extensions that cause CI resource issues
         extensions_to_enable = [
-            ext_name for ext_name in set(self.EXTENSIONS_TO_TEST) if ext_name in self.all_plugins
+            ext_name
+            for ext_name in set(self.EXTENSIONS_TO_TEST)
+            if ext_name in self.all_plugins and ext_name not in self.EXCLUDE_FROM_ALL_TOGETHER
         ]
 
         try:
@@ -342,6 +351,7 @@ class ScriptInjectionExtension(SimpleRockerExtension):
         extra_files: dict[str, str] | None = None,
         extra_root_dir: str | None = None,
     ):
+        super().__init__()
         self.context_name = "test.sh"
         self.extra_files = extra_files or {}
         if self.extra_files and not extra_root_dir:

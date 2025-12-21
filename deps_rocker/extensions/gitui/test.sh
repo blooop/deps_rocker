@@ -3,9 +3,6 @@ set -e
 
 echo "Testing GitUI installation..."
 
-# Source bashrc to get pixi global binaries in PATH
-export PATH="$HOME/.pixi/bin:$PATH"
-
 # Test that gitui command is available
 if ! command -v gitui &> /dev/null; then
     echo "ERROR: gitui command not found"

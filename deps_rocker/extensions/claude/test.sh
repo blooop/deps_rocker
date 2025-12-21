@@ -4,6 +4,11 @@ set -e
 
 # Determine active config dir (prefer explicit env)
 CONFIG_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+ROOT_CONFIG="/root/.claude"
+ROOT_EXISTS_BEFORE="false"
+if [ -e "$ROOT_CONFIG" ]; then
+  ROOT_EXISTS_BEFORE="true"
+fi
 
 echo "whoami=$(whoami)"; id || true
 echo "HOME=$HOME"
@@ -55,9 +60,20 @@ if [ -f "$CONFIG_DIR/.credentials.json" ]; then
   echo "Claude credentials detected."
 fi
 
-# Ensure no stray root-owned config dir exists
-if [ ! -e "/root/.claude" ]; then
-  echo "No stale root Claude config found"
+# Ensure no stray root-owned config dir exists unless explicitly using it
+if [ "$CONFIG_DIR" = "$ROOT_CONFIG" ]; then
+  if [ "$ROOT_EXISTS_BEFORE" = "true" ]; then
+    echo "Using existing root Claude config at $ROOT_CONFIG"
+  else
+    echo "Using fresh root Claude config at $ROOT_CONFIG (no host config detected)"
+  fi
+else
+  if [ ! -e "$ROOT_CONFIG" ]; then
+    echo "No stale root Claude config found"
+  else
+    echo "ERROR: Unexpected root-owned Claude config found at $ROOT_CONFIG" >&2
+    exit 1
+  fi
 fi
 
 # Claude Code Usage Monitor is no longer installed by default

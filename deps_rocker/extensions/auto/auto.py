@@ -328,7 +328,7 @@ class Auto(RockerExtension):
         """
         from rocker.core import list_plugins
 
-        detected_extensions = self._detect_files_in_workspace(cliargs)
+        detected_extensions = self._detect_files_in_workspace(cliargs, check_home=False)
 
         # Collect transitive dependencies of detected extensions with cycle detection
         # This is necessary because when auto is used standalone (not through RockerExtensionManager),

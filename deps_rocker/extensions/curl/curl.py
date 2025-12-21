@@ -5,4 +5,13 @@ class Curl(SimpleRockerExtension):
     """Adds curl to your docker container"""
 
     name = "curl"
-    apt_packages = ["curl", "ca-certificates"]
+    apt_packages: list[str] = []
+    depends_on_extension = ("pixi",)
+    pixi_global_packages = [
+        {
+            "name": "curl",
+            "channels": ["conda-forge"],
+            "deps": {"curl": "*"},
+            "exposed": {"curl": "curl"},
+        }
+    ]

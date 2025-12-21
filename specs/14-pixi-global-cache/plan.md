@@ -1,0 +1,5 @@
+- Remove build-time pixi global installs across extensions/templates; keep pixi bootstrap only.
+- Generate a consolidated pixi-global manifest (versions from existing logic) into `/etc/deps-rocker/pixi-global.toml` in the image.
+- Add runtime entrypoint script to `pixi global sync --manifest /etc/deps-rocker/pixi-global.toml` before user command.
+- Wire Dockerfile snippets to copy manifest and entrypoint, set ENTRYPOINT/CMD, and ensure caches are expected to be mounted.
+- Update docs/README to explain runtime sync and cache expectations; run pixi run ci to verify tests and image behavior.

@@ -5,8 +5,15 @@ class Nvim(SimpleRockerExtension):
     """Install nvim v0.11.4 and mount host configs (~/.config/nvim, ~/.vim)"""
 
     name = "nvim"
-    depends_on_extension = ("curl",)
-    builder_apt_packages = ["curl", "ca-certificates"]
+    depends_on_extension = ("pixi",)
+    pixi_global_packages = [
+        {
+            "name": "neovim",
+            "channels": ["https://prefix.dev/github-releases", "conda-forge"],
+            "deps": {"neovim": "*"},
+            "exposed": {"nvim": "nvim"},
+        }
+    ]
 
     def get_docker_args(self, cliargs):
         from pathlib import Path

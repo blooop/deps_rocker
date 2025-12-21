@@ -6,3 +6,11 @@ class Npm(SimpleRockerExtension):
 
     name = "npm"
     depends_on_extension = ("pixi",)
+    pixi_global_packages = [
+        {
+            "name": "nodejs",
+            "channels": ["conda-forge"],
+            "deps": {"nodejs": "*"},
+            "exposed": {"node": "node", "npm": "npm", "npx": "npx"},
+        }
+    ]
