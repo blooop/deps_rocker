@@ -108,13 +108,115 @@ my_tool --version
 echo "my_tool extension test completed successfully!"
 ```
 
+## Pixi Builder Pattern (PREFERRED)
+
+**When to use:** For tools/languages available on conda-forge (nodejs, rust, python, go, etc.)
+
+**Why use it:**
+- ✅ Faster builds (official pixi image is cached)
+- ✅ No curl download/install scripts
+- ✅ Reproducible installs from conda-forge
+- ✅ Tools available during build AND runtime
+- ✅ Works with renv/rockerc pattern
+- ✅ Consistent pattern across extensions
+
+### Pattern Template
+
+**File structure:**
+```
+deps_rocker/extensions/{tool}/
+├── __init__.py
+├── {tool}.py                        # Extension class
+├── {tool}_builder_snippet.Dockerfile  # Builder stage (uses pixi)
+├── {tool}_snippet.Dockerfile          # System stage (copy + symlinks)
+└── test.sh                            # Test script
+```
+
+**1. Extension Class (`{tool}.py`):**
+```python
+from deps_rocker.simple_rocker_extension import SimpleRockerExtension
+
+class MyTool(SimpleRockerExtension):
+    """Install my_tool using pixi"""
+
+    name = "my_tool"
+    depends_on_extension = ("user",)  # Only user, not curl!
+```
+
+**2. Builder Snippet (`{tool}_builder_snippet.Dockerfile`):**
+```dockerfile
+# syntax=docker/dockerfile:1.4
+
+# Use official pixi image to install the tool
+FROM ghcr.io/prefix-dev/pixi:latest AS mytool-builder
+
+# Install tool via pixi global install (installs to /root/.pixi/envs/{tool})
+RUN pixi global install {tool}
+
+# Copy tool environment to builder output
+@(f"FROM {base_image} AS {builder_stage}")
+RUN mkdir -p @(f"{builder_output_dir}")/{tool}
+COPY --from=mytool-builder /root/.pixi/envs/{tool} @(f"{builder_output_dir}")/{tool}
+```
+
+**3. System Snippet (`{tool}_snippet.Dockerfile`):**
+```dockerfile
+# syntax=docker/dockerfile:1.4
+
+# Copy tool from builder stage to /opt/{tool} in system stage
+@(f"COPY --from={builder_stage} {builder_output_dir}/{tool} /opt/{tool}")
+
+# Set proper permissions recursively so all users can read/execute
+RUN chmod -R a+rX /opt/{tool}
+
+# Create symlinks in /usr/local/bin for global access (BEFORE user stage)
+RUN ln -sf /opt/{tool}/bin/mytool /usr/local/bin/mytool && \
+    ln -sf /opt/{tool}/bin/othertool /usr/local/bin/othertool
+
+# Set environment variables if needed
+ENV MYTOOL_HOME=/opt/{tool}
+ENV PATH="/opt/{tool}/bin:${PATH}"
+```
+
+**4. User Snippet (optional, `{tool}_user_snippet.Dockerfile`):**
+```dockerfile
+# Optional user-specific configuration
+RUN echo 'export PATH="/opt/{tool}/bin:$PATH"' >> ~/.bashrc
+```
+
+### Real Examples
+
+**npm extension** (`deps_rocker/extensions/npm/`):
+- Builder: Uses pixi to install nodejs
+- System: Copies to `/opt/nodejs`, creates symlinks
+- User: Configures `~/.npm-global` for user packages
+
+**cargo extension** (`deps_rocker/extensions/cargo/`):
+- Builder: Uses pixi to install rust
+- System: Copies to `/opt/rust`, creates symlinks for cargo/rustc
+- Sets `CARGO_HOME=/opt/rust`
+
+### Key Points
+
+1. **Symlinks in system stage**: Create symlinks in `/usr/local/bin` during the system stage (not user stage) so tools are available for subsequent build steps
+2. **Permissions**: Run `chmod -R a+rX` in system stage as root (faster than sudo in user stage)
+3. **No curl dependency**: Extension only depends on `user`, pixi is used only in builder
+4. **Tool availability**: Tools work during build, at runtime, and with renv/rockerc
+
+### When NOT to use Pixi Builder Pattern
+
+- Tool not available on conda-forge
+- Tool requires specific installation method (e.g., system package manager)
+- Tool is already in base image
+
 ## Dependencies
 
 Common dependencies that extensions might need:
-- `curl` - For downloading files
+- `curl` - For downloading files (prefer pixi builder pattern when possible)
 - `git` - For cloning repositories
 - `locales` - For proper locale support
 - `tzdata` - For timezone data
+- `user` - Almost always needed (provides user setup)
 
 Always check if the tool being installed has specific requirements and add appropriate dependencies.
 
