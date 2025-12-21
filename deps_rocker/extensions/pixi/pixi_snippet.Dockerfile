@@ -3,7 +3,7 @@
 @(f"ARG PIXI_VERSION={PIXI_VERSION}")
 
 # Use BuildKit cache mounts for pixi and uv caches
-RUN --mount=type=cache,target=/root/.cache/pixi \
+RUN --mount=type=cache,target=/root/.cache/pixi,sharing=locked,id=pixi-cache \
 	echo "Pixi and uv caches mounted for faster builds"
 
 # Provide Pixi installation bundle for user stage

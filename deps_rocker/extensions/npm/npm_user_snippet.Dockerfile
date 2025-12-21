@@ -1,5 +1,6 @@
 # Install Node.js and npm via pixi global install
-RUN pixi global install nodejs
+RUN --mount=type=cache,target=/root/.cache/pixi,sharing=locked,id=pixi-cache \
+    pixi global install nodejs
 
 # Add npm global bin directory to PATH for login shells
 RUN echo 'export PATH="$HOME/.pixi/envs/nodejs/bin:$PATH"' >> ~/.profile

@@ -132,7 +132,9 @@ class SimpleRockerExtension(RockerExtension, metaclass=SimpleRockerExtensionMeta
         pixi_mount = ""
 
         if use_buildkit_cache:
-            pixi_mount = "--mount=type=cache,target=/root/.cache/pixi,sharing=locked,id=pixi-global-cache \\\n    "
+            pixi_mount = (
+                "--mount=type=cache,target=/root/.cache/pixi,sharing=locked,id=pixi-cache \\\n    "
+            )
 
         return f"""# Install pixi from official image (no apt dependencies needed)
 COPY --from=ghcr.io/prefix-dev/pixi:latest /usr/local/bin/pixi /usr/local/bin/pixi

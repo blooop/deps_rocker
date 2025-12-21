@@ -2,7 +2,7 @@
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install ROS Jazzy and colcon from robotstack with cache mount
-RUN --mount=type=cache,target=/root/.cache/pixi,id=pixi-cache \
+RUN --mount=type=cache,target=/root/.cache/pixi,sharing=locked,id=pixi-cache \
     pixi global install ros-jazzy-desktop colcon-common-extensions
 
 # Set up ROS environment variables
