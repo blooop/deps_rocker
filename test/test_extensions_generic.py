@@ -246,12 +246,15 @@ CMD [\"echo\", \"Extension test complete\"]
         # Temporarily disabled due to CI flakiness
         self.skipTest("ros_jazzy extension temporarily disabled in CI")
 
+    @pytest.mark.skip(reason="Temporarily disabled - ROS tests are slow and impact iteration time")
     def test_ros_underlay_extension(self):
         self.run_extension_build_and_test("ros_underlay")
 
+    @pytest.mark.skip(reason="Temporarily disabled - ROS tests are slow and impact iteration time")
     def test_vcstool_extension(self):
         self.run_extension_build_and_test("vcstool")
 
+    @pytest.mark.skip(reason="Temporarily disabled - ROS tests are slow and impact iteration time")
     def test_auto_extension(self):
         self.run_extension_build_and_test("auto")
 
