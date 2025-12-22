@@ -145,7 +145,7 @@ class PixiEnvironmentCollector:
         self.ensure_env(env_name)
 
         manifest: dict = {
-            "project": {
+            "workspace": {
                 "name": project_name,
                 "version": "0.0.0",
                 "channels": self.merged_channels(default_channels),
