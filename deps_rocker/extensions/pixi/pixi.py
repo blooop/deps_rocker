@@ -22,6 +22,7 @@ class PixiConfig:
     runtime_root: str
     cache_mounts: bool
     lock_in_context: bool
+    runtime_mode: bool = False
     manifest_name: str = "pixi.toml"
     lock_name: str = "pixi.lock"
     channels: list[str] | None = None
@@ -41,7 +42,12 @@ class PixiConfig:
 
 
 class Pixi(SimpleRockerExtension):
-    """Install pixi and bake a build-time tools environment"""
+    """Install pixi and manage tool environments.
+
+    Supports two modes:
+    - Build-time (default): Bake environment into image for CI/distribution
+    - Runtime (--pixi-runtime-mode): Install at container start with persistent cache for faster dev iteration
+    """
 
     name = "pixi"
     depends_on_extension: tuple[str, ...] = ("user",)
@@ -105,6 +111,14 @@ class Pixi(SimpleRockerExtension):
             default=defaults.get("pixi_lockfile"),
             help="Optional path to a pixi lockfile to copy into the build context for locked installs.",
         )
+        parser.add_argument(
+            "--pixi-runtime-mode",
+            action="store_true",
+            default=defaults.get("pixi_runtime_mode", False),
+            help="Use runtime pixi install instead of baking environment into image. "
+            "Requires Docker volume mounts for /opt/pixi. Faster installs with warm cache, "
+            "no image rebuilds when dependencies change. Default is False (build-time mode).",
+        )
 
     def _resolve_config(self, cliargs) -> PixiConfig:
         if self._config:
@@ -116,6 +130,7 @@ class Pixi(SimpleRockerExtension):
         builder_tag = cliargs.get("pixi_builder_tag") or self.DEFAULT_BUILDER_TAG
         env_name = cliargs.get("pixi_env_name") or DEFAULT_ENV_NAME
         runtime_root = cliargs.get("pixi_runtime_root") or self.DEFAULT_RUNTIME_ROOT
+        runtime_mode = cliargs.get("pixi_runtime_mode", False)
 
         extra_channels = cliargs.get("pixi_extra_channels") or []
         extra_platforms = cliargs.get("pixi_extra_platforms") or []
@@ -149,6 +164,7 @@ class Pixi(SimpleRockerExtension):
             runtime_root=runtime_root,
             cache_mounts=cache_mounts,
             lock_in_context=lock_in_context,
+            runtime_mode=runtime_mode,
             channels=channels,
             platforms=platforms,
         )
@@ -160,13 +176,14 @@ class Pixi(SimpleRockerExtension):
             "pixi_manifest_name": self._config.manifest_name,
             "pixi_lock_name": self._config.lock_name,
             "pixi_lock_present": lock_in_context,
+            "pixi_builder_image_ref": self._config.builder_image_ref,
+            "pixi_runtime_mode": runtime_mode,
         }
         self.empy_args = shared_args
         self.empy_builder_args = {
             **shared_args,
             "pixi_builder_image": builder_image,
             "pixi_builder_tag": builder_tag,
-            "pixi_builder_image_ref": self._config.builder_image_ref,
             "pixi_use_cache_mounts": cache_mounts,
         }
         return self._config
@@ -175,11 +192,40 @@ class Pixi(SimpleRockerExtension):
         return self._resolve_config(cliargs or {})
 
     def get_preamble(self, cliargs):
-        self._ensure_config(cliargs)
+        config = self._ensure_config(cliargs)
+
+        # Skip builder stage in runtime mode
+        if config.runtime_mode:
+            return ""
+
+        # Build-time mode: use builder stage
         return super().get_preamble(cliargs)
 
     def get_snippet(self, cliargs=None):
-        self._ensure_config(cliargs)
+        config = self._ensure_config(cliargs)
+
+        # Use runtime snippet in runtime mode, otherwise use standard snippet
+        if config.runtime_mode:
+            # Override snippet name for runtime mode
+            snippet_name = "pixi_runtime_snippet.Dockerfile"
+            try:
+                pkg = self._get_pkg()
+                dat = __import__("pkgutil").get_data(pkg, snippet_name)
+                if dat is not None:
+                    snippet = dat.decode("utf-8")
+                    import em
+
+                    template_args = self._build_template_args(cliargs, self.empy_args)
+                    expanded = em.expand(snippet, template_args)
+                    return expanded
+            except FileNotFoundError:
+                logging.warning(f"Runtime snippet not found: {snippet_name}")
+                return ""
+            except Exception as e:
+                self._log_empy_template_error(snippet_name, e)
+                return ""
+
+        # Build-time mode: use default snippet
         return super().get_snippet(cliargs)
 
     def get_user_snippet(self, cliargs):
@@ -189,6 +235,20 @@ class Pixi(SimpleRockerExtension):
     def get_files(self, cliargs):
         config = self._ensure_config(cliargs)
         files = {config.manifest_name: self._manifest or ""}
+
         if self._lock_bytes is not None:
             files[config.lock_name] = self._lock_bytes
+
+        # Add runtime-specific files
+        if config.runtime_mode:
+            # Add entrypoint script
+            entrypoint_content = self.get_config_file("pixi_entrypoint.sh")
+            if entrypoint_content:
+                files["pixi_entrypoint.sh"] = entrypoint_content
+
+            # Add pixi config
+            config_content = self.get_config_file("pixi_config.toml")
+            if config_content:
+                files["pixi_config.toml"] = config_content
+
         return files

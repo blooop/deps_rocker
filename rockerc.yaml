@@ -4,6 +4,7 @@
 # Key components:
 # - image: Specifies the base image to pass to rocker
 # - args: Lists additional features or tools to be added to the docker image
+# - defaults: Optional default values for extension-specific arguments
 
 image: ubuntu:22.04
 args:
@@ -15,3 +16,9 @@ args:
   - cwd
   - pixi
   - uv
+
+# Optional: Configure extension-specific defaults
+# defaults:
+#   # Pixi runtime mode (faster dev iteration with persistent cache)
+#   # Requires: docker run -v pixi-cache:/opt/pixi ...
+#   pixi_runtime_mode: false  # Default: false (build-time mode)

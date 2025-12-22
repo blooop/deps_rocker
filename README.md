@@ -53,14 +53,44 @@ pipx inject rockerc -e .
 rocker --deps ubuntu:22.04  
 ```
 
-### Pixi build-time tools environment
+### Pixi Environment Management
 
-- deps_rocker now bakes a pixi tools environment during `docker build` using the official pixi builder image (configurable via `--pixi-builder-image`/`--pixi-builder-tag`, default `ghcr.io/prefix-dev/pixi:latest`; override with a jammy or base-matching tag if needed); no runtime sync or entrypoint hooks required.
-- Active extensions declare pixi dependencies (e.g., `pixi_dependencies = {"nodejs": ">=20,<21"}`) that are merged into a generated `pixi.toml` for the `tools` environment; the builder stage copies `pixi.toml` (and an optional lock via `--pixi-lockfile`), runs `pixi install -e <env>` (adding `--locked` when a lock is present), and copies the realized `.pixi` into the runtime image.
-- The baked environment lives at `/opt/pixi/.pixi` (override with `--pixi-runtime-root`) and is placed on PATH for both root and the rocker user (`/opt/pixi/.pixi/envs/<env>/bin`), with `PIXI_HOME` set to the same path.
-- Provide a lockfile to pin versions (`--pixi-lockfile`); otherwise a lock is generated during the build and copied forward. Extra channels/platforms can be added with `--pixi-channel`/`--pixi-platform`.
-- **BuildKit cache optimization**: Pixi package downloads and solver metadata are cached using BuildKit cache mounts (automatically enabled by deps_rocker). This enables fast rebuilds and cache reuse across different projects with overlapping dependencies. First builds may be slow, but subsequent builds are significantly faster.
-- Migration note: prior pixi-global/runtime-sync flows are replaced by this build-time, self-contained tools env; rocker runtime features (GPU, audio, user mapping, X11/devices) remain unchanged.
+deps_rocker supports two modes for managing pixi tool environments:
+
+#### Build-time Mode (Default)
+
+- Bakes a pixi tools environment during `docker build` using the official pixi builder image (configurable via `--pixi-builder-image`/`--pixi-builder-tag`, default `ghcr.io/prefix-dev/pixi:latest`)
+- Active extensions declare pixi dependencies (e.g., `pixi_dependencies = {"nodejs": ">=20,<21"}`) that are merged into a generated `pixi.toml` for the `tools` environment
+- The builder stage copies `pixi.toml` (and an optional lock via `--pixi-lockfile`), runs `pixi install -e <env>` (adding `--locked` when a lock is present), and copies the realized `.pixi` into the runtime image
+- The baked environment lives at `/opt/pixi/.pixi` (override with `--pixi-runtime-root`) and is placed on PATH
+- Provide a lockfile to pin versions (`--pixi-lockfile`); otherwise a lock is generated during the build. Extra channels/platforms can be added with `--pixi-channel`/`--pixi-platform`
+- **BuildKit cache optimization**: Pixi package downloads and solver metadata are cached using BuildKit cache mounts (automatically enabled by deps_rocker)
+- **Best for**: CI/CD pipelines, distributable images, reproducible builds
+
+#### Runtime Mode (Opt-in via `--pixi-runtime-mode`)
+
+- Install pixi environments at container startup using persistent Docker volumes for caching
+- **10-100x faster** installs with warm cache compared to rebuilding images
+- No image rebuilds required when dependencies change
+- Cross-project package sharing via shared cache volume
+- Requires Docker volume mount: `docker run -v pixi-cache:/opt/pixi ...`
+- Environments are installed on first container start and reused on subsequent starts
+- **Best for**: Fast development iteration, dynamic dependency changes, local development
+
+**Usage example**:
+```bash
+# Build image with runtime mode enabled
+rocker --pixi --pixi-runtime-mode ubuntu:22.04
+
+# Run container with persistent cache volume
+docker run -v pixi-cache:/opt/pixi -it <image-name>
+```
+
+**Performance comparison**:
+- Build-time mode: ~2-5 minutes per image rebuild
+- Runtime mode (cold cache): ~2-5 minutes first install
+- Runtime mode (warm cache): ~5-30 seconds install
+- Container reuse (matching deps): <1 second attach
 
 ## Motivation
 

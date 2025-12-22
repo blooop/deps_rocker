@@ -1,0 +1,5 @@
+# Pixi configuration for runtime mode
+# Store environments outside workspace in a persistent location
+
+[detached-environments]
+path = "/opt/pixi/envs"
