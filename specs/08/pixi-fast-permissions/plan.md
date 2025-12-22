@@ -1,43 +1,55 @@
-# Implementation Plan: Optimize Pixi Permission Setting
+# Implementation Plan: Optimize Pixi Build Performance
 
 ## Analysis
-Current bottleneck in `deps_rocker/extensions/pixi/pixi_snippet.Dockerfile`:
+Current bottlenecks in `deps_rocker/extensions/pixi/pixi_snippet.Dockerfile`:
 ```dockerfile
-COPY --from=builder /opt/build/pixi/.pixi /opt/pixi/.pixi
+COPY --from=builder /opt/build/pixi/.pixi /opt/pixi/.pixi      # ← COPIES TOO MUCH
 COPY --from=builder /opt/build/pixi/pixi.toml /opt/pixi/pixi.toml
 COPY --from=builder /opt/build/pixi/pixi.lock /opt/pixi/pixi.lock
 RUN chmod -R a+rx /opt/pixi  # ← SLOW: walks entire tree
 ```
 
-The `.pixi` directory contains the full conda environment with tens of thousands of files.
+Investigation shows:
+- `.pixi/envs/` = 352MB, ~9k files (NEEDED: contains installed packages)
+- `.pixi/task-cache-v0/` = 16KB (NOT NEEDED: build-time cache)
+- Package download cache already uses BuildKit cache mounts (good!)
+- But we copy the entire `.pixi/` with all its metadata
 
 ## Implementation Steps
 
 ### 1. Update pixi_snippet.Dockerfile
-Replace the COPY + chmod pattern with COPY --chmod:
 
 **For the pixi binary** (line 4):
-- Already a single file, just needs execute permission
-- Change to: `COPY --chmod=755`
+- Change to: `COPY --chmod=755 --from=... /usr/local/bin/pixi`
+- Single file, needs execute permission
 
-**For the .pixi directory** (line 5):
-- Contains the environment with thousands of files/dirs
-- Change to: `COPY --chmod=755`
-- Note: chmod 755 = rwxr-xr-x (owner rwx, group/other rx)
-- Directories get execute (traversable), files get read, executables keep their +x
+**For the environment** (line 5):
+- OLD: `COPY --from=... .pixi {runtime}/.pixi` (copies everything)
+- NEW: `COPY --chmod=755 --from=... .pixi/envs/{env_name} {runtime}/.pixi/envs/{env_name}`
+- Only copies the specific environment, not task-cache or other envs
+- chmod 755 = rwxr-xr-x (owner rwx, group/other rx)
+- Directories get execute (traversable), files readable, executables keep +x
 
 **For pixi.toml and pixi.lock** (lines 6-7):
-- Config files, just need read permission
 - Change to: `COPY --chmod=644`
+- Config files, just need read permission
 
-**Remove** the separate `RUN chmod -R` command (line 9)
+**Remove** the separate `RUN chmod -R` command (old line 9)
 
 ### 2. Why This Works
-- `--chmod=755` on directories: makes them readable/traversable by all users
-- Files inside inherit from their source permissions during copy
-- Executables already have +x from the builder stage, preserving that
-- Much faster: permissions set during copy, not after
+
+**COPY --chmod optimization:**
+- `--chmod=755` on directories: readable/traversable by all users
+- Files inside inherit from source permissions during copy
+- Executables already have +x from builder, preserving that
+- Much faster: permissions set during copy, not in separate walk
 - BuildKit optimization: permission setting is part of copy operation
+
+**Copying only specific environment:**
+- Reduces copy size: only ~9k files for one env vs entire `.pixi/` tree
+- Avoids copying build artifacts (task-cache-v0/)
+- Still provides all runtime binaries/libraries needed
+- PATH already points to specific env: `.pixi/envs/{env_name}/bin`
 
 ### 3. Testing
 Verify in tests that:

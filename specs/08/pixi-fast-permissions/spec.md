@@ -1,21 +1,37 @@
-# Spec: Optimize Pixi Permission Setting
+# Spec: Optimize Pixi Build Performance
 
 ## Problem
-The pixi extension build has a slow step (`RUN chmod -R a+rx /opt/pixi`) that walks tens of thousands of files in the pixi environment, defeating the performance goal of using pixi.
+The pixi extension has two slow build steps:
+1. `RUN chmod -R a+rx /opt/pixi` - walks tens of thousands of files
+2. Copying entire `.pixi/` directory including unnecessary caches and metadata
 
 ## Root Cause
-Docker's overlay filesystem makes recursive metadata operations (chmod -R) extremely slow. The current implementation:
-1. Copies files from builder stage
-2. Then runs separate `chmod -R` command that walks entire tree
+1. **Slow chmod**: Docker's overlay filesystem makes recursive metadata operations extremely slow
+2. **Over-copying**: Copying `.pixi/` includes task-cache and potentially multiple environments when only one is needed
+
+The builder already uses cache mounts for package downloads (`/root/.cache/pixi` and `/root/.cache/rattler`), but we still copy runtime-unnecessary files.
 
 ## Solution
-Use `COPY --chmod=755` flag to set directory/executable permissions during copy operation, eliminating the separate chmod step entirely.
+Two optimizations:
+
+### 1. Use COPY --chmod (eliminates chmod -R)
+Use `COPY --chmod` flag to set permissions during copy, eliminating separate chmod step.
+
+### 2. Copy only specific environment (reduces file count)
+Copy only `.pixi/envs/{env_name}/` instead of entire `.pixi/` directory, avoiding:
+- `task-cache-v0/` - build-time cache, not needed at runtime
+- Other environments if multiple exist in builder
+- Metadata files
 
 ## Requirements
 - Remove `RUN chmod -R a+rx @(pixi_runtime_root)` from pixi_snippet.Dockerfile
-- Add `--chmod=755` to COPY commands that copy directories
-- Maintain rocker compatibility (any UID must be able to read/execute)
+- Add `--chmod=755` to COPY commands for directories/binaries
+- Add `--chmod=644` to COPY commands for config files
+- Change `.pixi` copy to copy only `.pixi/envs/{env_name}`
+- Maintain rocker compatibility (any UID must read/execute)
 - Verify permissions work for non-root users
 
 ## Expected Outcome
-Significantly faster builds by eliminating the recursive chmod walk while maintaining proper permissions for rocker's user mapping.
+Significantly faster builds by:
+1. Eliminating recursive chmod walk
+2. Reducing files copied by ~30-50% (no task-cache, metadata)
