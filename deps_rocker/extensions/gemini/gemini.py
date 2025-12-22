@@ -8,7 +8,7 @@ class Gemini(SimpleRockerExtension):
     """Install Google Gemini CLI tool and mount host ~/.gemini config"""
 
     name = "gemini"
-    depends_on_extension = ("npm", "user")
+    depends_on_extension = ("homebrew", "user")
 
     def get_template_args(self, _cliargs=None):
         return {}

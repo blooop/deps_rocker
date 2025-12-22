@@ -1,3 +1,3 @@
-# Install Google Gemini CLI tool via npm with BuildKit cache for global installs
-RUN --mount=type=cache,target=/root/.npm,id=global-npm-cache \
-	npm install -g @@google/gemini-cli
+# Install Google Gemini CLI tool via Homebrew (must run as non-root user)
+# Note: This runs in the root section but uses su to run as non-root
+RUN su - $(getent passwd 1000 | cut -d: -f1) -c 'brew install gemini-cli'
