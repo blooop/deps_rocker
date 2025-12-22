@@ -51,4 +51,6 @@ def test_pixi_dockerfile_contains_builder_stage_and_path():
     assert "--locked" in dockerfile
     assert re.search(r"/opt/pixi/.pixi/envs/tools/bin", dockerfile)
     assert "COPY pixi.toml" in dockerfile
-    assert "COPY --from=pixi_builder" in dockerfile
+    # Check that COPY uses --chmod and --from=pixi_builder
+    assert "COPY --chmod" in dockerfile
+    assert "--from=pixi_builder" in dockerfile
