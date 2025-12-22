@@ -1,0 +1,6 @@
+- Inspect the feature/pixi_builder branch codepaths for Dockerfile generation, pixi integration, and extension detection/merging to map current behavior and touchpoints.
+- Define/extend an extension contribution schema for pixi deps (env name `tools`, packages, channels, lock handling), and implement a generator that merges detected extensions into a single `pixi.toml` (plus lock if present).
+- Update Dockerfile generation to add a pixi builder stage using a configurable pixi-docker image; copy pixi manifests, run `pixi install -e tools` (preferring `--locked` when lock exists), and copy the realized `.pixi` into the runtime image with PATH set for both root and rocker user without modifying entrypoints.
+- Adjust extensions to contribute pixi deps instead of runtime/global installs where appropriate while keeping OS-level apt/pip fallbacks for non-pixi bits; remove runtime pixi sync assumptions.
+- Add/refresh tests to assert pixi builder stage emission, PATH wiring for tools, and correct extension-driven dependency aggregation; ensure CI covers the new flow.
+- Update README/docs with the build-time pixi workflow, configuration knobs for the builder image/tag, lockfile behavior, PATH details, and migration guidance from the previous pixi-global/runtime-sync model.

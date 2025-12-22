@@ -20,7 +20,4 @@ fi
 cargo --version
 rustc --version
 
-# Test that cargo can create a basic project
-cargo --version | head -n 1
-
 echo "cargo extension test completed successfully!"

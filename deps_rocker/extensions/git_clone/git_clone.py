@@ -5,5 +5,5 @@ class GitClone(SimpleRockerExtension):
     """Adds support for git cloning"""
 
     name = "git_clone"
-    depends_on_extension = ["git"]
-    apt_packages = ["git", "git-lfs", "ca-certificates"]
+    depends_on_extension = ("pixi",)
+    pixi_dependencies = {"git": "*", "git-lfs": "*", "ca-certificates": "*"}

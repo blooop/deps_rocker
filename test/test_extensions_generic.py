@@ -309,7 +309,7 @@ CMD [\"echo\", \"Extension test complete\"]
             self.assertIn("codex", ext_names)
             self.assertIn("gemini", ext_names)
             self.assertIn("user", ext_names)  # Should be included as transitive dep
-            self.assertIn("curl", ext_names)  # Should be included as transitive dep
+            # Note: curl is no longer a transitive dependency (npm uses official pixi image in builder only)
         except Exception as e:
             self.fail(f"npm/codex/gemini ordering test raised an exception: {e}")
 
@@ -342,6 +342,7 @@ class ScriptInjectionExtension(SimpleRockerExtension):
         extra_files: dict[str, str] | None = None,
         extra_root_dir: str | None = None,
     ):
+        super().__init__()
         self.context_name = "test.sh"
         self.extra_files = extra_files or {}
         if self.extra_files and not extra_root_dir:

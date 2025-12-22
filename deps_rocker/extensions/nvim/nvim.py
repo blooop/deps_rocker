@@ -2,11 +2,12 @@ from deps_rocker.simple_rocker_extension import SimpleRockerExtension
 
 
 class Nvim(SimpleRockerExtension):
-    """Install nvim v0.11.4 and mount host configs (~/.config/nvim, ~/.vim)"""
+    """Install Neovim from the shared pixi tools env and mount host configs (~/.config/nvim, ~/.vim)"""
 
     name = "nvim"
-    depends_on_extension = ("curl",)
-    builder_apt_packages = ["curl", "ca-certificates"]
+    depends_on_extension = ("pixi",)
+    pixi_channels = ("https://prefix.dev/github-releases", "conda-forge")
+    pixi_dependencies = {"nvim": "*"}
 
     def get_docker_args(self, cliargs):
         from pathlib import Path

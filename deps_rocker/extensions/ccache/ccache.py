@@ -5,7 +5,8 @@ class Ccache(SimpleRockerExtension):
     """Install ccache and share cache with host (~/.ccache)"""
 
     name = "ccache"
-    apt_packages = ["ccache"]
+    depends_on_extension = ("pixi",)
+    pixi_dependencies = {"ccache": "*"}
 
     def get_docker_args(self, cliargs):
         from pathlib import Path

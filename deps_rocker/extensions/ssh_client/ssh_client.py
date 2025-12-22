@@ -7,8 +7,9 @@ class SshClient(SimpleRockerExtension):
     """Install openssh-client and mount the user's ~/.ssh directory into the container."""
 
     name = "ssh_client"
-    depends = ["ssh", "user"]
-    apt_packages = ["openssh-client"]
+    depends = ["user"]
+    depends_on_extension = ("pixi",)
+    pixi_dependencies = {"openssh": "*"}
 
     def get_docker_args(self, cliargs):
         # Mount the entire ~/.ssh directory from the host to the container

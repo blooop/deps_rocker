@@ -5,4 +5,5 @@ class Curl(SimpleRockerExtension):
     """Adds curl to your docker container"""
 
     name = "curl"
-    apt_packages = ["curl", "ca-certificates"]
+    depends_on_extension = ("pixi",)
+    pixi_dependencies = {"curl": "*", "ca-certificates": "*"}

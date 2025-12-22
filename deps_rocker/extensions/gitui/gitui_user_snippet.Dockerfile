@@ -1,2 +1,1 @@
-# Install GitUI via pixi global install in user environment
-RUN pixi global install gitui
+# GitUI is provided via the baked pixi tools environment (no runtime install required)
