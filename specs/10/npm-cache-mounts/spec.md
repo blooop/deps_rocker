@@ -1,12 +1,13 @@
 # Spec 10: NPM BuildKit Cache Mounts for Gemini and Codex
 
 ## Problem
-Gemini and Codex extensions are slow to install because npm packages are re-downloaded on every build, even when the packages haven't changed.
+Gemini and Codex extensions are slow to install because npm packages are re-downloaded on every build, even when the packages haven't changed. Even with cache mounts, npm still makes network calls to check registry metadata.
 
 ## Root Cause
 - `npm install -g` commands in Dockerfiles don't use BuildKit cache mounts
 - NPM downloads package tarballs to `/root/.npm` cache but this cache is lost between builds
 - Each build re-downloads the same packages from the npm registry
+- Even with download cache, npm checks registry for updates and runs security audits
 
 ## Requirements
 - Cache npm's package download cache across builds
@@ -17,6 +18,7 @@ Gemini and Codex extensions are slow to install because npm packages are re-down
 ## Solution
 - Add `--mount=type=cache,target=/root/.npm,id=npm-cache` to npm install RUN commands
 - Use stable cache ID `npm-cache` shared across all npm-using extensions
+- Add npm optimization flags: `--prefer-offline` (use cache first), `--no-audit` (skip security audit)
 - Cache directory is only used during build, not included in final layers
 
 ## Success Criteria
