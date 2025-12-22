@@ -1,4 +1,4 @@
-#!/bin/bash -l
+#!/bin/bash
 set -e
 
 echo "Testing gemini installation..."
