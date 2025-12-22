@@ -21,4 +21,14 @@ RUN --mount=type=cache,target=/tmp/homebrew-cache,id=homebrew-install-cache \
         chown linuxbrew:linuxbrew \"\$installer\"; \
     fi && \
     su - linuxbrew -c 'NONINTERACTIVE=1 bash /tmp/homebrew-cache/install.sh' && \
-    cp -a /home/linuxbrew/.linuxbrew \"\$OUTPUT_DIR/.linuxbrew\""
+    cp -a /home/linuxbrew/.linuxbrew \"\$OUTPUT_DIR/.linuxbrew\" && \
+    { \
+      echo 'export HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew'; \
+      echo 'export HOMEBREW_CELLAR=/home/linuxbrew/.linuxbrew/Cellar'; \
+      echo 'export HOMEBREW_REPOSITORY=/home/linuxbrew/.linuxbrew/Homebrew'; \
+      echo 'export PATH=/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:\$PATH'; \
+      echo 'export MANPATH=/home/linuxbrew/.linuxbrew/share/man:\${MANPATH:-}'; \
+      echo 'export INFOPATH=/home/linuxbrew/.linuxbrew/share/info:\${INFOPATH:-}'; \
+      echo 'export HOMEBREW_NO_ANALYTICS=1'; \
+      echo 'export HOMEBREW_NO_AUTO_UPDATE=1'; \
+    } > \"\$OUTPUT_DIR/homebrew-env.sh\""

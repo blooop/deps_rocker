@@ -18,8 +18,11 @@ echo "Homebrew version: $BREW_VERSION"
 echo "Testing brew list..."
 brew list
 
-# Test brew config
-echo "Testing brew config..."
-brew config
+# Test brew --prefix
+echo "Testing brew --prefix..."
+brew --prefix
+
+# Verify HOMEBREW_PREFIX is set
+echo "HOMEBREW_PREFIX: $HOMEBREW_PREFIX"
 
 echo "Homebrew extension test completed successfully!"
