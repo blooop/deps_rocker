@@ -31,4 +31,5 @@ RUN --mount=type=cache,target=/tmp/homebrew-cache,id=homebrew-install-cache \
       echo 'export INFOPATH=/home/linuxbrew/.linuxbrew/share/info:\${INFOPATH:-}'; \
       echo 'export HOMEBREW_NO_ANALYTICS=1'; \
       echo 'export HOMEBREW_NO_AUTO_UPDATE=1'; \
+      echo 'export HOMEBREW_ALLOW_ROOT=1'; \
     } > \"\$OUTPUT_DIR/homebrew-env.sh\""

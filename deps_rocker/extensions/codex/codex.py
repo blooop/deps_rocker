@@ -10,7 +10,7 @@ class Codex(SimpleRockerExtension):
     """Install OpenAI Codex CLI for AI-assisted development"""
 
     name = "codex"
-    depends_on_extension = ("npm", "user")
+    depends_on_extension = ("homebrew", "user")
 
     def get_template_args(self, _cliargs=None):
         return {}

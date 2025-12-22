@@ -21,3 +21,4 @@ ENV MANPATH="/home/linuxbrew/.linuxbrew/share/man:${MANPATH}"
 ENV INFOPATH="/home/linuxbrew/.linuxbrew/share/info:${INFOPATH}"
 ENV HOMEBREW_NO_ANALYTICS=1
 ENV HOMEBREW_NO_AUTO_UPDATE=1
+ENV HOMEBREW_ALLOW_ROOT=1
