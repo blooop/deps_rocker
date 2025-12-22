@@ -1,4 +1,5 @@
-#!/bin/bash -l
+#!/bin/bash
+
 set -e
 
 echo "Testing npm installation..."
