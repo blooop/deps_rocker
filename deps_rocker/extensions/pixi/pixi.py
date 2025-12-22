@@ -5,7 +5,6 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from deps_rocker.buildkit import is_buildkit_enabled
 from deps_rocker.pixi_env import (
     DEFAULT_CHANNELS,
     DEFAULT_ENV_NAME,
@@ -140,7 +139,8 @@ class Pixi(SimpleRockerExtension):
                     "Pixi lockfile not found at %s, continuing without it.", resolved_lock
                 )
 
-        cache_mounts = is_buildkit_enabled()
+        # Always enable cache mounts - BuildKit is assumed available and ensured during build
+        cache_mounts = True
 
         self._config = PixiConfig(
             builder_image=builder_image,

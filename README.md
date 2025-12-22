@@ -59,6 +59,7 @@ rocker --deps ubuntu:22.04
 - Active extensions declare pixi dependencies (e.g., `pixi_dependencies = {"nodejs": ">=20,<21"}`) that are merged into a generated `pixi.toml` for the `tools` environment; the builder stage copies `pixi.toml` (and an optional lock via `--pixi-lockfile`), runs `pixi install -e <env>` (adding `--locked` when a lock is present), and copies the realized `.pixi` into the runtime image.
 - The baked environment lives at `/opt/pixi/.pixi` (override with `--pixi-runtime-root`) and is placed on PATH for both root and the rocker user (`/opt/pixi/.pixi/envs/<env>/bin`), with `PIXI_HOME` set to the same path.
 - Provide a lockfile to pin versions (`--pixi-lockfile`); otherwise a lock is generated during the build and copied forward. Extra channels/platforms can be added with `--pixi-channel`/`--pixi-platform`.
+- **BuildKit cache optimization**: Pixi package downloads and solver metadata are cached using BuildKit cache mounts (automatically enabled by deps_rocker). This enables fast rebuilds and cache reuse across different projects with overlapping dependencies. First builds may be slow, but subsequent builds are significantly faster.
 - Migration note: prior pixi-global/runtime-sync flows are replaced by this build-time, self-contained tools env; rocker runtime features (GPU, audio, user mapping, X11/devices) remain unchanged.
 
 ## Motivation

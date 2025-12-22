@@ -14,7 +14,9 @@ ENV PATH="/usr/local/bin:${PATH}"
 
 RUN mkdir -p @(f"{builder_output_dir}")/bin @(f"{builder_output_dir}")/pixi
 
-RUN @( "--mount=type=cache,target=/root/.cache/pixi,id=pixi-cache \\\n    --mount=type=cache,target=/root/.cache/rattler,id=rattler-cache \\\n    " if pixi_use_cache_mounts else "" )bash -c "set -euo pipefail; \
+RUN --mount=type=cache,target=/root/.cache/pixi,id=pixi-cache \
+    --mount=type=cache,target=/root/.cache/rattler,id=rattler-cache \
+    bash -c "set -euo pipefail; \
     mkdir -p \"${HOME}\" \"${PIXI_HOME}\"; \
     install_args='-e @(pixi_env_name)'; \
     if [ -f pixi.lock ]; then install_args=\"${install_args} --locked\"; fi; \
