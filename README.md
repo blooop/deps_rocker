@@ -305,6 +305,27 @@ script_test:
   - test.sh
 
 
+## Troubleshooting
+
+### X11 Extension: `.Xauthority does not exist` Error
+
+If you encounter this error when using the x11 extension:
+```
+xauth:  file /home/user/.Xauthority does not exist
+xauth: (argv):1:  unable to read any entries from file "(stdin)"
+```
+
+This occurs because the upstream rocker X11 extension expects `~/.Xauthority` to exist on the host system. The X11 extension runs `xauth nlist $DISPLAY` to copy X11 authentication entries into the container, but this command fails if the file doesn't exist.
+
+**Quick Fix:**
+```bash
+touch ~/.Xauthority
+```
+
+This creates an empty `.Xauthority` file. When you start X11 or log in again, the file will be populated with the appropriate authentication entries.
+
+**Alternative Solution:** If you don't need GUI support in your container, remove `x11` from your `rockerc.yaml` args list.
+
 ## limitations/TODO
 
 This has only been tested on the ubuntu base image. It assumes you have access to apt-get.
