@@ -29,7 +29,7 @@
     "mounts": [
         "source=${localWorkspaceFolderBasename}-pixi,target=${containerWorkspaceFolder}/.pixi,type=volume"
     ],
-    "postCreateCommand": "sudo chown vscode .pixi && pixi install && echo '{}' > ~/.docker/config.json || true",
+    "postCreateCommand": ".devcontainer/post-create.sh && echo '{}' > ~/.docker/config.json || true",
     // "name" lives at the end on purpose: it is the only line this repo
     // changes, and next to the build block every template merge conflicts.
     "name": "deps_rocker"
