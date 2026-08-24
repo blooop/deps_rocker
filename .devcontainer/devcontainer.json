@@ -20,7 +20,7 @@
               ]
         }
     },
-    "env": {
+    "containerEnv": {
         "DOCKER_BUILDKIT": "1"
     },
     "features": {
