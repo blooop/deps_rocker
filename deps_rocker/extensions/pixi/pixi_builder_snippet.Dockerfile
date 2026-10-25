@@ -2,6 +2,7 @@
 @(f"ARG PIXI_VERSION={PIXI_VERSION}")
 
 @(f"FROM {base_image} AS {builder_stage}")
+ARG PIXI_VERSION
 
 RUN --mount=type=cache,target=/root/.cache/pixi-install-cache,id=pixi-install-cache \
     bash -c "set -euxo pipefail && \
