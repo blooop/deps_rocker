@@ -27,6 +27,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+      # The devcontainer bind-mounts these two host directories; a fresh
+      # runner has neither, and a missing bind source fails the container start.
+      - name: Create the host directories the devcontainer mounts
+        run: mkdir -p ~/.config/gh ~/.claude
       - name: Build and run Dev Container task
         uses: devcontainers/ci@v0.3
         with:
